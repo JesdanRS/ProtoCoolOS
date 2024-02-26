@@ -77,6 +77,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Agregar evento de doble clic para editar el texto del nodo
+    grafoContainer.addEventListener('dblclick', function (event) {
+        const nodoDobleClic = event.target.closest('.nodo');
+        if (nodoDobleClic) {
+            editarTextoNodo(nodoDobleClic);
+        }
+    });
+
     function crearNodo(x, y) {
         const nodo = document.createElement('div');
         nodo.className = 'nodo';
@@ -136,5 +144,30 @@ document.addEventListener('DOMContentLoaded', function () {
         if (flechaEnProceso) {
             grafoContainer.removeChild(flechaEnProceso);
         }
+    }
+
+    // Función para editar el texto del nodo
+    function editarTextoNodo(nodo) {
+        // Crear un elemento de entrada de texto
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'nodo-texto';
+        input.value = nodo.textContent;
+        
+        // Colocar el elemento de entrada de texto en el mismo lugar que el nodo
+        input.style.left = nodo.style.left;
+        input.style.top = nodo.style.top;
+        
+        // Reemplazar el nodo por el elemento de entrada de texto
+        nodo.parentNode.replaceChild(input, nodo);
+        
+        // Enfocar el elemento de entrada de texto
+        input.focus();
+        
+        // Cuando se pierde el foco del elemento de entrada de texto, guardar el valor y restaurar el nodo
+        input.addEventListener('blur', function() {
+            nodo.textContent = input.value;
+            input.parentNode.replaceChild(nodo, input);
+        });
     }
 });
