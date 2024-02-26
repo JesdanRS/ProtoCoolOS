@@ -2,41 +2,74 @@ document.addEventListener('DOMContentLoaded', function () {
     const grafoContainer = document.getElementById('grafo-container');
     let nodoOrigen = null;
     let flechaEnProceso = null;
+    let isCtrlPressed = false;
+
+    // Detectar cuando se presiona la tecla Ctrl
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Control') {
+            isCtrlPressed = true;
+        }
+    });
+
+    // Detectar cuando se suelta la tecla Ctrl
+    document.addEventListener('keyup', function (event) {
+        if (event.key === 'Control') {
+            isCtrlPressed = false;
+        }
+    });
 
     grafoContainer.addEventListener('mousedown', function (event) {
         const nodoClic = event.target.closest('.nodo');
         if (nodoClic) {
-            nodoOrigen = nodoClic;
-            event.preventDefault();
-            flechaEnProceso = crearFlecha(nodoOrigen, event.clientX, event.clientY);
+            if (!isCtrlPressed) {
+                nodoOrigen = nodoClic;
+                event.preventDefault();
+                flechaEnProceso = crearFlecha(nodoOrigen, event.clientX, event.clientY);
+            } else {
+                nodoOrigen = nodoClic;
+                startX = nodoOrigen.offsetLeft - event.clientX;
+                startY = nodoOrigen.offsetTop - event.clientY;
+                event.preventDefault();
+                isDragging = true;
+            }
         }
     });
 
     grafoContainer.addEventListener('mousemove', function (event) {
+        if (isDragging && nodoOrigen) {
+            const x = event.clientX + startX;
+            const y = event.clientY + startY;
+            nodoOrigen.style.left = x + 'px';
+            nodoOrigen.style.top = y + 'px';
+        }
+
         if (flechaEnProceso) {
             actualizarFlecha(flechaEnProceso, event.clientX, event.clientY);
         }
     });
 
     grafoContainer.addEventListener('mouseup', function (event) {
-        const nodoDestino = event.target.closest('.nodo');
-        if (flechaEnProceso && nodoDestino && nodoOrigen !== nodoDestino) {
-            conectarNodos(nodoOrigen, nodoDestino);
+        if (isDragging) {
+            isDragging = false;
+            nodoOrigen = null;
+        } else {
+            const nodoDestino = event.target.closest('.nodo');
+            if (flechaEnProceso && nodoDestino && nodoOrigen !== nodoDestino) {
+                conectarNodos(nodoOrigen, nodoDestino);
+            }
+            eliminarFlechaEnProceso();
+            nodoOrigen = null;
+            flechaEnProceso = null;
         }
-        eliminarFlechaEnProceso();
-        nodoOrigen = null;
-        flechaEnProceso = null;
     });
 
     grafoContainer.addEventListener('click', function (event) {
         const x = event.clientX - grafoContainer.getBoundingClientRect().left - 15;
         const y = event.clientY - grafoContainer.getBoundingClientRect().top - 15;
 
-        // Verificar si hay algún nodo en las coordenadas clicadas
         const nodoExistente = document.elementFromPoint(event.clientX, event.clientY).closest('.nodo');
 
-        // Si no hay nodo en las coordenadas, crear uno
-        if (!nodoExistente) {
+        if (!nodoExistente && !isCtrlPressed) {
             crearNodo(x, y);
         }
     });
