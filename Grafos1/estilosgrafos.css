@@ -1,0 +1,19 @@
+/* Puedes agregar estilos según tus preferencias */
+#grafo-container {
+    position: relative;
+    width: 500px;
+    height: 500px;
+    border: 1px solid #ccc;
+}
+.nodo {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-color: #3498db;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    cursor: pointer;
+}
