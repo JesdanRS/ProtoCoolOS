@@ -1,34 +1,43 @@
 document.addEventListener('DOMContentLoaded', function () {
     const grafoContainer = document.getElementById('grafo-container');
-    let nodoSeleccionado = null;
+    let nodoOrigen = null;
+    let flechaEnProceso = null;
 
     grafoContainer.addEventListener('mousedown', function (event) {
         const nodoClic = event.target.closest('.nodo');
         if (nodoClic) {
-            nodoSeleccionado = nodoClic;
+            nodoOrigen = nodoClic;
             event.preventDefault();
+            flechaEnProceso = crearFlecha(nodoOrigen, event.clientX, event.clientY);
         }
     });
 
     grafoContainer.addEventListener('mousemove', function (event) {
-        if (nodoSeleccionado) {
-            const x = event.clientX - grafoContainer.getBoundingClientRect().left - 15;
-            const y = event.clientY - grafoContainer.getBoundingClientRect().top - 15;
-
-            nodoSeleccionado.style.left = x + 'px';
-            nodoSeleccionado.style.top = y + 'px';
+        if (flechaEnProceso) {
+            actualizarFlecha(flechaEnProceso, event.clientX, event.clientY);
         }
     });
 
     grafoContainer.addEventListener('mouseup', function (event) {
-        if (nodoSeleccionado) {
-            const nodoSoltado = event.target.closest('.nodo');
+        const nodoDestino = event.target.closest('.nodo');
+        if (flechaEnProceso && nodoDestino && nodoOrigen !== nodoDestino) {
+            conectarNodos(nodoOrigen, nodoDestino);
+        }
+        eliminarFlechaEnProceso();
+        nodoOrigen = null;
+        flechaEnProceso = null;
+    });
 
-            if (nodoSoltado && nodoSoltado !== nodoSeleccionado) {
-                crearFlecha(nodoSeleccionado, nodoSoltado);
-            }
+    grafoContainer.addEventListener('click', function (event) {
+        const x = event.clientX - grafoContainer.getBoundingClientRect().left - 15;
+        const y = event.clientY - grafoContainer.getBoundingClientRect().top - 15;
 
-            nodoSeleccionado = null;
+        // Verificar si hay algún nodo en las coordenadas clicadas
+        const nodoExistente = document.elementFromPoint(event.clientX, event.clientY).closest('.nodo');
+
+        // Si no hay nodo en las coordenadas, crear uno
+        if (!nodoExistente) {
+            crearNodo(x, y);
         }
     });
 
@@ -40,9 +49,39 @@ document.addEventListener('DOMContentLoaded', function () {
         grafoContainer.appendChild(nodo);
     }
 
-    function crearFlecha(origen, destino) {
+    function crearFlecha(origen, x, y) {
         const flecha = document.createElement('div');
         flecha.className = 'flecha';
+        grafoContainer.appendChild(flecha);
+
+        const x1 = parseInt(origen.style.left) + 15;
+        const y1 = parseInt(origen.style.top) + 15;
+        const angle = Math.atan2(y - y1, x - x1) * (180 / Math.PI);
+        const length = Math.sqrt((x - x1) ** 2 + (y - y1) ** 2);
+
+        flecha.style.width = length + 'px';
+        flecha.style.left = x1 + 'px';
+        flecha.style.top = y1 + 'px';
+        flecha.style.transform = 'rotate(' + angle + 'deg)';
+
+        return flecha;
+    }
+
+    function actualizarFlecha(flecha, x, y) {
+        const x1 = parseInt(flecha.style.left);
+        const y1 = parseInt(flecha.style.top);
+        const angle = Math.atan2(y - y1, x - x1) * (180 / Math.PI);
+        const length = Math.sqrt((x - x1) ** 2 + (y - y1) ** 2);
+
+        flecha.style.width = length + 'px';
+        flecha.style.transform = 'rotate(' + angle + 'deg)';
+    }
+
+    function conectarNodos(origen, destino) {
+        const flecha = document.createElement('div');
+        flecha.className = 'flecha';
+        grafoContainer.appendChild(flecha);
+
         const x1 = parseInt(origen.style.left) + 15;
         const y1 = parseInt(origen.style.top) + 15;
         const x2 = parseInt(destino.style.left) + 15;
@@ -54,13 +93,11 @@ document.addEventListener('DOMContentLoaded', function () {
         flecha.style.left = x1 + 'px';
         flecha.style.top = y1 + 'px';
         flecha.style.transform = 'rotate(' + angle + 'deg)';
-        grafoContainer.appendChild(flecha);
     }
 
-    // Evento para crear nodo al hacer clic en el contenedor
-    grafoContainer.addEventListener('click', function (event) {
-        const x = event.clientX - grafoContainer.getBoundingClientRect().left - 15;
-        const y = event.clientY - grafoContainer.getBoundingClientRect().top - 15;
-        crearNodo(x, y);
-    });
+    function eliminarFlechaEnProceso() {
+        if (flechaEnProceso) {
+            grafoContainer.removeChild(flechaEnProceso);
+        }
+    }
 });
