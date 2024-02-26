@@ -27,11 +27,12 @@
 .flecha-punta {
     width: 0;
     height: 0;
-    border-left: 7px solid transparent;
-    border-right: 7px solid transparent;
-    border-bottom: 10px solid black; /* Cambia el color según tus preferencias */
+    border-top: 7px solid transparent;
+    border-bottom: 7px solid transparent;
+    border-left: 10px solid black; /* Cambia el color según tus preferencias */
     position: absolute;
-    top: -15px;
-    right: 175px;
+    top: -7px;
+    right: -7.5px;
+    
 }
 
