@@ -4,15 +4,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="style.css">
+    <title>ProtoCool OS</title>
 </head>
 
 <body>
-    <h1>Titulo de mierda</h1>
-    <a href="Grafos1/indexGrafos.html">
-        <button>Grafos</button>
-    </a>
 
+    <div class="main">
+        <!-- Navbar -->
+        <div class="navbar">
+            <a href="#" class="logo">ProtoCool OS</a>
+            <div class="nav-links">
+                <span class="item selected">Home</span>
+                <span id="scroll" class="item inactive"><a href="Grafos1/indexGrafos.html" target="_blank">Grafos</a></span>
+                <span class="item inactive">Contacto</span>
+            </div>
+            <div class="nav-buttons" id="navMenu">
+                <!-- <button class="nav-btn selected">TEST</button>
+                <button class="nav-btn">TEST</button> BOTONES POR ASIGNAR-->
+            </div>
+
+            <button class="toggler">
+                <i class='bx bx-menu'></i>
+            </button>
+        </div>
+        <!-- End of Navbar -->
+
+        <!-- Top Container -->
+        <div class="top-container">
+            <div class="info-box">
+                <p class="header">
+                    ¿Qué son los algoritmos?
+                </p>
+                <p class="info-text">
+                    Un algoritmo es un conjunto ordenado de pasos definidos y finitos que se utilizan para resolver un problema o realizar una tarea específica. Los algoritmos son la base de la programación y la informática en general. Pueden ser simples o complejos, pero todos siguen un conjunto de reglas para producir un resultado deseado.
+                </p>
+                <div class="info-buttons">
+                    <button class="info-btn selected">Explorar</button>
+                    <button class="info-btn nav-btn">Crear</button>
+                </div>
+            </div>
+            <div class="nft-box">
+                <img src="logo_de_ProtoCool_OSv2.png" class="nft-pic">
+                <div class="nft-content">
+                    <div class="info">
+                        <!-- <img src="logo.png" class="info-img"> -->
+                        <i class='bx bx-ghost'></i>
+                        <div>
+                            <p>
+                                ProtoCool OS
+                            </p>
+                        </div>
+                    </div>
+                    <div class="likes">
+                        <div class="icon-box">
+                            <i class='bx bx-heart'></i>
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End of Top Container -->
+
+        <!-- Get Stearted -->
+        <div class="get-started">
+            <p class="header">Conozcamos un poco más acerca de los algoritmos</p>
+            <p class="info-text">Ventajas de usar algoritmos</p>
+            <div class="items-box">
+                <div class="item-container">
+                    <div class="item">
+                        <i class='bx bx-check-shield'></i>
+                    </div>
+                    <p>test</p>
+                </div>
+                <div class="item-container">
+                    <div class="item">
+                        <i class='bx bx-code-alt'></i>
+                    </div>
+                    <p>test</p>
+                </div>
+                <div class="item-container">
+                    <div class="item">
+                        <i class='bx bxs-timer' ></i>
+                    </div>
+                    <p>test</p>
+                </div>
+                <div class="item-container">
+                    <div class="item">
+                        <i class='bx bx-rocket'></i>
+                    </div>
+                    <p>test</p>
+                </div>
+            </div>
+        </div>
+        <!-- End of Get Started -->
+
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-header">
+                "Los algoritmos son las herramientas que nos permiten convertir los desafíos en oportunidades, y cada línea de código es un paso más hacia el éxito."
+            </div>
+            <div class="footer-links">
+                <div class="link">
+                    <h5>Contacto</h5>
+                    <p>Info del equipo</p>
+                </div>
+
+            </div>
+
+        </div>
+        <!-- End of Footer -->
+        <div class="copyright">
+            <p>Copyright 2024, ProtoCool OS</p>
+        </div>
+
+    </div>
+
+
+    <script src="index.js"></script>
 </body>
 
 </html>
