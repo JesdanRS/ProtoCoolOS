@@ -343,7 +343,7 @@ body{
     .top-container .nft-box{
         display: none;
     }
-    
+
     .main .footer{
         flex-direction: column;
     }
@@ -458,4 +458,47 @@ body{
     to{
         transform: translateX(0px);
     }
+}
+
+h2.separator{
+    padding: 0 80px;
+    font-size: 40px;
+    margin-top: 40px;
+}
+.sl-nft{
+    padding: 0 80px;
+    margin: 50px 0 80px;
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+}
+.sl-nft .item{
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 18px;
+    box-shadow: 0 10px 30px #f4f1f1;
+    transition: all 0.3s ease;
+}
+
+.sl-nft .item:hover{
+    box-shadow: none;  
+}
+
+.sl-nft .item .header{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.sl-nft .item .header i{
+    font-size: 40px;
+}
+
+.sl-nft .item .header h5{
+    font-size: 18px;
+}
+
+.sl-nft .item p{
+    margin-top: 10px;
+    padding: 0 4px;
+
 }
