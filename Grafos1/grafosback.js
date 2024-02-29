@@ -168,7 +168,16 @@ document.addEventListener('DOMContentLoaded', function () {
         if (nodoClic) {
             eliminarNodoYFlechas(nodoClic);
         }
+
+        const flechaClic = event.target.closest('.flecha');
+        if (flechaClic) {
+            eliminarFlecha(flechaClic);
+        }
     });
+
+    function eliminarFlecha(flecha) {
+        grafoContainer.removeChild(flecha);
+    }
 
     function eliminarNodoYFlechas(nodo) {
         eliminarFlechasConectadasANodo(nodo);
@@ -178,14 +187,14 @@ document.addEventListener('DOMContentLoaded', function () {
     function eliminarFlechasConectadasANodo(nodo) {
         const flechas = document.querySelectorAll('.flecha');
         flechas.forEach((flecha) => {
-            const nodoInicio = flecha.dataset.nodoInicio;
-            const nodoFin = flecha.dataset.nodoFin;
-            if (nodoInicio === nodo.id || nodoFin === nodo.id) {
+            const nodoInicioId = flecha.dataset.nodoInicio;
+            const nodoFinId = flecha.dataset.nodoFin;
+
+            if (nodoInicioId === nodo.id || nodoFinId === nodo.id) {
                 grafoContainer.removeChild(flecha);
             }
         });
     }
-
     function eliminarNodo(nodo) {
         grafoContainer.removeChild(nodo);
     }
@@ -262,7 +271,28 @@ document.addEventListener('DOMContentLoaded', function () {
             grafoContainer.style.boxShadow = sombraOriginal;
         }
     }
+    document.getElementById('limpiarBtn').addEventListener('click', function () {
+        limpiarContenedor();
+    });
+
+
+    function limpiarContenedor() {
+        // Guarda el color de fondo original y las sombras
+        const fondoOriginal = window.getComputedStyle(grafoContainer).backgroundColor;
+        const sombraOriginal = window.getComputedStyle(grafoContainer).boxShadow;
     
+        // Elimina todos los nodos y flechas del contenedor
+        const nodos = document.querySelectorAll('.nodo');
+        nodos.forEach(nodo => {
+            eliminarFlechasConectadasANodo(nodo);
+            grafoContainer.removeChild(nodo);
+        });
     
+        const flechas = document.querySelectorAll('.flecha');
+        flechas.forEach(flecha => grafoContainer.removeChild(flecha));
+    
+        // Restaura el color de fondo original y las sombras
+        grafoContainer.style.backgroundColor = fondoOriginal;
+        grafoContainer.style.boxShadow = sombraOriginal;
+    }
 });
- 
