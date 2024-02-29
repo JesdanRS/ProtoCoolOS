@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     const grafoContainer = document.getElementById('grafo-container');
+    let idNodo = 0; // Contador global para identificadores de nodos
+    let idFlecha = 0; // Contador global para identificadores de flechas
     let nodoOrigen = null;
     let flechaEnProceso = null;
     let isCtrlPressed = false;
@@ -7,19 +9,18 @@ document.addEventListener('DOMContentLoaded', function () {
     let startX = 0;
     let startY = 0;
 
-    // Detectar cuando se presiona la tecla Ctrl
     document.addEventListener('keydown', function (event) {
         if (event.key === 'Control') {
             isCtrlPressed = true;
         }
     });
 
-    // Detectar cuando se suelta la tecla Ctrl
     document.addEventListener('keyup', function (event) {
         if (event.key === 'Control') {
             isCtrlPressed = false;
         }
     });
+    
 
     grafoContainer.addEventListener('mousedown', function (event) {
         const nodoClic = event.target.closest('.nodo');
@@ -67,17 +68,17 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     grafoContainer.addEventListener('click', function (event) {
-        const x = event.clientX - grafoContainer.getBoundingClientRect().left - 15;
-        const y = event.clientY - grafoContainer.getBoundingClientRect().top - 15;
+        if (!isCtrlPressed) {
+            const x = event.clientX - grafoContainer.getBoundingClientRect().left - 15;
+            const y = event.clientY - grafoContainer.getBoundingClientRect().top - 15;
+            const nodoExistente = document.elementFromPoint(event.clientX, event.clientY).closest('.nodo');
 
-        const nodoExistente = document.elementFromPoint(event.clientX, event.clientY).closest('.nodo');
-
-        if (!nodoExistente && !isCtrlPressed) {
-            crearNodo(x, y);
+            if (!nodoExistente) {
+                crearNodo(x, y);
+            }
         }
     });
 
-    // Agregar evento de doble clic para editar el texto del nodo
     grafoContainer.addEventListener('dblclick', function (event) {
         const nodoDobleClic = event.target.closest('.nodo');
         if (nodoDobleClic) {
@@ -90,68 +91,79 @@ document.addEventListener('DOMContentLoaded', function () {
         nodo.className = 'nodo';
         nodo.style.left = x + 'px';
         nodo.style.top = y + 'px';
+        nodo.setAttribute('data-id', `nodo-${idNodo++}`); // Asignar ID único
         grafoContainer.appendChild(nodo);
     }
 
     function crearFlecha(origen, x, y) {
         const flecha = document.createElement('div');
         flecha.className = 'flecha';
+        flecha.setAttribute('data-id', `flecha-${idFlecha++}`); // Asignar ID único
+        flecha.setAttribute('data-nodo-inicio', origen.getAttribute('data-id')); // Asignar ID del nodo de origen
         grafoContainer.appendChild(flecha);
+        actualizarFlecha(flecha, x, y);
+        return flecha;
+    }
 
+    function actualizarFlecha(flecha, x, y) {
+        const origen = document.querySelector(`.nodo[data-id="${flecha.getAttribute('data-nodo-inicio')}"]`);
         const x1 = parseInt(origen.style.left) + 15;
         const y1 = parseInt(origen.style.top) + 15;
         const angle = Math.atan2(y - y1, x - x1) * (180 / Math.PI);
         const length = Math.sqrt((x - x1) ** 2 + (y - y1) ** 2);
 
         flecha.style.width = length + 'px';
+        flecha.style.transform = `rotate(${angle}deg)`;
+        flecha.style.position = 'absolute';
         flecha.style.left = x1 + 'px';
         flecha.style.top = y1 + 'px';
-        flecha.style.transform = 'rotate(' + angle + 'deg)';
-
-        return flecha;
-    }
-
-    function actualizarFlecha(flecha, x, y) {
-        const x1 = parseInt(flecha.style.left);
-        const y1 = parseInt(flecha.style.top);
-        const angle = Math.atan2(y - y1, x - x1) * (180 / Math.PI);
-        const length = Math.sqrt((x - x1) ** 2 + (y - y1) ** 2);
-
-        flecha.style.width = length + 'px';
-        flecha.style.transform = 'rotate(' + angle + 'deg)';
     }
 
     function conectarNodos(origen, destino) {
         const atributo = prompt('Ingrese el atributo para la conexión:');
-        if (atributo !== null) { // Verifica si el usuario ha ingresado un atributo
+        if (atributo !== null) {
             const flecha = document.createElement('div');
             flecha.className = 'flecha';
-            flecha.setAttribute('data-atributo', atributo); // Guarda el atributo en un atributo de datos
+            flecha.setAttribute('data-id', `flecha-${idFlecha++}`); // Asignar ID único
+            flecha.setAttribute('data-nodo-inicio', origen.getAttribute('data-id')); // Nodo de origen
+            flecha.setAttribute('data-nodo-fin', destino.getAttribute('data-id')); // Nodo de destino
+            flecha.setAttribute('data-atributo', atributo); // Guarda el atributo
+            actualizarFlecha(flecha, parseInt(destino.style.left) + 15, parseInt(destino.style.top) + 15);
             grafoContainer.appendChild(flecha);
 
-            const x1 = parseInt(origen.style.left) + 15;
-            const y1 = parseInt(origen.style.top) + 15;
-            const x2 = parseInt(destino.style.left) + 15;
-            const y2 = parseInt(destino.style.top) + 15;
-            const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
-            const length = Math.sqrt((x2 - x1)  **2 + (y2 - y1)  **2);
-
-            flecha.style.width = length + 'px';
-            flecha.style.left = x1 + 'px';
-            flecha.style.top = y1 + 'px';
-            flecha.style.transform = 'rotate(' + angle + 'deg)';
-            flecha.innerHTML = '<div class="flecha-punta"></div>';
-
-            // Crear y mostrar el número de atributo encima de la flecha
-            const atributoText = document.createElement('div');
-            atributoText.className = 'atributo-text';
-            atributoText.textContent = atributo;
-            atributoText.style.position = 'absolute';
-            atributoText.style.color = 'white';
-            atributoText.style.top = ((y1 + y2 - 50) / 2) + 'px';
-            atributoText.style.left = ((x1 + x2) / 2) + 'px';
-            grafoContainer.appendChild(atributoText);
+            // Mostrar atributo en el contenedor
+            mostrarAtributoEnContenedor(flecha);
         }
+    }
+
+    function mostrarAtributoEnContenedor(flecha) {
+        const atributoText = document.createElement('div');
+        atributoText.className = 'atributo-text';
+        atributoText.textContent = flecha.getAttribute('data-atributo');
+        atributoText.style.position = 'absolute';
+        atributoText.style.color = 'white';
+    
+        // Obtener los nodos de inicio y fin usando los IDs almacenados en la flecha
+        const nodoInicio = document.querySelector(`.nodo[data-id="${flecha.getAttribute('data-nodo-inicio')}"]`);
+        const nodoFin = document.querySelector(`.nodo[data-id="${flecha.getAttribute('data-nodo-fin')}"]`);
+    
+        // Calcular el punto medio entre el nodo de inicio y fin
+        const xInicio = parseInt(nodoInicio.style.left) + nodoInicio.offsetWidth / 2;
+        const yInicio = parseInt(nodoInicio.style.top) + nodoInicio.offsetHeight / 2;
+        const xFin = parseInt(nodoFin.style.left) + nodoFin.offsetWidth / 2;
+        const yFin = parseInt(nodoFin.style.top) + nodoFin.offsetHeight / 2;
+        
+        // Punto medio
+        const xMedio = (xInicio + xFin) / 2;
+        const yMedio = (yInicio + yFin) / 2;
+    
+        // Ajustar la posición para que el texto aparezca sobre la flecha, no en el centro exacto
+        atributoText.style.left = `${xMedio}px`;
+        // Ajusta el valor '10' según sea necesario para posicionar mejor el texto sobre la flecha
+        atributoText.style.top = `${yMedio - 20}px`; 
+    
+        atributoText.dataset.flechaId = flecha.getAttribute('data-id'); // Asignar ID único de la flecha
+        grafoContainer.appendChild(atributoText);
     }
 
     function eliminarFlechaEnProceso() {
@@ -160,63 +172,54 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    
     grafoContainer.addEventListener('contextmenu', function (event) {
         event.preventDefault();
-
         const nodoClic = event.target.closest('.nodo');
         if (nodoClic) {
             eliminarNodoYFlechas(nodoClic);
         }
-
-        const flechaClic = event.target.closest('.flecha');
-        if (flechaClic) {
-            eliminarFlecha(flechaClic);
-        }
     });
-
-    function eliminarFlecha(flecha) {
-        grafoContainer.removeChild(flecha);
-    }
 
     function eliminarNodoYFlechas(nodo) {
         eliminarFlechasConectadasANodo(nodo);
-        eliminarNodo(nodo);
+        grafoContainer.removeChild(nodo);
     }
 
     function eliminarFlechasConectadasANodo(nodo) {
+        const idNodo = nodo.getAttribute('data-id');
         const flechas = document.querySelectorAll('.flecha');
         flechas.forEach((flecha) => {
-            const nodoInicioId = flecha.dataset.nodoInicio;
-            const nodoFinId = flecha.dataset.nodoFin;
+            const nodoInicioId = flecha.getAttribute('data-nodo-inicio');
+            const nodoFinId = flecha.getAttribute('data-nodo-fin');
 
-            if (nodoInicioId === nodo.id || nodoFinId === nodo.id) {
+            if (nodoInicioId === idNodo || nodoFinId === idNodo) {
+                eliminarAtributosDeFlecha(flecha);
                 grafoContainer.removeChild(flecha);
             }
         });
     }
-    function eliminarNodo(nodo) {
-        grafoContainer.removeChild(nodo);
+
+    function eliminarAtributosDeFlecha(flecha) {
+        const flechaId = flecha.getAttribute('data-id');
+        const atributos = document.querySelectorAll('.atributo-text');
+        atributos.forEach((atributo) => {
+            if (atributo.dataset.flechaId === flechaId) {
+                grafoContainer.removeChild(atributo);
+            }
+        });
     }
-    // Función para editar el texto del nodo
+
     function editarTextoNodo(nodo) {
-        // Crear un elemento de entrada de texto
         const input = document.createElement('input');
         input.type = 'text';
         input.className = 'nodo-texto';
         input.value = nodo.textContent;
-        
-        // Colocar el elemento de entrada de texto en el mismo lugar que el nodo
+        input.style.position = 'absolute';
         input.style.left = nodo.style.left;
         input.style.top = nodo.style.top;
-        
-        // Reemplazar el nodo por el elemento de entrada de texto
         nodo.parentNode.replaceChild(input, nodo);
-        
-        // Enfocar el elemento de entrada de texto
+
         input.focus();
-        
-        // Cuando se pierde el foco del elemento de entrada de texto, guardar el valor y restaurar el nodo
         input.addEventListener('blur', function() {
             nodo.textContent = input.value;
             input.parentNode.replaceChild(nodo, input);
@@ -230,69 +233,45 @@ document.addEventListener('DOMContentLoaded', function () {
     function guardarComoImagen() {
         // Obtén el contenedor de grafo
         const grafoContainer = document.getElementById('grafo-container');
-    
-        // Guarda el color de fondo original y las sombras
-        const fondoOriginal = window.getComputedStyle(grafoContainer).backgroundColor;
-        const sombraOriginal = window.getComputedStyle(grafoContainer).boxShadow;
-    
-        // Establece un fondo negro y elimina sombras antes de convertir el contenido a una imagen
+        
+        // Guarda el color de fondo original y cambia a negro temporalmente
+        const colorFondoOriginal = grafoContainer.style.backgroundColor;
         grafoContainer.style.backgroundColor = 'black';
-        grafoContainer.style.boxShadow = 'none';
-    
-        // Pide al usuario ingresar el nombre del archivo
-        const nombreArchivo = prompt('Ingrese el nombre del archivo', 'grafo');
-    
-        // Si el usuario ingresó un nombre, convierte a imagen
-        if (nombreArchivo !== null) {
-            // Convierte el contenido del contenedor a una imagen utilizando html2canvas
-            html2canvas(grafoContainer, { useCORS: true, backgroundColor: null }).then(function (canvas) {
-                // Restaura el color de fondo original y las sombras
-                grafoContainer.style.backgroundColor = fondoOriginal;
-                grafoContainer.style.boxShadow = sombraOriginal;
-    
-                // Convierte el canvas a una representación binaria en formato PNG
-                canvas.toBlob(function (blob) {
-                    // Crea un enlace de descarga con el nombre ingresado
-                    const enlaceDescarga = document.createElement('a');
-                    enlaceDescarga.href = URL.createObjectURL(blob);
-                    enlaceDescarga.download = nombreArchivo + '.png';
-    
-                    // Agrega el enlace de descarga al cuerpo del documento y haz clic en él
-                    document.body.appendChild(enlaceDescarga);
-                    enlaceDescarga.click();
-    
-                    // Elimina el enlace de descarga del cuerpo del documento
-                    document.body.removeChild(enlaceDescarga);
-                });
-            });
-        } else {
-            // Si el usuario cancela, restaura el color de fondo original y las sombras
-            grafoContainer.style.backgroundColor = fondoOriginal;
-            grafoContainer.style.boxShadow = sombraOriginal;
+        
+        // Pregunta al usuario por el nombre del archivo
+        const nombreArchivo = prompt("Ingrese el nombre del archivo:", "miGrafo");
+        if (nombreArchivo === null || nombreArchivo === "") {
+            // Si el usuario presiona cancelar o deja el campo vacío, no hacer nada
+            grafoContainer.style.backgroundColor = colorFondoOriginal;
+            return; // Salir de la función
         }
+        
+        // Usa html2canvas para tomar una "captura de pantalla" del contenedor
+        html2canvas(grafoContainer, { scale: 1, backgroundColor: null }).then(canvas => {
+            // Restaura el color de fondo original
+            grafoContainer.style.backgroundColor = colorFondoOriginal;
+            
+            // Crea un elemento <a> para descargar la imagen
+            const enlaceDescarga = document.createElement('a');
+            enlaceDescarga.download = `${nombreArchivo}.png`; // Utiliza el nombre ingresado por el usuario
+            enlaceDescarga.href = canvas.toDataURL('image/png');
+            document.body.appendChild(enlaceDescarga); // Agregar el enlace al cuerpo del documento para asegurar que funcione en Firefox
+            enlaceDescarga.click(); // Simula un clic en el enlace para descargar la imagen
+            document.body.removeChild(enlaceDescarga); // Elimina el enlace del cuerpo del documento
+        });
     }
     document.getElementById('limpiarBtn').addEventListener('click', function () {
         limpiarContenedor();
     });
-
-
+    
     function limpiarContenedor() {
-        // Guarda el color de fondo original y las sombras
-        const fondoOriginal = window.getComputedStyle(grafoContainer).backgroundColor;
-        const sombraOriginal = window.getComputedStyle(grafoContainer).boxShadow;
-    
-        // Elimina todos los nodos y flechas del contenedor
-        const nodos = document.querySelectorAll('.nodo');
-        nodos.forEach(nodo => {
-            eliminarFlechasConectadasANodo(nodo);
-            grafoContainer.removeChild(nodo);
-        });
-    
-        const flechas = document.querySelectorAll('.flecha');
-        flechas.forEach(flecha => grafoContainer.removeChild(flecha));
-    
-        // Restaura el color de fondo original y las sombras
-        grafoContainer.style.backgroundColor = fondoOriginal;
-        grafoContainer.style.boxShadow = sombraOriginal;
+        // Obtén el contenedor de grafo
+        const grafoContainer = document.getElementById('grafo-container');
+        
+        // Elimina todos los elementos dentro del contenedor
+        while (grafoContainer.firstChild) {
+            grafoContainer.removeChild(grafoContainer.firstChild);
+        }
     }
+
 });
