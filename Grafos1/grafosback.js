@@ -122,22 +122,36 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function conectarNodos(origen, destino) {
-        const flecha = document.createElement('div');
-        flecha.className = 'flecha';
-        grafoContainer.appendChild(flecha);
+        const atributo = prompt('Ingrese el atributo para la conexión:');
+        if (atributo !== null) { // Verifica si el usuario ha ingresado un atributo
+            const flecha = document.createElement('div');
+            flecha.className = 'flecha';
+            flecha.setAttribute('data-atributo', atributo); // Guarda el atributo en un atributo de datos
+            grafoContainer.appendChild(flecha);
 
-        const x1 = parseInt(origen.style.left) + 15;
-        const y1 = parseInt(origen.style.top) + 15;
-        const x2 = parseInt(destino.style.left) + 15;
-        const y2 = parseInt(destino.style.top) + 15;
-        const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
-        const length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+            const x1 = parseInt(origen.style.left) + 15;
+            const y1 = parseInt(origen.style.top) + 15;
+            const x2 = parseInt(destino.style.left) + 15;
+            const y2 = parseInt(destino.style.top) + 15;
+            const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
+            const length = Math.sqrt((x2 - x1)  **2 + (y2 - y1)  **2);
 
-        flecha.style.width = length + 'px';
-        flecha.style.left = x1 + 'px';
-        flecha.style.top = y1 + 'px';
-        flecha.style.transform = 'rotate(' + angle + 'deg)';
-        flecha.innerHTML = '<div class="flecha-punta"></div>';
+            flecha.style.width = length + 'px';
+            flecha.style.left = x1 + 'px';
+            flecha.style.top = y1 + 'px';
+            flecha.style.transform = 'rotate(' + angle + 'deg)';
+            flecha.innerHTML = '<div class="flecha-punta"></div>';
+
+            // Crear y mostrar el número de atributo encima de la flecha
+            const atributoText = document.createElement('div');
+            atributoText.className = 'atributo-text';
+            atributoText.textContent = atributo;
+            atributoText.style.position = 'absolute';
+            atributoText.style.color = 'white';
+            atributoText.style.top = ((y1 + y2 - 50) / 2) + 'px';
+            atributoText.style.left = ((x1 + x2) / 2) + 'px';
+            grafoContainer.appendChild(atributoText);
+        }
     }
 
     function eliminarFlechaEnProceso() {
@@ -146,6 +160,35 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    
+    grafoContainer.addEventListener('contextmenu', function (event) {
+        event.preventDefault();
+
+        const nodoClic = event.target.closest('.nodo');
+        if (nodoClic) {
+            eliminarNodoYFlechas(nodoClic);
+        }
+    });
+
+    function eliminarNodoYFlechas(nodo) {
+        eliminarFlechasConectadasANodo(nodo);
+        eliminarNodo(nodo);
+    }
+
+    function eliminarFlechasConectadasANodo(nodo) {
+        const flechas = document.querySelectorAll('.flecha');
+        flechas.forEach((flecha) => {
+            const nodoInicio = flecha.dataset.nodoInicio;
+            const nodoFin = flecha.dataset.nodoFin;
+            if (nodoInicio === nodo.id || nodoFin === nodo.id) {
+                grafoContainer.removeChild(flecha);
+            }
+        });
+    }
+
+    function eliminarNodo(nodo) {
+        grafoContainer.removeChild(nodo);
+    }
     // Función para editar el texto del nodo
     function editarTextoNodo(nodo) {
         // Crear un elemento de entrada de texto
