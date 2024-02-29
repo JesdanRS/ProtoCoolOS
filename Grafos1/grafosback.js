@@ -190,8 +190,8 @@ document.addEventListener('DOMContentLoaded', function () {
         // Pide al usuario ingresar el nombre del archivo
         const nombreArchivo = prompt('Ingrese el nombre del archivo', 'grafo');
     
-        // Verifica si el usuario ingresó un nombre y convierte a imagen
-        if (nombreArchivo) {
+        // Si el usuario ingresó un nombre, convierte a imagen
+        if (nombreArchivo !== null) {
             // Convierte el contenido del contenedor a una imagen utilizando html2canvas
             html2canvas(grafoContainer, { useCORS: true, backgroundColor: null }).then(function (canvas) {
                 // Restaura el color de fondo original y las sombras
@@ -213,9 +213,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     document.body.removeChild(enlaceDescarga);
                 });
             });
+        } else {
+            // Si el usuario cancela, restaura el color de fondo original y las sombras
+            grafoContainer.style.backgroundColor = fondoOriginal;
+            grafoContainer.style.boxShadow = sombraOriginal;
         }
     }
     
-
+    
 });
  
