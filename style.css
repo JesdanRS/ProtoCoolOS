@@ -67,8 +67,8 @@ body{
 }
 
 .navbar .nav-btn.selected{
-    border: 1px solid #ccc;
-    border-radius: 8px;
+    border: 2px solid #ccc;
+    border-radius: 50px;
 }
 
 .navbar .logo{
