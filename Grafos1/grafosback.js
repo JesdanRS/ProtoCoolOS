@@ -170,4 +170,52 @@ document.addEventListener('DOMContentLoaded', function () {
             input.parentNode.replaceChild(nodo, input);
         });
     }
+
+    document.getElementById('guardarBtn').addEventListener('click', function () {
+        guardarComoImagen();
+    });
+
+    function guardarComoImagen() {
+        // Obtén el contenedor de grafo
+        const grafoContainer = document.getElementById('grafo-container');
+    
+        // Guarda el color de fondo original y las sombras
+        const fondoOriginal = window.getComputedStyle(grafoContainer).backgroundColor;
+        const sombraOriginal = window.getComputedStyle(grafoContainer).boxShadow;
+    
+        // Establece un fondo negro y elimina sombras antes de convertir el contenido a una imagen
+        grafoContainer.style.backgroundColor = 'black';
+        grafoContainer.style.boxShadow = 'none';
+    
+        // Pide al usuario ingresar el nombre del archivo
+        const nombreArchivo = prompt('Ingrese el nombre del archivo', 'grafo');
+    
+        // Verifica si el usuario ingresó un nombre y convierte a imagen
+        if (nombreArchivo) {
+            // Convierte el contenido del contenedor a una imagen utilizando html2canvas
+            html2canvas(grafoContainer, { useCORS: true, backgroundColor: null }).then(function (canvas) {
+                // Restaura el color de fondo original y las sombras
+                grafoContainer.style.backgroundColor = fondoOriginal;
+                grafoContainer.style.boxShadow = sombraOriginal;
+    
+                // Convierte el canvas a una representación binaria en formato PNG
+                canvas.toBlob(function (blob) {
+                    // Crea un enlace de descarga con el nombre ingresado
+                    const enlaceDescarga = document.createElement('a');
+                    enlaceDescarga.href = URL.createObjectURL(blob);
+                    enlaceDescarga.download = nombreArchivo + '.png';
+    
+                    // Agrega el enlace de descarga al cuerpo del documento y haz clic en él
+                    document.body.appendChild(enlaceDescarga);
+                    enlaceDescarga.click();
+    
+                    // Elimina el enlace de descarga del cuerpo del documento
+                    document.body.removeChild(enlaceDescarga);
+                });
+            });
+        }
+    }
+    
+
 });
+ 
