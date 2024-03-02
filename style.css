@@ -537,3 +537,8 @@ Función agregada para quitar el subrayao de las etiquetas a
 .nav-buttons a {
     text-decoration: none; /* Elimina la decoración del enlace */
 }
+
+.heart {
+    cursor: pointer;
+    
+  }
