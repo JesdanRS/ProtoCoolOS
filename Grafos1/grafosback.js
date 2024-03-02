@@ -39,23 +39,41 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    grafoContainer.addEventListener('mousemove', function (event) {
-        if (isDragging && nodoOrigen) {
+    document.addEventListener('mousemove', function (event) {
+        if (flechaEnProceso) {
+            const rect = grafoContainer.getBoundingClientRect();
+            const x1 = parseInt(nodoOrigen.style.left) + 15;
+            const y1 = parseInt(nodoOrigen.style.top) + 15;
+    
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
+    
+            const angle = Math.atan2(mouseY - y1, mouseX - x1) * (180 / Math.PI);
+            const length = Math.sqrt((mouseX - x1) ** 2 + (mouseY - y1) ** 2);
+    
+            flechaEnProceso.style.width = length + 'px';
+            flechaEnProceso.style.transform = `rotate(${angle}deg)`;
+            flechaEnProceso.style.position = 'absolute';
+            flechaEnProceso.style.left = x1 + 'px';
+            flechaEnProceso.style.top = y1 + 'px';
+        }
+    
+        if (isCtrlPressed && isDragging && nodoOrigen) {
             const x = event.clientX + startX;
             const y = event.clientY + startY;
             nodoOrigen.style.left = x + 'px';
             nodoOrigen.style.top = y + 'px';
-        }
-
-        if (flechaEnProceso) {
-            actualizarFlecha(flechaEnProceso, event.clientX, event.clientY);
+    
+            // También actualiza la posición de las flechas conectadas al nodo
+            actualizarPosicionFlechas(nodoOrigen);
         }
     });
-
     grafoContainer.addEventListener('mouseup', function (event) {
         if (isDragging) {
             isDragging = false;
             nodoOrigen = null;
+
+            actualizarPosicionFlechas(nodoOrigen);
         } else {
             const nodoDestino = event.target.closest('.nodo');
             if (flechaEnProceso && nodoDestino && nodoOrigen !== nodoDestino) {
@@ -86,6 +104,51 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+
+    function actualizarPosicionFlechas(nodo) {
+        const idNodo = nodo.getAttribute('data-id');
+    
+        // Actualiza la posición de las flechas conectadas al nodo de inicio
+        const flechasInicio = document.querySelectorAll(`.flecha[data-nodo-inicio="${idNodo}"]`);
+        flechasInicio.forEach(flecha => {
+            const nodoFinId = flecha.getAttribute('data-nodo-fin');
+            const nodoFin = document.querySelector(`.nodo[data-id="${nodoFinId}"]`);
+            const atributoText = document.querySelector(`.atributo-text[data-flecha-id="${flecha.getAttribute('data-id')}"]`);
+    
+            if (nodoFin && atributoText) {
+                const xFin = parseInt(nodoFin.style.left) + 15;
+                const yFin = parseInt(nodoFin.style.top) + 15;
+                actualizarFlecha(flecha, xFin, yFin);
+    
+                // Actualiza la posición del atributo sobre la flecha
+                const xMedio = (parseInt(nodo.style.left) + xFin) / 2;
+                const yMedio = (parseInt(nodo.style.top) + yFin) / 2;
+                atributoText.style.left = `${xMedio}px`;
+                atributoText.style.top = `${yMedio - 20}px`;
+            }
+        });
+    
+        // Actualiza la posición de las flechas conectadas al nodo de destino
+        const flechasDestino = document.querySelectorAll(`.flecha[data-nodo-fin="${idNodo}"]`);
+        flechasDestino.forEach(flecha => {
+            const nodoInicioId = flecha.getAttribute('data-nodo-inicio');
+            const nodoInicio = document.querySelector(`.nodo[data-id="${nodoInicioId}"]`);
+            const atributoText = document.querySelector(`.atributo-text[data-flecha-id="${flecha.getAttribute('data-id')}"]`);
+    
+            if (nodoInicio && atributoText) {
+                const xInicio = parseInt(nodoInicio.style.left) + 15;
+                const yInicio = parseInt(nodoInicio.style.top) + 15;
+                actualizarFlecha(flecha, xInicio, yInicio);
+    
+                // Actualiza la posición del atributo sobre la flecha
+                const xMedio = (parseInt(nodoInicio.style.left) + parseInt(nodo.style.left)) / 2;
+                const yMedio = (parseInt(nodoInicio.style.top) + parseInt(nodo.style.top)) / 2;
+                atributoText.style.left = `${xMedio}px`;
+                atributoText.style.top = `${yMedio - 20}px`;
+            }
+        });
+    }
+
     function crearNodo(x, y) {
         const nombreNodo = prompt("Ingrese el nombre del nodo:"); // Solicitar el nombre al usuario
         if (nombreNodo !== null && nombreNodo.trim() !== "") { // Verificar que el nombre no esté vacío
@@ -113,17 +176,28 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function actualizarFlecha(flecha, x, y) {
-        const origen = document.querySelector(`.nodo[data-id="${flecha.getAttribute('data-nodo-inicio')}"]`);
-        const x1 = parseInt(origen.style.left) + 15;
-        const y1 = parseInt(origen.style.top) + 15;
-        const angle = Math.atan2(y - y1, x - x1) * (180 / Math.PI);
-        const length = Math.sqrt((x - x1) ** 2 + (y - y1) ** 2);
-
-        flecha.style.width = length + 'px';
-        flecha.style.transform = `rotate(${angle}deg)`;
-        flecha.style.position = 'absolute';
-        flecha.style.left = x1 + 'px';
-        flecha.style.top = y1 + 'px';
+        const nodoInicioId = flecha.getAttribute('data-nodo-inicio');
+        const nodoFinId = flecha.getAttribute('data-nodo-fin');
+    
+        const nodoInicio = document.querySelector(`.nodo[data-id="${nodoInicioId}"]`);
+        const nodoFin = document.querySelector(`.nodo[data-id="${nodoFinId}"]`);
+    
+        if (nodoInicio && nodoFin) {
+            const x1 = parseInt(nodoInicio.style.left) + 15;
+            const y1 = parseInt(nodoInicio.style.top) + 15;
+    
+            const x2 = parseInt(nodoFin.style.left) + 15;
+            const y2 = parseInt(nodoFin.style.top) + 15;
+    
+            const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
+            const length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+    
+            flecha.style.width = length + 'px';
+            flecha.style.transform = `rotate(${angle}deg)`;
+            flecha.style.position = 'absolute';
+            flecha.style.left = x1 + 'px';
+            flecha.style.top = y1 + 'px';
+        }
     }
 
     function conectarNodos(origen, destino) {
