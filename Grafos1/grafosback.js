@@ -191,8 +191,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     function eliminarNodoYFlechas(nodo) {
-        eliminarFlechasConectadasANodo(nodo);
-        grafoContainer.removeChild(nodo);
+        const nombreNodo = nodo.textContent; // Obtener el nombre del nodo antes de eliminarlo
+        eliminarFlechasConectadasANodo(nodo); // Función existente para eliminar flechas
+        grafoContainer.removeChild(nodo); // Función existente para eliminar el nodo del DOM
+        
+        // Llamada nueva función para eliminar el nodo de la matriz y actualizar la UI
+        eliminarNodoDeMatriz(nombreNodo);
     }
 
     function eliminarFlechasConectadasANodo(nodo) {
@@ -279,5 +283,20 @@ function actualizarConexionEnMatriz(origen, destino, atributo) {
         }
     }
 }
+
+function eliminarNodoDeMatriz(nombreNodo) {
+    // Eliminar el nodo del array de nodos
+    const index = nodos.indexOf(nombreNodo);
+    if (index > -1) {
+        nodos.splice(index, 1);
+    }
+
+    // Actualizar la matriz de adyacencia y la UI
+    actualizarMatrizUI();
+}
+
+
+
+
 
 });

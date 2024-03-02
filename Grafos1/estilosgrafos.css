@@ -4,21 +4,40 @@
     height: 420px;
     border:1px solid #ccc;
 }
-#matriz-container {
-    display: inline-block;
-    vertical-align: top;
-    margin-left: 20px;
+
+#contenedor-general {
+    display: flex;
+    align-items: flex-start; /* Para alinear los elementos en la parte superior */
 }
 
+#grafo-container,
+#matriz-container {
+    margin-right: 20px;
+}
+
+#matriz-adyacencia th,
+#matriz-adyacencia td,
+.nodo {
+    color: white;
+}
+
+#matriz-container {
+    margin-left: auto;
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
 #matriz-adyacencia {
     border-collapse: collapse;
 }
 
 #matriz-adyacencia, #matriz-adyacencia th, #matriz-adyacencia td {
     border: 1px solid #ccc;
-    padding: 5px;
+    padding: 11.3px;
     text-align: center;
 }
+
 body{
     background-color: #252954;
 }
