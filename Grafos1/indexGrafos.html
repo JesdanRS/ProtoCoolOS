@@ -2,21 +2,56 @@
 <html lang="en">
 
 <head>
-    <link rel="stylesheet" href="estilosgrafos.css">
-    <script src="grafosback.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <a href="#" class="logo">ProtoCool OS</a>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="estilosgrafos.css">
+    <script src="grafosback.js"></script>
     <title>Grafos</title>
 </head>
-
+    
 <body>
+
     <div class="main">
-    <div id="logo"></div>
-    <h1>Grafos</h1>
-    <div id="grafo-container"></div>
-    <div id="flecha-punta"></div>
-</div>
+        <!-- Navbar -->
+        <div class="navbar">
+            <a href="#" class="logo">ProtoCool OS</a>
+            <!--
+            <div class="nav-links">
+                <span class="item selected">Home</span>
+            </div>
+            -->
+            <div class="nav-buttons" id="navMenu">
+                <a href="../index.html">
+                    <button class="nav-btn">HOME</button>
+                </a>
+                <a href="../Grafos1/indexGrafos.html">
+                    <button class="nav-btn selected">GRAFOS</button>
+                </a>
+                <button class="nav-btn">JOHNSON</button>
+                <button class="nav-btn">ASIGNACIÓN</button>
+                <a href="../Contacto/indexContacto.html">
+                    <button class="nav-btn">CONTACTO</button>
+                </a>
+            </div>
+    
+            <button class="toggler">
+                <i class='bx bx-menu'></i>
+            </button>
+        </div>
+        <!-- End of Navbar -->
+
+        <!-- Top Container -->
+
+        <div id="logo"></div>
+            <div id="grafo-container"></div>
+            <div id="flecha-punta"></div>
+
+        <!-- End of Top Container -->
+
+    </div>
+
 </body>
 
 </html>
