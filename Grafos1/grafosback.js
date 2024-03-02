@@ -296,7 +296,4 @@ function eliminarNodoDeMatriz(nombreNodo) {
 }
 
 
-
-
-
 });
