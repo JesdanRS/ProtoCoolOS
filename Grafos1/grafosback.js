@@ -87,13 +87,20 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     function crearNodo(x, y) {
-        const nodo = document.createElement('div');
-        nodo.className = 'nodo';
-        nodo.style.left = x + 'px';
-        nodo.style.top = y + 'px';
-        nodo.setAttribute('data-id', `nodo-${idNodo++}`); // Asignar ID único
-        grafoContainer.appendChild(nodo);
+        const nombreNodo = prompt("Ingrese el nombre del nodo:"); // Solicitar el nombre al usuario
+        if (nombreNodo !== null && nombreNodo.trim() !== "") { // Verificar que el nombre no esté vacío
+            const nodo = document.createElement('div');
+            nodo.className = 'nodo';
+            nodo.style.left = x + 'px';
+            nodo.style.top = y + 'px';
+            nodo.setAttribute('data-id', `nodo-${idNodo++}`); // Asignar ID único
+            nodo.textContent = nombreNodo; // Establecer el nombre del nodo
+            grafoContainer.appendChild(nodo);
+    
+            agregarNodoAMatriz(nombreNodo); // Actualizar la matriz de adyacencia
+        }
     }
+
 
     function crearFlecha(origen, x, y) {
         const flecha = document.createElement('div');
@@ -130,9 +137,12 @@ document.addEventListener('DOMContentLoaded', function () {
             flecha.setAttribute('data-atributo', atributo); // Guarda el atributo
             actualizarFlecha(flecha, parseInt(destino.style.left) + 15, parseInt(destino.style.top) + 15);
             grafoContainer.appendChild(flecha);
-
+    
             // Mostrar atributo en el contenedor
             mostrarAtributoEnContenedor(flecha);
+    
+            // Actualizar la matriz de adyacencia con el atributo de la conexión
+            actualizarConexionEnMatriz(origen.textContent, destino.textContent, atributo);
         }
     }
 
@@ -210,68 +220,64 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function editarTextoNodo(nodo) {
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.className = 'nodo-texto';
-        input.value = nodo.textContent;
-        input.style.position = 'absolute';
-        input.style.left = nodo.style.left;
-        input.style.top = nodo.style.top;
-        nodo.parentNode.replaceChild(input, nodo);
-
-        input.focus();
-        input.addEventListener('blur', function() {
-            nodo.textContent = input.value;
-            input.parentNode.replaceChild(nodo, input);
-        });
+        const nombreActual = nodo.textContent; // Obtener el nombre actual del nodo
+        const nuevoNombre = prompt("Editar nombre del nodo:", nombreActual); // Solicitar el nuevo nombre, mostrando el actual como predeterminado
+    
+        if (nuevoNombre !== null && nuevoNombre.trim() !== "") { // Verificar que el nombre no esté vacío
+            nodo.textContent = nuevoNombre; // Actualizar con el nuevo nombre
+        }
     }
-
     document.getElementById('guardarBtn').addEventListener('click', function () {
         guardarComoImagen();
     });
 
-    function guardarComoImagen() {
-        // Obtén el contenedor de grafo
-        const grafoContainer = document.getElementById('grafo-container');
-        
-        // Guarda el color de fondo original y cambia a negro temporalmente
-        const colorFondoOriginal = grafoContainer.style.backgroundColor;
-        grafoContainer.style.backgroundColor = 'black';
-        
-        // Pregunta al usuario por el nombre del archivo
-        const nombreArchivo = prompt("Ingrese el nombre del archivo:", "miGrafo");
-        if (nombreArchivo === null || nombreArchivo === "") {
-            // Si el usuario presiona cancelar o deja el campo vacío, no hacer nada
-            grafoContainer.style.backgroundColor = colorFondoOriginal;
-            return; // Salir de la función
-        }
-        
-        // Usa html2canvas para tomar una "captura de pantalla" del contenedor
-        html2canvas(grafoContainer, { scale: 1, backgroundColor: null }).then(canvas => {
-            // Restaura el color de fondo original
-            grafoContainer.style.backgroundColor = colorFondoOriginal;
-            
-            // Crea un elemento <a> para descargar la imagen
-            const enlaceDescarga = document.createElement('a');
-            enlaceDescarga.download = `${nombreArchivo}.png`; // Utiliza el nombre ingresado por el usuario
-            enlaceDescarga.href = canvas.toDataURL('image/png');
-            document.body.appendChild(enlaceDescarga); // Agregar el enlace al cuerpo del documento para asegurar que funcione en Firefox
-            enlaceDescarga.click(); // Simula un clic en el enlace para descargar la imagen
-            document.body.removeChild(enlaceDescarga); // Elimina el enlace del cuerpo del documento
-        });
-    }
-    document.getElementById('limpiarBtn').addEventListener('click', function () {
-        limpiarContenedor();
+    let nodos = []; // Array para mantener los nombres de los nodos
+
+function actualizarMatrizUI() {
+    // Actualiza la cabecera de la matriz
+    const header = document.getElementById('matriz-header');
+    header.innerHTML = '<th></th>'; // Limpiar y añadir la celda vacía inicial
+    nodos.forEach(nombre => {
+        const th = document.createElement('th');
+        th.textContent = nombre;
+        header.appendChild(th);
     });
-    
-    function limpiarContenedor() {
-        // Obtén el contenedor de grafo
-        const grafoContainer = document.getElementById('grafo-container');
-        
-        // Elimina todos los elementos dentro del contenedor
-        while (grafoContainer.firstChild) {
-            grafoContainer.removeChild(grafoContainer.firstChild);
+
+    // Actualizar el cuerpo de la matriz
+    const body = document.getElementById('matriz-body');
+    body.innerHTML = ''; // Limpiar el cuerpo de la matriz
+    nodos.forEach((nombreFila, i) => {
+        const tr = document.createElement('tr');
+        const th = document.createElement('th');
+        th.textContent = nombreFila;
+        tr.appendChild(th);
+
+        nodos.forEach((nombreColumna, j) => {
+            const td = document.createElement('td');
+            td.textContent = '0'; // Valor predeterminado
+            td.setAttribute('id', `celda-${i}-${j}`); // ID único para cada celda
+            tr.appendChild(td);
+        });
+
+        body.appendChild(tr);
+    });
+}
+
+function agregarNodoAMatriz(nombreNodo) {
+    nodos.push(nombreNodo); // Agregar el nombre del nuevo nodo
+    actualizarMatrizUI(); // Actualizar la UI de la matriz
+}
+
+function actualizarConexionEnMatriz(origen, destino, atributo) {
+    const indiceOrigen = nodos.indexOf(origen);
+    const indiceDestino = nodos.indexOf(destino);
+
+    if (indiceOrigen !== -1 && indiceDestino !== -1) {
+        const celda = document.getElementById(`celda-${indiceOrigen}-${indiceDestino}`);
+        if (celda) {
+            celda.textContent = atributo; // Actualizar con el atributo de la conexión
         }
     }
+}
 
 });
