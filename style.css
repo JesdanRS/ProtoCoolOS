@@ -290,7 +290,7 @@ body{
 }
 
 .main .copyright{
-    padding-bottom: 25px;
+    padding-bottom: 30px;
     border-top: 1px solid #ccc;
 }
 
@@ -472,13 +472,15 @@ h2.separator{
     justify-content: space-between;
     gap: 30px;
 }
-.sl-nft .item{
+.sl-nft .item {
+
     padding: 20px;
     background: rgba(255, 255, 255, 0.2);
     border-radius: 18px;
     box-shadow: 0 10px 30px #f4f1f1;
     transition: all 0.3s ease;
 }
+
 
 .sl-nft .item:hover{
     box-shadow: none;  
@@ -502,6 +504,32 @@ h2.separator{
     padding: 0 4px;
 
 }
+.sl-nft {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Ajusta el espacio entre los videos según necesites */
+    justify-content: center; /* Centra los elementos si no ocupan todo el ancho */
+}
+
+.sl-nft .item {
+    flex: 1 1 200px; /* Los elementos se ajustan pero no serán más pequeños de 200px */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.video-container {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.video-container iframe {
+    display: block; /* Elimina cualquier espacio extra abajo del iframe */
+    width: 100%;
+    height: auto;
+}
+
 /*
 Función agregada para quitar el subrayao de las etiquetas a
 */
