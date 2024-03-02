@@ -371,7 +371,14 @@ body{
     line-height: 36px;
     letter-spacing: 0.5px;
 }
-
+.get-started .info-text1{
+    align-self: left;
+    color: #ccc;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 20px;
+    letter-spacing: 0.5px;
+}
 .get-started .items-box{
     padding: 60px 80px;
     position: relative;
