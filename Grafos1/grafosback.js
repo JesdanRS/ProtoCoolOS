@@ -324,6 +324,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let nodos = []; // Array para mantener los nombres de los nodos
 
+
 // Esta función actualiza la interfaz de usuario de la matriz de adyacencia sin restablecer los valores existentes.
 function actualizarMatrizUI() {
     const header = document.getElementById('matriz-header');
