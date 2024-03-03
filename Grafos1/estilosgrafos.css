@@ -152,3 +152,8 @@ h1{
     background: linear-gradient(95deg, #7e22ce 3.2%, #3b82f6 99.5%);
     font-family: 'Poppins', sans-serif;
 }
+
+.atributo-text {
+    color: white;
+    /* Otros estilos necesarios para posicionar y mostrar correctamente el texto del atributo */
+}
