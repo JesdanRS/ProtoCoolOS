@@ -370,4 +370,29 @@ function eliminarNodoDeMatriz(nombreNodo) {
 }
 
 
+document.getElementById('limpiarBtn').addEventListener('click', function () {
+    limpiarContenedores();
+});
+
+function limpiarContenedores() {
+    // Elimina todos los nodos y flechas dentro del contenedor de grafos
+    while (grafoContainer.firstChild) {
+        grafoContainer.removeChild(grafoContainer.firstChild);
+    }
+
+    // Limpia el contenido de las celdas en la matriz
+    const celdasMatriz = document.querySelectorAll('#matriz-adyacencia td');
+    celdasMatriz.forEach(celda => {
+        celda.textContent = '0';
+    });
+
+    // Restablece los arrays y contadores según sea necesario
+    nodos = [];
+    idNodo = 0;
+    idFlecha = 0;
+
+    // Actualiza la matriz de adyacencia
+    actualizarMatrizUI();
+}
+
 });
