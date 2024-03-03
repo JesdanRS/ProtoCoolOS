@@ -300,99 +300,111 @@ document.addEventListener('DOMContentLoaded', function () {
     function editarTextoNodo(nodo) {
         const nombreActual = nodo.textContent; // Obtener el nombre actual del nodo
         const nuevoNombre = prompt("Editar nombre del nodo:", nombreActual); // Solicitar el nuevo nombre, mostrando el actual como predeterminado
-    
+        
         if (nuevoNombre !== null && nuevoNombre.trim() !== "") { // Verificar que el nombre no esté vacío
             nodo.textContent = nuevoNombre; // Actualizar con el nuevo nombre
+    
+            // Actualizar el nombre en la matriz de adyacencia
+            const index = nodos.indexOf(nombreActual);
+            if (index !== -1) {
+                nodos[index] = nuevoNombre;
+                
+                // Actualiza los headers de la matriz
+                const headers = document.querySelectorAll(`#matriz-header th`);
+                headers[index + 1].textContent = nuevoNombre; // +1 porque el primer th es vacío
+    
+                // Actualiza los headers de las filas
+                const rowHeaders = document.querySelectorAll('#matriz-body th');
+                rowHeaders[index].textContent = nuevoNombre;
+            }
         }
-    }
-    document.getElementById('guardarBtn').addEventListener('click', function () {
-        guardarComoImagen();
-    });
+    }    
+    
 
     let nodos = []; // Array para mantener los nombres de los nodos
 
-function actualizarMatrizUI() {
-    // Actualiza la cabecera de la matriz
-    const header = document.getElementById('matriz-header');
-    header.innerHTML = '<th></th>'; // Limpiar y añadir la celda vacía inicial
-    nodos.forEach(nombre => {
-        const th = document.createElement('th');
-        th.textContent = nombre;
-        header.appendChild(th);
-    });
-
-    // Actualizar el cuerpo de la matriz
-    const body = document.getElementById('matriz-body');
-    body.innerHTML = ''; // Limpiar el cuerpo de la matriz
-    nodos.forEach((nombreFila, i) => {
-        const tr = document.createElement('tr');
-        const th = document.createElement('th');
-        th.textContent = nombreFila;
-        tr.appendChild(th);
-
-        nodos.forEach((nombreColumna, j) => {
-            const td = document.createElement('td');
-            td.textContent = '0'; // Valor predeterminado
-            td.setAttribute('id', `celda-${i}-${j}`); // ID único para cada celda
-            tr.appendChild(td);
+    function actualizarMatrizUI() {
+        // Actualiza la cabecera de la matriz
+        const header = document.getElementById('matriz-header');
+        header.innerHTML = '<th></th>'; // Limpiar y añadir la celda vacía inicial
+        nodos.forEach(nombre => {
+            const th = document.createElement('th');
+            th.textContent = nombre;
+            header.appendChild(th);
         });
 
-        body.appendChild(tr);
-    });
-}
+        // Actualizar el cuerpo de la matriz
+        const body = document.getElementById('matriz-body');
+        body.innerHTML = ''; // Limpiar el cuerpo de la matriz
+        nodos.forEach((nombreFila, i) => {
+            const tr = document.createElement('tr');
+            const th = document.createElement('th');
+            th.textContent = nombreFila;
+            tr.appendChild(th);
 
-function agregarNodoAMatriz(nombreNodo) {
-    nodos.push(nombreNodo); // Agregar el nombre del nuevo nodo
-    actualizarMatrizUI(); // Actualizar la UI de la matriz
-}
+            nodos.forEach((nombreColumna, j) => {
+                const td = document.createElement('td');
+                td.textContent = '0'; // Valor predeterminado
+                td.setAttribute('id', `celda-${i}-${j}`); // ID único para cada celda
+                tr.appendChild(td);
+            });
 
-function actualizarConexionEnMatriz(origen, destino, atributo) {
-    const indiceOrigen = nodos.indexOf(origen);
-    const indiceDestino = nodos.indexOf(destino);
+            body.appendChild(tr);
+        });
+    }
 
-    if (indiceOrigen !== -1 && indiceDestino !== -1) {
-        const celda = document.getElementById(`celda-${indiceOrigen}-${indiceDestino}`);
-        if (celda) {
-            celda.textContent = atributo; // Actualizar con el atributo de la conexión
+    function agregarNodoAMatriz(nombreNodo) {
+        nodos.push(nombreNodo); // Agregar el nombre del nuevo nodo
+        actualizarMatrizUI(); // Actualizar la UI de la matriz
+    }
+
+    function actualizarConexionEnMatriz(origen, destino, atributo) {
+        const indiceOrigen = nodos.indexOf(origen);
+        const indiceDestino = nodos.indexOf(destino);
+
+        if (indiceOrigen !== -1 && indiceDestino !== -1) {
+            const celda = document.getElementById(`celda-${indiceOrigen}-${indiceDestino}`);
+            if (celda) {
+                celda.textContent = atributo; // Actualizar con el atributo de la conexión
+            }
         }
     }
-}
 
-function eliminarNodoDeMatriz(nombreNodo) {
-    // Eliminar el nodo del array de nodos
-    const index = nodos.indexOf(nombreNodo);
-    if (index > -1) {
-        nodos.splice(index, 1);
+    function eliminarNodoDeMatriz(nombreNodo) {
+        // Eliminar el nodo del array de nodos
+        const index = nodos.indexOf(nombreNodo);
+        if (index > -1) {
+            nodos.splice(index, 1);
+        }
+
+        // Actualizar la matriz de adyacencia y la UI
+        actualizarMatrizUI();
     }
 
-    // Actualizar la matriz de adyacencia y la UI
-    actualizarMatrizUI();
-}
 
-
-document.getElementById('limpiarBtn').addEventListener('click', function () {
-    limpiarContenedores();
-});
-
-function limpiarContenedores() {
-    // Elimina todos los nodos y flechas dentro del contenedor de grafos
-    while (grafoContainer.firstChild) {
-        grafoContainer.removeChild(grafoContainer.firstChild);
-    }
-
-    // Limpia el contenido de las celdas en la matriz
-    const celdasMatriz = document.querySelectorAll('#matriz-adyacencia td');
-    celdasMatriz.forEach(celda => {
-        celda.textContent = '0';
+    document.getElementById('limpiarBtn').addEventListener('click', function () {
+        limpiarContenedores();
     });
 
-    // Restablece los arrays y contadores según sea necesario
-    nodos = [];
-    idNodo = 0;
-    idFlecha = 0;
+    function limpiarContenedores() {
+        // Elimina todos los nodos y flechas dentro del contenedor de grafos
+        while (grafoContainer.firstChild) {
+            grafoContainer.removeChild(grafoContainer.firstChild);
+        }
 
-    // Actualiza la matriz de adyacencia
-    actualizarMatrizUI();
-}
+        // Limpia el contenido de las celdas en la matriz
+        const celdasMatriz = document.querySelectorAll('#matriz-adyacencia td');
+        celdasMatriz.forEach(celda => {
+            celda.textContent = '0';
+        });
+
+        // Restablece los arrays y contadores según sea necesario
+        nodos = [];
+        idNodo = 0;
+        idFlecha = 0;
+
+        // Actualiza la matriz de adyacencia
+        actualizarMatrizUI();
+    }
 
 });
