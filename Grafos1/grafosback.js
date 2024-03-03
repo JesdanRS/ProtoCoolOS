@@ -146,6 +146,19 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Botón HELP
+
+    document.getElementById('helpBtn').addEventListener('click', function() {
+        var popup = document.getElementById('helpPopup');
+        if (popup.style.display == 'none' || popup.style.display == '') {
+            popup.style.display = 'block';
+        } else {
+            popup.style.display = 'none';
+        }
+    });
+
+    // End of Botón HELP
+
     // Función para editar el texto del nodo
     function editarTextoNodo(nodo) {
         // Crear un elemento de entrada de texto
@@ -171,3 +184,4 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+

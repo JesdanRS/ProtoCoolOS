@@ -564,3 +564,50 @@ Función agregada para quitar el subrayao de las etiquetas a
     text-decoration: none; /* Elimina la decoración del enlace */
 }
 
+
+/*
+Estilo de botón HELP
+*/
+
+#helpBtn {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 24px;
+    line-height: 50px;
+    text-align: center;
+    border: none;
+    background: linear-gradient(95deg, #7e22ce 3.2%, #3b82f6 99.5%);
+    color: white;
+    cursor: pointer;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    animation: helpBtnAnim 2s infinite;
+}
+
+@keyframes helpBtnAnim {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+#helpPopup {
+    position: fixed;
+    bottom: 80px;
+    left: 20px;
+    width: 300px;
+    background-color: #252954;
+    color: white;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    padding: 20px;
+    border-radius: 10px;
+    display: none;
+}
+
+.hidden {
+    display: none;
+}
+
+
