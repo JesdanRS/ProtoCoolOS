@@ -299,32 +299,75 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+
     function editarTextoNodo(nodo) {
         const nombreActual = nodo.textContent; // Obtener el nombre actual del nodo
         const nuevoNombre = prompt("Editar nombre del nodo:", nombreActual); // Solicitar el nuevo nombre, mostrando el actual como predeterminado
         
-        if (nuevoNombre !== null && nuevoNombre.trim() !== "") { // Verificar que el nombre no esté vacío
-            nodo.textContent = nuevoNombre; // Actualizar con el nuevo nombre
+        if (nuevoNombre !== null && nuevoNombre.trim() !== "" && nuevoNombre !== nombreActual) {
+            // Almacenar temporalmente las conexiones existentes
+            let conexionesTemporales = [];
+            nodos.forEach(nodoInicio => {
+                const celdaInicio = document.getElementById(`celda-${nodoInicio}-${nombreActual}`);
+                if (celdaInicio && celdaInicio.textContent !== '0') {
+                    conexionesTemporales.push({ inicio: nodoInicio, fin: nombreActual, valor: celdaInicio.textContent });
+                }
     
-            // Actualizar el nombre en la matriz de adyacencia
+                const celdaFin = document.getElementById(`celda-${nombreActual}-${nodoInicio}`);
+                if (celdaFin && celdaFin.textContent !== '0') {
+                    conexionesTemporales.push({ inicio: nombreActual, fin: nodoInicio, valor: celdaFin.textContent });
+                }
+            });
+    
+            // Actualizar el nombre en la lista de nodos
             const index = nodos.indexOf(nombreActual);
             if (index !== -1) {
                 nodos[index] = nuevoNombre;
-                
-                // Actualiza los headers de la matriz
-                const headers = document.querySelectorAll('#matriz-header th');
-                headers[index + 1].textContent = nuevoNombre; // +1 porque el primer th es vacío
-    
-                // Actualiza los headers de las filas
-                const rowHeaders = document.querySelectorAll('#matriz-body th');
-                rowHeaders[index].textContent = nuevoNombre;
             }
+    
+            // Actualizar el nombre del nodo en el DOM
+            nodo.textContent = nuevoNombre;
+            
+            // Reestablecer las celdas con los valores almacenados
+            conexionesTemporales.forEach(conexion => {
+                const celdaInicio = document.getElementById(`celda-${conexion.inicio}-${conexion.fin}`);
+                if (conexion.fin === nombreActual && celdaInicio) {
+                    celdaInicio.setAttribute('id', `celda-${conexion.inicio}-${nuevoNombre}`);
+                }
+                const celdaFin = document.getElementById(`celda-${conexion.fin}-${conexion.inicio}`);
+                if (conexion.inicio === nombreActual && celdaFin) {
+                    celdaFin.setAttribute('id', `celda-${nuevoNombre}-${conexion.fin}`);
+                }
+            });
+    
+            // Actualizar los identificadores y textos de las flechas afectadas
+            document.querySelectorAll(`.flecha[data-nodo-inicio="${nodo.getAttribute('data-id')}"], .flecha[data-nodo-fin="${nodo.getAttribute('data-id')}"]`).forEach(flecha => {
+                if (flecha.getAttribute('data-nodo-inicio') === nodo.getAttribute('data-id')) {
+                    flecha.setAttribute('data-nodo-inicio-nombre', nuevoNombre);
+                }
+                if (flecha.getAttribute('data-nodo-fin') === nodo.getAttribute('data-id')) {
+                    flecha.setAttribute('data-nodo-fin-nombre', nuevoNombre);
+                }
+            });
+    
+            // Actualizar la matriz de adyacencia en la interfaz de usuario
+            actualizarMatrizUI();
+    
+            // Restaurar las conexiones en la matriz de adyacencia
+            conexionesTemporales.forEach(conexion => {
+                actualizarConexionEnMatriz(
+                    conexion.inicio === nombreActual ? nuevoNombre : conexion.inicio,
+                    conexion.fin === nombreActual ? nuevoNombre : conexion.fin,
+                    conexion.valor
+                );
+            });
         }
     }
+    
 
     let nodos = []; // Array para mantener los nombres de los nodos
 
-// Esta función actualiza la interfaz de usuario de la matriz de adyacencia sin restablecer los valores existentes.
+
 function actualizarMatrizUI() {
     const header = document.getElementById('matriz-header');
     const body = document.getElementById('matriz-body');
@@ -355,6 +398,22 @@ function actualizarMatrizUI() {
         });
 
         body.appendChild(tr);
+    });
+
+    // Restaurar las conexiones existentes en la matriz de adyacencia
+    const flechas = document.querySelectorAll('.flecha');
+    flechas.forEach((flecha) => {
+        const nodoInicioNombre = flecha.getAttribute('data-nodo-inicio-nombre');
+        const nodoFinNombre = flecha.getAttribute('data-nodo-fin-nombre');
+        const atributo = flecha.getAttribute('data-atributo');
+        
+        // Si los nombres de los nodos inicio y fin están en la lista de nodos, actualizamos la celda correspondiente
+        if (nodos.includes(nodoInicioNombre) && nodos.includes(nodoFinNombre)) {
+            const celda = document.getElementById(`celda-${nodoInicioNombre}-${nodoFinNombre}`);
+            if (celda) {
+                celda.textContent = atributo;
+            }
+        }
     });
 }
 
@@ -395,9 +454,16 @@ function agregarNodoAMatriz(nombreNodo) {
     });
 }
 
-
-
+/*
 // Esta función actualiza los valores de las conexiones en la matriz de adyacencia.
+function actualizarConexionEnMatriz(origen, destino, atributo) {
+    const celda = document.getElementById(`celda-${origen}-${destino}`);
+    if (celda) {
+        celda.textContent = atributo; // Actualizar con el atributo de la conexión
+    }
+}*/
+
+// Esta función necesita ser modificada para usar los nuevos nombres de los nodos
 function actualizarConexionEnMatriz(origen, destino, atributo) {
     const celda = document.getElementById(`celda-${origen}-${destino}`);
     if (celda) {
