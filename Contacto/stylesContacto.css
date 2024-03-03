@@ -652,6 +652,7 @@ Función agregada para quitar el subrayao de las etiquetas a
 .nav-buttons a {
     text-decoration: none; /* Elimina la decoración del enlace */
 }
+
 ul {
     list-style: none;
     padding: 0;
@@ -747,3 +748,6 @@ ul {
     color: #e9e2e2; 
   }
   
+  .google, .instagram, .github {
+    text-decoration: none;
+}
