@@ -39,6 +39,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    
+
     document.addEventListener('mousemove', function (event) {
         if (flechaEnProceso) {
             const rect = grafoContainer.getBoundingClientRect();
@@ -266,13 +268,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function eliminarNodoYFlechas(nodo) {
         const nombreNodo = nodo.textContent; // Obtener el nombre del nodo antes de eliminarlo
-        eliminarFlechasConectadasANodo(nodo); // Función existente para eliminar flechas
-        grafoContainer.removeChild(nodo); // Función existente para eliminar el nodo del DOM
+        eliminarFlechasConectadasANodo(nodo); // Eliminar flechas conectadas al nodo
+        grafoContainer.removeChild(nodo); // Eliminar el nodo del DOM
         
-        // Llamada nueva función para eliminar el nodo de la matriz y actualizar la UI
+        // Eliminar el nodo de la matriz de adyacencia
         eliminarNodoDeMatriz(nombreNodo);
     }
-
+    
     function eliminarFlechasConectadasANodo(nodo) {
         const idNodo = nodo.getAttribute('data-id');
         const flechas = document.querySelectorAll('.flecha');
@@ -300,30 +302,45 @@ document.addEventListener('DOMContentLoaded', function () {
     function editarTextoNodo(nodo) {
         const nombreActual = nodo.textContent; // Obtener el nombre actual del nodo
         const nuevoNombre = prompt("Editar nombre del nodo:", nombreActual); // Solicitar el nuevo nombre, mostrando el actual como predeterminado
-    
+        
         if (nuevoNombre !== null && nuevoNombre.trim() !== "") { // Verificar que el nombre no esté vacío
             nodo.textContent = nuevoNombre; // Actualizar con el nuevo nombre
+    
+            // Actualizar el nombre en la matriz de adyacencia
+            const index = nodos.indexOf(nombreActual);
+            if (index !== -1) {
+                nodos[index] = nuevoNombre;
+                
+                // Actualiza los headers de la matriz
+                const headers = document.querySelectorAll('#matriz-header th');
+                headers[index + 1].textContent = nuevoNombre; // +1 porque el primer th es vacío
+    
+                // Actualiza los headers de las filas
+                const rowHeaders = document.querySelectorAll('#matriz-body th');
+                rowHeaders[index].textContent = nuevoNombre;
+            }
         }
     }
-    document.getElementById('guardarBtn').addEventListener('click', function () {
-        guardarComoImagen();
-    });
 
     let nodos = []; // Array para mantener los nombres de los nodos
 
+// Esta función actualiza la interfaz de usuario de la matriz de adyacencia sin restablecer los valores existentes.
 function actualizarMatrizUI() {
-    // Actualiza la cabecera de la matriz
     const header = document.getElementById('matriz-header');
-    header.innerHTML = '<th></th>'; // Limpiar y añadir la celda vacía inicial
+    const body = document.getElementById('matriz-body');
+
+    // Limpiar el encabezado y el cuerpo de la matriz
+    header.innerHTML = '<th></th>';
+    body.innerHTML = '';
+
+    // Crear el encabezado de la matriz
     nodos.forEach(nombre => {
         const th = document.createElement('th');
         th.textContent = nombre;
         header.appendChild(th);
     });
 
-    // Actualizar el cuerpo de la matriz
-    const body = document.getElementById('matriz-body');
-    body.innerHTML = ''; // Limpiar el cuerpo de la matriz
+    // Crear las filas y celdas de la matriz
     nodos.forEach((nombreFila, i) => {
         const tr = document.createElement('tr');
         const th = document.createElement('th');
@@ -332,8 +349,8 @@ function actualizarMatrizUI() {
 
         nodos.forEach((nombreColumna, j) => {
             const td = document.createElement('td');
-            td.textContent = '0'; // Valor predeterminado
-            td.setAttribute('id', `celda-${i}-${j}`); // ID único para cada celda
+            td.textContent = '0'; // Inicializar con 0
+            td.setAttribute('id', `celda-${nombreFila}-${nombreColumna}`); // Usar nombres de nodos para IDs
             tr.appendChild(td);
         });
 
@@ -346,19 +363,34 @@ function agregarNodoAMatriz(nombreNodo) {
     actualizarMatrizUI(); // Actualizar la UI de la matriz
 }
 
+// Esta función actualiza los valores de las conexiones en la matriz de adyacencia.
 function actualizarConexionEnMatriz(origen, destino, atributo) {
-    const indiceOrigen = nodos.indexOf(origen);
-    const indiceDestino = nodos.indexOf(destino);
-
-    if (indiceOrigen !== -1 && indiceDestino !== -1) {
-        const celda = document.getElementById(`celda-${indiceOrigen}-${indiceDestino}`);
-        if (celda) {
-            celda.textContent = atributo; // Actualizar con el atributo de la conexión
-        }
+    const celda = document.getElementById(`celda-${origen}-${destino}`);
+    if (celda) {
+        celda.textContent = atributo; // Actualizar con el atributo de la conexión
     }
 }
 
+
+// Esta función maneja la eliminación de nodos y actualiza la matriz de adyacencia.
 function eliminarNodoDeMatriz(nombreNodo) {
+    // Guardar las conexiones existentes que no involucran al nodo eliminado
+    let conexionesRestantes = [];
+    nodos.forEach(nodoInicio => {
+        nodos.forEach(nodoFin => {
+            if (nodoInicio !== nombreNodo && nodoFin !== nombreNodo) {
+                const celda = document.getElementById(`celda-${nodoInicio}-${nodoFin}`);
+                if (celda && celda.textContent !== '0') {
+                    conexionesRestantes.push({
+                        inicio: nodoInicio,
+                        fin: nodoFin,
+                        valor: celda.textContent
+                    });
+                }
+            }
+        });
+    });
+
     // Eliminar el nodo del array de nodos
     const index = nodos.indexOf(nombreNodo);
     if (index > -1) {
@@ -367,6 +399,11 @@ function eliminarNodoDeMatriz(nombreNodo) {
 
     // Actualizar la matriz de adyacencia y la UI
     actualizarMatrizUI();
+
+    // Restaurar las conexiones restantes en la matriz de adyacencia
+    conexionesRestantes.forEach(conexion => {
+        actualizarConexionEnMatriz(conexion.inicio, conexion.fin, conexion.valor);
+    });
 }
 
 
