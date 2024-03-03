@@ -652,4 +652,98 @@ Función agregada para quitar el subrayao de las etiquetas a
 .nav-buttons a {
     text-decoration: none; /* Elimina la decoración del enlace */
 }
+ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+  }
+  
+  ul li {
+    margin: 0 10px; /* Ajusta el espaciado entre iconos según necesites */
+  }
+  
+  ul li a {
+    display: inline-block; /* Cambia a inline-block para mejor alineación */
+    position: relative;
+    width: 60px; /* Tamaño de los iconos, ajusta según prefieras */
+    height: 60px;
+    text-align: center;
+    color: #404040; /* Color de los iconos */
+    transition: .5s;
+  }
+  
+  ul li a i {
+    line-height: 60px; /* Alinea verticalmente los iconos */
+    font-size: 30px; /* Tamaño de los iconos, ajusta según prefieras */
+  }
+  
+  /* Estilos para animaciones */
+  ul li a span {
+    position: absolute;
+    transition: transform .5s;
+  }
+  /* Horizontales */
+  ul li a span:nth-child(1){
+    width: 100%;
+    height: 3px;
+    background: #404040;
+  }
+  ul li a span:nth-child(3){
+    width: 100%;
+    height: 3px;
+    background: #404040;
+  }
+  ul li a span:nth-child(1) {
+    top: 0;
+    left: 0;
+  }
+  ul li a:hover span:nth-child(1){
+    width: 0; /* Efecto de desaparición */
 
+  }
+  ul li a:hover span:nth-child(3) {
+    width: 0; /* Efecto de desaparición */
+  }
+  /* Verticales */
+  ul li a span:nth-child(2){
+    width: 3px;
+    height: 100%;
+    background: #404040;
+  }
+  ul li a span:nth-child(4){
+    width: 3px;
+    height: 100%;
+    background: #404040;
+  }
+  ul li a span:nth-child(2) {
+    top: 0;
+    left: 0;
+  }
+  ul li a:hover span:nth-child(2){
+    height: 0;
+  }
+  ul li a:hover span:nth-child(4) {
+    height: 0; 
+  }
+  .google:hover{
+    color: #dd4b39; 
+  }
+  .instagram:hover{
+    color: #c32aa3; 
+
+  }
+  .github:hover {
+    color: #e9e2e2; 
+  }
+  .google:hover span{
+    color: #dd4b39; 
+
+  }
+  .instagram:hover span{
+    color: #c32aa3; 
+
+  }
+  .github:hover span{
+    color: #e9e2e2; 
+  }
+  
