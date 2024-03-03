@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let nodos = []; // Para gestionar los nombres de los nodos y la matriz de adyacencia
     //
 
-    
+
 //EVENTOS
 
 // Eventos de teclado para controlar la presión de Ctrl
@@ -363,8 +363,79 @@ document.getElementById('limpiarBtn').addEventListener('click', function () {
     }
 
     function agregarNodoAMatriz(nombreNodo) {
-        nodos.push(nombreNodo); // Agregar el nombre del nuevo nodo
-        actualizarMatrizUI(); // Actualizar la UI de la matriz
+        // Guardar las conexiones existentes antes de actualizar la matriz
+        let conexionesRestantes = [];
+        nodos.forEach(nodoInicio => {
+            nodos.forEach(nodoFin => {
+                const celda = document.getElementById(`celda-${nodoInicio}-${nodoFin}`);
+                if (celda && celda.textContent !== '0') {
+                    conexionesRestantes.push({
+                        inicio: nodoInicio,
+                        fin: nodoFin,
+                        valor: celda.textContent
+                    });
+                }
+            });
+        });
+    
+        // Agregar el nombre del nuevo nodo a la lista de nodos
+        nodos.push(nombreNodo);
+    
+        // Actualizar la matriz de adyacencia y la UI con el nuevo nodo
+        actualizarMatrizUI();
+    
+        // Restaurar las conexiones restantes en la matriz de adyacencia
+        conexionesRestantes.forEach(conexion => {
+            actualizarConexionEnMatriz(conexion.inicio, conexion.fin, conexion.valor);
+        });
+    
+        // Asegurarse de que las nuevas celdas para el nuevo nodo estén configuradas correctamente
+        nodos.forEach((nodoExistente) => {
+            if (nodoExistente !== nombreNodo) {
+                document.getElementById(`celda-${nodoExistente}-${nombreNodo}`).textContent = '0';
+                document.getElementById(`celda-${nombreNodo}-${nodoExistente}`).textContent = '0';
+            }
+        });
+    }
+    
+    function actualizarConexionEnMatriz(origen, destino, atributo) { // Esta función actualiza los valores de las conexiones en la matriz de adyacencia.
+        const celda = document.getElementById('celda-${origen}-${destino}');
+        if (celda) {
+            celda.textContent = atributo; // Actualizar con el atributo de la conexión
+        }
+    }
+    
+    function eliminarNodoDeMatriz(nombreNodo) { // Esta función maneja la eliminación de nodos y actualiza la matriz de adyacencia.
+        // Guardar las conexiones existentes que no involucran al nodo eliminado
+        let conexionesRestantes = [];
+        nodos.forEach(nodoInicio => {
+            nodos.forEach(nodoFin => {
+                if (nodoInicio !== nombreNodo && nodoFin !== nombreNodo) {
+                    const celda = document.getElementById('celda-${nodoInicio}-${nodoFin}');
+                    if (celda && celda.textContent !== '0') {
+                        conexionesRestantes.push({
+                            inicio: nodoInicio,
+                            fin: nodoFin,
+                            valor: celda.textContent
+                        });
+                    }
+                }
+            });
+        });
+    
+        // Eliminar el nodo del array de nodos
+        const index = nodos.indexOf(nombreNodo);
+        if (index > -1) {
+            nodos.splice(index, 1);
+        }
+    
+        // Actualizar la matriz de adyacencia y la UI
+        actualizarMatrizUI();
+    
+        // Restaurar las conexiones restantes en la matriz de adyacencia
+        conexionesRestantes.forEach(conexion => {
+            actualizarConexionEnMatriz(conexion.inicio, conexion.fin, conexion.valor);
+        });
     }
 
     function actualizarConexionEnMatriz(origen, destino, atributo) { // Esta función actualiza los valores de las conexiones en la matriz de adyacencia.
