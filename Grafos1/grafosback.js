@@ -324,7 +324,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let nodos = []; // Array para mantener los nombres de los nodos
 
-
 // Esta función actualiza la interfaz de usuario de la matriz de adyacencia sin restablecer los valores existentes.
 function actualizarMatrizUI() {
     const header = document.getElementById('matriz-header');
@@ -359,10 +358,44 @@ function actualizarMatrizUI() {
     });
 }
 
+
 function agregarNodoAMatriz(nombreNodo) {
-    nodos.push(nombreNodo); // Agregar el nombre del nuevo nodo
-    actualizarMatrizUI(); // Actualizar la UI de la matriz
+    // Guardar las conexiones existentes antes de actualizar la matriz
+    let conexionesRestantes = [];
+    nodos.forEach(nodoInicio => {
+        nodos.forEach(nodoFin => {
+            const celda = document.getElementById(`celda-${nodoInicio}-${nodoFin}`);
+            if (celda && celda.textContent !== '0') {
+                conexionesRestantes.push({
+                    inicio: nodoInicio,
+                    fin: nodoFin,
+                    valor: celda.textContent
+                });
+            }
+        });
+    });
+
+    // Agregar el nombre del nuevo nodo a la lista de nodos
+    nodos.push(nombreNodo);
+
+    // Actualizar la matriz de adyacencia y la UI con el nuevo nodo
+    actualizarMatrizUI();
+
+    // Restaurar las conexiones restantes en la matriz de adyacencia
+    conexionesRestantes.forEach(conexion => {
+        actualizarConexionEnMatriz(conexion.inicio, conexion.fin, conexion.valor);
+    });
+
+    // Asegurarse de que las nuevas celdas para el nuevo nodo estén configuradas correctamente
+    nodos.forEach((nodoExistente) => {
+        if (nodoExistente !== nombreNodo) {
+            document.getElementById(`celda-${nodoExistente}-${nombreNodo}`).textContent = '0';
+            document.getElementById(`celda-${nombreNodo}-${nodoExistente}`).textContent = '0';
+        }
+    });
 }
+
+
 
 // Esta función actualiza los valores de las conexiones en la matriz de adyacencia.
 function actualizarConexionEnMatriz(origen, destino, atributo) {
