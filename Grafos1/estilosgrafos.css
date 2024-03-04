@@ -19,12 +19,10 @@ html, body {
 #grafo-container {
     position: relative;
     width: 800px;
-    height: 420px;
+    height: 450px;
     border: 1px solid #ccc;
 
 }
-
-
 #contenedor-general {
     display: flex;
     align-items: flex-start; /* Para alinear los elementos en la parte superior */
@@ -41,6 +39,7 @@ html, body {
     color: white;
 }
 
+
 #matriz-container {
     margin-left: auto;
     margin-top: 15px;
@@ -48,6 +47,7 @@ html, body {
     flex-direction: column;
     align-items: flex-end;
 }
+
 #matriz-adyacencia {
     border-collapse: collapse;
 }
@@ -57,40 +57,6 @@ html, body {
     padding: 11.3px;
     text-align: center;
 }
-
-body{
-    background-color: #252954;
-}
-
-.main{
-    padding: 0 88px;
-    position: relative;
-    overflow-x: hidden;
-    background-color: #221f2f;
-}
-
-.main::before{
-    content: "";
-    position: absolute;
-    width: 120px;
-    height: 120px;
-    left: 55%;
-    top: 20%;
-    background-color: #ed2ff0;
-    filter: blur(90px);
-}
-
-.main::after{
-    content: "";
-    position: absolute;
-    width: 120px;
-    height: 120px;
-    left: 80%;
-    top: 44%;
-    background-color: #22a8cd;
-    filter: blur(90px);
-}
-
 
 
 
@@ -129,14 +95,15 @@ body{
 }
 
 
+
 /*
 Estilos agregados desde style.css
 */
 
 
 .main{
-    width: 100%; /* Ocupa el 100% del ancho de `body` */
-    height: 100%; /* Ocupa el 100% de la altura de `body` */
+    width: 100%; /* Ocupa el 100% del ancho de body */
+    height: 100%; /* Ocupa el 100% de la altura de body */
     padding: 0 88px;
     position: relative;
     overflow-x: hidden;
@@ -271,11 +238,6 @@ Estilos agregados desde style.css
     cursor: pointer;
     padding: 8px 38px;
     border-radius: 16px;
-
-#guardarBtn{
-    cursor: pointer;
-    padding: 8px 38px;
-    border-radius: 18px;
     font-weight: 500;
     font-size: 13px;
     letter-spacing: -1px;
@@ -680,20 +642,29 @@ Estilo de botón HELP
     padding: 20px;
     border-radius: 10px;
     display: none;
+    z-index: 1;
 }
 
 .hidden {
     display: none;
 }
 
-
+#cargarBtn{
+    margin-top: 15px;
+    margin-left: 10px;
+    cursor: pointer;
+    padding: 8px 38px;
+    border-radius: 18px;
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: -1px;
+    color: #fff;
     border: none;
     background: linear-gradient(95deg, #7e22ce 3.2%, #3b82f6 99.5%);
     font-family: 'Poppins', sans-serif;
 }
 
-
-#cargarBtn{
+#guardarBtn{
     cursor: pointer;
     padding: 8px 38px;
     border-radius: 18px;
@@ -708,6 +679,8 @@ Estilo de botón HELP
 
 #limpiarBtn{
     cursor: pointer;
+    margin-left: 10px;
+
     padding: 8px 38px;
     border-radius: 18px;
     font-weight: 500;

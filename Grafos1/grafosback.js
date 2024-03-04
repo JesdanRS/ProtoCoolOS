@@ -5,6 +5,15 @@ document.addEventListener('DOMContentLoaded', function() {
         let isCtrlPressed = false, isDragging = false, startX = 0, startY = 0;
         let nodos = []; // Para gestionar los nombres de los nodos y la matriz de adyacencia
         //
+        document.getElementById('helpBtn').addEventListener('click', function() {
+            var popup = document.getElementById('helpPopup');
+            if (popup.style.display == 'none' || popup.style.display == '') {
+                popup.style.display = 'block';
+            } else {
+                popup.style.display = 'none';
+            }
+        });
+        
     
     
     //EVENTOS
