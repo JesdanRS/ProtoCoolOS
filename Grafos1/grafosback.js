@@ -364,6 +364,38 @@ document.addEventListener('DOMContentLoaded', function() {
     
         function agregarNodoAMatriz(nombreNodo) {
             // Guardar las conexiones existentes antes de actualizar la matriz
+            nodos.push(nombreNodo);
+            
+            // // Actualiza la UI de la matriz de adyacencia para incluir el nuevo nodo
+            // const header = document.getElementById('matriz-header');
+            // const body = document.getElementById('matriz-body');
+        
+            // // Añadir nueva columna al header
+            // const th = document.createElement('th');
+            // th.textContent = nombreNodo;
+            // header.appendChild(th);
+        
+            // // Añadir nueva fila y columna a cada fila existente
+            // const filasExistentes = body.querySelectorAll('tr');
+            // filasExistentes.forEach(tr => {
+            //     const td = document.createElement('td');
+            //     td.textContent = '0';
+            //     tr.appendChild(td);
+            // });
+        
+            // // Añadir nueva fila para el nuevo nodo
+            // const nuevaFila = document.createElement('tr');
+            // const thFila = document.createElement('th');
+            // thFila.textContent = nombreNodo;
+            // nuevaFila.appendChild(thFila);
+            // nodos.forEach(() => {
+            //     const td = document.createElement('td');
+            //     td.textContent = '0';
+            //     nuevaFila.appendChild(td);
+            // });
+            // body.appendChild(nuevaFila);
+        
+        
             let conexionesRestantes = [];
             nodos.forEach(nodoInicio => {
                 nodos.forEach(nodoFin => {
@@ -377,10 +409,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
             });
-        
-            // Agregar el nombre del nuevo nodo a la lista de nodos
-            nodos.push(nombreNodo);
-        
+                
             // Actualizar la matriz de adyacencia y la UI con el nuevo nodo
             actualizarMatrizUI();
         
@@ -398,10 +427,11 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        function actualizarConexionEnMatriz(origen, destino, atributo) { // Esta función actualiza los valores de las conexiones en la matriz de adyacencia.
-            const celda = document.getElementById('celda-${origen}-${destino}');
+        function actualizarConexionEnMatriz(origen, destino, atributo) {
+            // Corrige la sintaxis para usar literales de plantilla correctamente
+            const celda = document.getElementById(`celda-${origen}-${destino}`);
             if (celda) {
-                celda.textContent = atributo; // Actualizar con el atributo de la conexión
+                celda.textContent = atributo; // Asegúrate de que el atributo se asigna correctamente
             }
         }
         
@@ -581,21 +611,41 @@ document.addEventListener('DOMContentLoaded', function() {
     
         function reconstruirEstado(estado) {
             // Primero, limpia el estado actual del grafo y la matriz de adyacencia si es necesario
-            limpiarGrafoYMatriz(); // Esta función debe ser implementada por ti.
+            limpiarGrafoYMatriz(); // Asume que esta función ya existe y hace lo que su nombre indica
         
+            let maxIdNodo = 0;
+            let maxIdFlecha = 0;
+            nodos = []; // Reinicia la lista de nodos
+
             // Reconstruir nodos
             estado.nodos.forEach(nodo => {
-                crearNodoConEstado(nodo); // Asume una función adaptada para crear nodos basados en el estado.
+                crearNodoConEstado(nodo); // Asume una función adaptada para crear nodos basados en el estado
+                nodos.push(nodo.nombre); // Añade el nombre del nodo a la lista de nodos
+                const idNum = parseInt(nodo.id.split('-')[1]);
+                if (idNum > maxIdNodo) {
+                    maxIdNodo = idNum;
+                }
             });
         
             // Reconstruir flechas/conexiones
             estado.flechas.forEach(flecha => {
-                crearFlechaConEstado(flecha); // Asume una función adaptada para crear flechas basadas en el estado.
+                crearFlechaConEstado(flecha); // Asume una función adaptada para crear flechas basadas en el estado
+                const idNum = parseInt(flecha.id.split('-')[1]);
+                if (idNum > maxIdFlecha) {
+                    maxIdFlecha = idNum;
+                }
             });
         
+            // Actualizar contadores
+            idNodo = maxIdNodo + 1;
+            idFlecha = maxIdFlecha + 1;
+
+
+            actualizarMatrizUI(); // Asegúrate de que esta llamada se realice después de actualizar la lista de nodos
             // Reconstruir matriz de adyacencia
             reconstruirMatrizDeAdyacencia(estado.matriz, estado.nodos);
         }
+        
     
         function limpiarGrafoYMatriz() {
             document.getElementById('grafo-container').innerHTML = ''; // Limpia nodos y flechas
