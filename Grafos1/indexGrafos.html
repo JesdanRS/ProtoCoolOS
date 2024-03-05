@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="estilosgrafos.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
     <script src="grafosback.js"></script>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -65,6 +66,13 @@
             <div id="flecha-punta"></div>
 
         </div>
+
+        <div style="margin-top: 20px;">
+            <label for="cambiarColorBtn" style="color: white; margin-right: 5px;">Color de Nodo:</label>
+            <input type="color" id="cambiarColorBtn" value="#d2e5ff">
+            <!-- Botón Eliminar -->
+            <button id="eliminarBtn" style="margin-left: 10px;">Eliminar</button>
+        </div>        
 
         <button id="guardarBtn">Guardar</button>
         <button id="cargarBtn">Cargar</button>
