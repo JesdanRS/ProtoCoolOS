@@ -1,13 +1,13 @@
 document.addEventListener('DOMContentLoaded', function() {
     const pasos = [
         {
-            elemento: document.getElementById('navMenu'), // Asegúrate de que este ID corresponda al contenedor de la barra de navegación
+            elemento: document.getElementById('navMenu'),
             mensaje: 'Aquí puedes navegar a diferentes secciones de nuestro sitio.',
         },
         {
             elemento: document.getElementById('contenedor-general'),
             mensaje: 'Este es el área central de interacción donde puedes ver y editar los grafos.',
-            posicionMedio: true, // Indicador para ajustar la posición al medio
+            posicionMedio: true,
         },
         {
             elemento: document.getElementById('cambiarColorBtn'),
@@ -29,33 +29,45 @@ document.addEventListener('DOMContentLoaded', function() {
             elemento: document.getElementById('limpiarBtn'),
             mensaje: 'Limpia el lienzo y empieza de nuevo.',
         }
-        // Si necesitas más pasos, puedes agregarlos aquí.
     ];
 
     let pasoActual = 0;
 
+    function agregarOverlay() {
+        const overlay = document.createElement('div');
+        overlay.id = 'tutorial-overlay';
+        overlay.className = 'overlay';
+        document.body.appendChild(overlay);
+    }
+
+    function quitarOverlay() {
+        const overlay = document.getElementById('tutorial-overlay');
+        if (overlay) {
+            overlay.remove();
+        }
+    }
+
     function mostrarPaso(paso) {
         ocultarPasos();
+        agregarOverlay();
+
         const tooltip = document.createElement('div');
         tooltip.className = 'tooltip';
         tooltip.innerHTML = `<p>${paso.mensaje}</p><div style="margin-top: 10px;">`;
 
         if (pasoActual > 0) {
-            // Botón "Anterior" con solo el ícono de flecha
-            tooltip.innerHTML += `<button onclick="anteriorPaso()" style="margin-right: 5px;"><span style="margin-right: 5px;">←</span></button>`;
+            tooltip.innerHTML += `<button onclick="anteriorPaso()"><span>←</span></button>`;
         }
 
-        // Botón "Siguiente" o "Finalizar" con solo el ícono, según el paso actual
         if (pasoActual < pasos.length - 1) {
-            tooltip.innerHTML += `<button onclick="siguientePaso()"><span style="margin-left: 5px;">✓</span></button>`;
+            tooltip.innerHTML += `<button onclick="siguientePaso()"><span>✓</span></button>`;
         } else {
-            tooltip.innerHTML += `<button onclick="finalizarTutorial()"><span style="margin-left: 5px;">✓</span></button>`;
+            tooltip.innerHTML += `<button onclick="finalizarTutorial()"><span>✓</span></button>`;
         }
-
+        tooltip.style.zIndex = '10001';
         tooltip.innerHTML += `</div>`;
         document.body.appendChild(tooltip);
 
-        // Posiciona el tooltip
         const rect = paso.elemento.getBoundingClientRect();
         tooltip.style.position = 'absolute';
         tooltip.style.left = `${rect.left}px`;
@@ -67,12 +79,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         paso.elemento.classList.add('resaltar');
+        paso.elemento.style.position = 'relative';
+        paso.elemento.style.zIndex = '10001'; // Ensure the highlighted part is above the overlay
     }
-
 
     function ocultarPasos() {
         document.querySelectorAll('.tooltip').forEach(tooltip => tooltip.remove());
-        document.querySelectorAll('.resaltar').forEach(elemento => elemento.classList.remove('resaltar'));
+        document.querySelectorAll('.resaltar').forEach(elemento => {
+            elemento.classList.remove('resaltar');
+            elemento.style.zIndex = ''; // Reset custom z-index after highlighting
+        });
+        quitarOverlay();
     }
 
     window.anteriorPaso = function() {

@@ -747,6 +747,8 @@ Estilo de botón HELP
     display: inline-block;
     margin: 5px;
     font-size: 16px;
+    position: absolute; /* o 'fixed', dependiendo de tu estructura */
+    z-index: 10001;
 }
 
 /* Ajusta estos estilos según la librería de iconos que uses */
@@ -756,3 +758,18 @@ Estilo de botón HELP
 }
 
 /* Estilos adicionales para los botones, si es necesario */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    z-index: 10000; /* Asegúrate de que esto sea menor que el z-index de los tooltips y las partes resaltadas */
+}
+
+.resaltar {
+    z-index: 11; /* Asegúrate de que esto sea mayor que el z-index del overlay */
+    position: relative; /* Esto puede necesitar ajustes basados en tu layout */
+}
