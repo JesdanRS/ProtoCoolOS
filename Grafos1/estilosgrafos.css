@@ -738,9 +738,9 @@ Estilo de botón HELP
     margin-right: 10px;
 }
 .resaltar {
-    outline: 2px solid #7e22ce; /* Añade un contorno para resaltar */
+    outline: 2px solid #f2eff5; /* Añade un contorno para resaltar */
     outline-offset: 2px;
-    box-shadow: 0 0 8px #7e22ce; /* Añade un resplandor para mayor visibilidad */
+    box-shadow: 0 0 8px #f4f3f6; /* Añade un resplandor para mayor visibilidad */
 }
 
 .tooltip button {

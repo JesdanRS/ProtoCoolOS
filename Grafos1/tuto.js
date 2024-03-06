@@ -35,38 +35,55 @@ document.addEventListener('DOMContentLoaded', function() {
     let pasoActual = 0;
 
     function mostrarPaso(paso) {
+        ocultarPasos();
         const tooltip = document.createElement('div');
         tooltip.className = 'tooltip';
-        tooltip.innerHTML = `<p>${paso.mensaje}</p>`;
-        
-        if (pasoActual < pasos.length - 1) { // Agrega botón "Siguiente" si no es el último paso
-            tooltip.innerHTML += `<button onclick="siguientePaso()">Siguiente</button>`;
-        } else {
-            tooltip.innerHTML += `<button onclick="finalizarTutorial()">Finalizar</button>`;
+        tooltip.innerHTML = `<p>${paso.mensaje}</p><div style="margin-top: 10px;">`;
+
+        if (pasoActual > 0) {
+            // Botón "Anterior" con solo el ícono de flecha
+            tooltip.innerHTML += `<button onclick="anteriorPaso()" style="margin-right: 5px;"><span style="margin-right: 5px;">←</span></button>`;
         }
 
-        document.body.appendChild(tooltip);
-        const rect = paso.elemento.getBoundingClientRect();
-        
-        if (paso.posicionMedio) { // Si se indica que el tooltip debe ir en el medio del elemento
-            tooltip.style.top = `${rect.top + window.scrollY + (rect.height / 2) - (tooltip.offsetHeight / 2)}px`;
-            tooltip.style.left = `${rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2)}px`;
+        // Botón "Siguiente" o "Finalizar" con solo el ícono, según el paso actual
+        if (pasoActual < pasos.length - 1) {
+            tooltip.innerHTML += `<button onclick="siguientePaso()"><span style="margin-left: 5px;">✓</span></button>`;
         } else {
-            tooltip.style.top = `${rect.top + window.scrollY + rect.height + 10}px`;
-            tooltip.style.left = `${rect.left}px`;
+            tooltip.innerHTML += `<button onclick="finalizarTutorial()"><span style="margin-left: 5px;">✓</span></button>`;
+        }
+
+        tooltip.innerHTML += `</div>`;
+        document.body.appendChild(tooltip);
+
+        // Posiciona el tooltip
+        const rect = paso.elemento.getBoundingClientRect();
+        tooltip.style.position = 'absolute';
+        tooltip.style.left = `${rect.left}px`;
+        tooltip.style.top = `${rect.bottom + window.scrollY}px`;
+
+        if (paso.posicionMedio) {
+            tooltip.style.left = `${rect.left + rect.width / 2 - tooltip.offsetWidth / 2}px`;
+            tooltip.style.top = `${rect.top + window.scrollY + rect.height / 2 - tooltip.offsetHeight / 2}px`;
         }
 
         paso.elemento.classList.add('resaltar');
     }
+
 
     function ocultarPasos() {
         document.querySelectorAll('.tooltip').forEach(tooltip => tooltip.remove());
         document.querySelectorAll('.resaltar').forEach(elemento => elemento.classList.remove('resaltar'));
     }
 
+    window.anteriorPaso = function() {
+        if (pasoActual > 0) {
+            pasoActual--;
+            mostrarPaso(pasos[pasoActual]);
+        }
+    };
+
     window.siguientePaso = function() {
         if (pasoActual < pasos.length - 1) {
-            ocultarPasos();
             pasoActual++;
             mostrarPaso(pasos[pasoActual]);
         }
@@ -74,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.finalizarTutorial = function() {
         ocultarPasos();
-        pasoActual = 0; // Opcional: reiniciar el tutorial
+        pasoActual = 0;
         alert('Fin del tutorial. Gracias por participar.');
     };
 
