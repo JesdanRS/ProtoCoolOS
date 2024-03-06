@@ -1,5 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     const grafoContainer = document.getElementById('grafo-container');
+    const matrizContainer = document.getElementById('matriz-container');
+    const matrizHeader = document.getElementById('matriz-header');
+    const matrizBody = document.getElementById('matriz-body');
+    const colorPicker = document.getElementById('cambiarColorBtn');
     let nodos = new vis.DataSet();
     let aristas = new vis.DataSet();
     let network = null;
@@ -126,6 +130,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
+
+        nodos.on("*", function() {
+            actualizarMatriz();
+            comprobarVisibilidadMatriz();
+        });
+        aristas.on("*", function() {
+            actualizarMatriz();
+        });
     }
 
     function crearNodo(x, y, color, nombre) {
@@ -158,6 +170,42 @@ document.addEventListener('DOMContentLoaded', function() {
         return loops.length > 0;
     }
 
+    function comprobarVisibilidadMatriz() {
+        matrizContainer.style.display = nodos.length === 0 && aristas.length === 0 ? 'none' : 'block';
+    }
+
+    function actualizarMatriz() {
+        const nodosArray = nodos.get().map(nodo => nodo.id);
+        let matriz = {};
+
+        nodosArray.forEach(nodoId => {
+            matriz[nodoId] = nodosArray.reduce((acc, id) => ({ ...acc, [id]: 0 }), {});
+        });
+
+        aristas.get().forEach(arista => {
+            const valor = arista.label ? parseInt(arista.label, 10) : 0;
+            if (matriz[arista.from] && matriz[arista.from][arista.to] !== undefined) { // Asegura que ambos nodos existan
+                matriz[arista.from][arista.to] = isNaN(valor) ? 0 : valor;
+            }
+        });
+
+        generarHTMLMatriz(matriz, nodosArray);
+    }
+
+    function generarHTMLMatriz(matriz, nodosIds) {
+        const nodosLabels = nodosIds.map(id => nodos.get(id).label);
+        matrizHeader.innerHTML = '<th></th>' + nodosLabels.map(label => `<th>${label}</th>`).join('') + '<th>Suma</th>';
+        matrizBody.innerHTML = nodosIds.map(id => {
+            const fila = nodosIds.map(idInterno => matriz[id][idInterno]).join('</td><td>');
+            const sumaFila = nodosIds.reduce((acc, idInterno) => acc + matriz[id][idInterno], 0);
+            return `<tr><th>${nodos.get(id).label}</th><td>${fila}</td><td>${sumaFila}</td></tr>`;
+        }).join('');
+
+        const sumaColumna = nodosIds.map(idInterno => nodosIds.reduce((acc, id) => acc + matriz[id][idInterno], 0));
+        const total = sumaColumna.reduce((acc, val) => acc + val, 0);
+        matrizBody.innerHTML += `<tr><th>Suma</th>${sumaColumna.map(suma => `<td>${suma}</td>`).join('')}<td>${total}</td></tr>`;
+    }
+
     document.getElementById('eliminarBtn').addEventListener('click', function() {
         estado.modoEliminar = !estado.modoEliminar;
         grafoContainer.style.cursor = estado.modoEliminar ? 'crosshair' : '';
@@ -170,8 +218,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('limpiarBtn').addEventListener('click', function() {
         nodos.clear();
         aristas.clear();
-        estado = { seleccionando: false, nodoOrigen: null, colorActual: '#d2e5ff', modoEliminar: false };
+        estado = { seleccionando: false, nodoOrigen: null, colorActual: estado.colorActual, modoEliminar: false };
         ultimoIdNodo = 0; // Restablecer el contador de ID de nodos al limpiar
+        actualizarMatriz(); // Asegurar que la matriz se actualiza al limpiar
+        comprobarVisibilidadMatriz();
     });
 
     inicializarRed();
