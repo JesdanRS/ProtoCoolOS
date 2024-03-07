@@ -5,6 +5,8 @@
     <link rel="stylesheet" href="estilosgrafos.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
     <script src="grafosback.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.2/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
     <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -75,9 +77,15 @@
             <button id="limpiarBtn" style="margin-left: 10px;">Limpiar</button>
         </div>        
 
-        <button id="guardarBtn">Guardar</button>
-        <button id="cargarBtn">Cargar</button>
-        <input type="file" id="cargarArchivo" style="display: none;" accept=".json">
+        <button id="guardarBtn">Exportar</button>
+        <div id="exportOptions" style="display:none; position: absolute; background-color: #252954; padding: 10px; border-radius: 5px; margin-top: 5px;">
+            <button id="exportPNG">PNG</button>
+            <button id="exportPDF">PDF</button>
+            <button id="exportJSON">JSON (editable)</button>
+        </div>              
+        <button id="cargarBtn">Importar</button>
+        <input type="file" id="importarArchivo" style="display: none;" accept=".json">
+
         <!-- End of Top Container -->
 
         <!-- Botón help -->

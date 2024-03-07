@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const matrizContainer = document.getElementById('matriz-container');
     const matrizHeader = document.getElementById('matriz-header');
     const matrizBody = document.getElementById('matriz-body');
+    const exportarBtn = document.getElementById('exportarBtn');
+    const importarBtn = document.getElementById('importarBtn');
+    const importarArchivo = document.getElementById('importarArchivo');
     const colorPicker = document.getElementById('cambiarColorBtn');
     let nodos = new vis.DataSet();
     let aristas = new vis.DataSet();
@@ -137,6 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         aristas.on("*", function() {
             actualizarMatriz();
+            comprobarVisibilidadMatriz();
         });
     }
 
@@ -205,6 +209,107 @@ document.addEventListener('DOMContentLoaded', function() {
         const total = sumaColumna.reduce((acc, val) => acc + val, 0);
         matrizBody.innerHTML += `<tr><th>Suma</th>${sumaColumna.map(suma => `<td>${suma}</td>`).join('')}<td>${total}</td></tr>`;
     }
+
+    function exportarComoPNG(nombreArchivo) {
+        matrizHeader.style.color = 'black'; // Cambiar temporalmente el color del texto de la matriz
+        matrizBody.style.color = 'black'; // Cambiar temporalmente el color del texto de la matriz
+        html2canvas(grafoContainer).then(canvas => {
+            let enlace = document.createElement('a');
+            enlace.download = nombreArchivo || 'grafo.png';
+            enlace.href = canvas.toDataURL('image/png');
+            enlace.click();
+            enlace.remove();
+            setTimeout(() => {
+                matrizHeader.style.color = ''; // Restaurar el color original del texto de la matriz
+                matrizBody.style.color = ''; // Restaurar el color original del texto de la matriz
+            }, 100); // Ajustar según sea necesario para asegurar que se restaura después de la exportación
+        });
+    }
+
+    async function exportarComoPDF(nombreArchivo) {
+        matrizHeader.style.color = 'black'; // Cambiar temporalmente el color del texto de la matriz
+        matrizBody.style.color = 'black'; // Cambiar temporalmente el color del texto de la matriz
+        const canvas = await html2canvas(grafoContainer);
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jspdf.jsPDF({
+            orientation: 'landscape',
+        });
+        pdf.addImage(imgData, 'PNG', 10, 10);
+        pdf.save(nombreArchivo || 'grafo.pdf');
+        setTimeout(() => {
+            matrizHeader.style.color = ''; // Restaurar el color original del texto de la matriz
+            matrizBody.style.color = ''; // Restaurar el color original del texto de la matriz
+        }, 100); // Ajustar según sea necesario para asegurar que se restaura después de la exportación
+    }
+
+    function exportarGrafo(nombreArchivo) {
+        const datosExportar = {
+            nodos: nodos.get({ returnType: "Object" }),
+            aristas: aristas.get(),
+            estado: estado
+        };
+        const datosStr = JSON.stringify(datosExportar);
+        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(datosStr);
+        
+        let exportarLink = document.createElement('a');
+        exportarLink.setAttribute('href', dataUri);
+        exportarLink.setAttribute('download', nombreArchivo || 'grafo.json');
+        document.body.appendChild(exportarLink);
+        
+        exportarLink.click();
+        document.body.removeChild(exportarLink);
+    }
+
+    function importarGrafo(event) {
+        const archivo = event.target.files[0];
+        if (!archivo) {
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(fileEvent) {
+            try {
+                const datos = JSON.parse(fileEvent.target.result);
+                nodos.clear();
+                aristas.clear();
+                nodos.add(Object.values(datos.nodos)); // Agrega nodos manteniendo posiciones
+                aristas.add(datos.aristas);
+                estado = datos.estado;
+                colorPicker.value = estado.colorActual;
+                ultimoIdNodo = Math.max(...Object.values(datos.nodos).map(nodo => nodo.id));
+                actualizarMatriz();
+                comprobarVisibilidadMatriz();
+            } catch (error) {
+                console.error('Error al importar el archivo', error);
+            }
+        };
+        reader.readAsText(archivo);
+    }
+
+    guardarBtn.addEventListener('click', function() {
+        exportOptions.style.display = 'block';
+    });
+
+    exportPNG.addEventListener('click', function() {
+        let nombreArchivo = prompt("Ingrese el nombre del archivo:", "grafo.png");
+        exportarComoPNG(nombreArchivo);
+        exportOptions.style.display = 'none';
+    });
+
+    exportPDF.addEventListener('click', function() {
+        let nombreArchivo = prompt("Ingrese el nombre del archivo:", "grafo.pdf");
+        exportarComoPDF(nombreArchivo);
+        exportOptions.style.display = 'none';
+    });
+
+    exportJSON.addEventListener('click', function() {
+        let nombreArchivo = prompt("Ingrese el nombre del archivo:", "grafo.json");
+        exportarGrafo();
+        exportOptions.style.display = 'none';
+    });
+
+    cargarBtn.addEventListener('click', () => importarArchivo.click());
+    importarArchivo.addEventListener('change', importarGrafo);
 
     document.getElementById('eliminarBtn').addEventListener('click', function() {
         estado.modoEliminar = !estado.modoEliminar;
