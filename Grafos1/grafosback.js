@@ -11,9 +11,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let aristas = new vis.DataSet();
     let network = null;
     let estado = { seleccionando: false, nodoOrigen: null, colorActual: '#d2e5ff', modoEliminar: false };
-    let ultimoIdNodo = 0; // Nuevo: Mantener el control del último ID de nodo utilizado
+    let ultimoIdNodo = 0; // Mantener el control del último ID de nodo utilizado
 
-    const opciones = {
+    const opciones = { //Opciones de grafo
         nodes: {
             shape: 'circle',
             font: {
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         network = new vis.Network(grafoContainer, datos, opciones);
 
-        network.on("click", function(params) {
+        network.on("click", function(params) { // Entrar al modo eliminar
             if (estado.modoEliminar) {
                 const nodeId = this.getNodeAt(params.pointer.DOM);
                 const edgeId = this.getEdgeAt(params.pointer.DOM);
@@ -79,35 +79,45 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (params.nodes.length > 0) {
                 const nodeId = params.nodes[0];
-                if (estado.seleccionando) {
+                if (estado.seleccionando) { // Verificación de nodo seleccionado
                     const nodoOrigen = estado.nodoOrigen;
                     const nodoDestino = nodeId;
-                    if (nodoOrigen !== nodoDestino && !aristaDuplicada(nodoOrigen, nodoDestino)) {
-                        const atributoArista = prompt("Ingrese el atributo de la arista (ej. peso):", "");
-                        if (atributoArista !== null) {
+                    if (nodoOrigen !== nodoDestino && !aristaDuplicada(nodoOrigen, nodoDestino)) { // Acción para creación arista ida o vuelta
+                        let atributoArista;
+                        do {
+                            atributoArista = prompt("Ingrese el atributo de la arista (ej. peso):", "");
+                            if (atributoArista === null) break; // El usuario canceló el prompt
+                        } while (isNaN(atributoArista) || atributoArista.trim() === ""); // Repetir mientras la entrada no sea un número o esté vacía
+                    
+                        if (atributoArista !== null) { // Verificar nuevamente por si el usuario canceló el prompt
                             aristas.add({
                                 from: nodoOrigen,
                                 to: nodoDestino,
                                 label: atributoArista
                             });
                         }
-                    } else if(nodoOrigen === nodoDestino && !loopExistente(nodoOrigen)) {
-                        const atributoArista = prompt("Ingrese el atributo de la arista (loop):", "");
-                        if (atributoArista !== null) {
+                    } else if(nodoOrigen === nodoDestino && !loopExistente(nodoOrigen)) { // Acción para creación arista loop
+                        let atributoArista;
+                        do {
+                            atributoArista = prompt("Ingrese el atributo de la arista (loop):", "");
+                            if (atributoArista === null) break; // El usuario canceló el prompt
+                        } while (isNaN(atributoArista) || atributoArista.trim() === ""); // Repetir mientras la entrada no sea un número o esté vacía
+                    
+                        if (atributoArista !== null) { // Verificar nuevamente por si el usuario canceló el prompt
                             aristas.add({
                                 from: nodoOrigen,
                                 to: nodoDestino,
                                 label: atributoArista
                             });
                         }
-                    }
+                    }                    
                     estado.seleccionando = false;
                     estado.nodoOrigen = null;
                 } else {
                     estado.seleccionando = true;
                     estado.nodoOrigen = nodeId;
                 }
-            } else {
+            } else { // Si no hay nodo para seleccionar
                 const coordenadas = params.pointer.canvas;
                 const nombreNodo = prompt("Ingrese el nombre del nodo:", `Nodo ${ultimoIdNodo + 1}`);
                 if (nombreNodo !== null) {
@@ -116,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        network.on("oncontext", function(params) {
+        network.on("oncontext", function(params) { // Cambiar nombre nodo o arista con click derecho
             params.event.preventDefault();
             const nodeId = this.getNodeAt(params.pointer.DOM);
             const edgeId = this.getEdgeAt(params.pointer.DOM);
@@ -134,17 +144,17 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        nodos.on("*", function() {
+        nodos.on("*", function() { // Verificar acciones sobre nodo
             actualizarMatriz();
             comprobarVisibilidadMatriz();
         });
-        aristas.on("*", function() {
+        aristas.on("*", function() { // Verificar acciones sobre aristas
             actualizarMatriz();
             comprobarVisibilidadMatriz();
         });
     }
 
-    function crearNodo(x, y, color, nombre) {
+    function crearNodo(x, y, color, nombre) { //Crear nodo
         ultimoIdNodo++; // Incrementar el ID del último nodo para asegurar que sea único
         nodos.add({
             id: ultimoIdNodo,
@@ -156,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function aristaDuplicada(origen, destino) {
+    function aristaDuplicada(origen, destino) { // Verificar si no existe ya una arista en la misma dirección al mismo nodo
         const aristasExistentes = aristas.get({
             filter: function(item) {
                 return (item.from === origen && item.to === destino);
@@ -165,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return aristasExistentes.length > 0;
     }
 
-    function loopExistente(nodo) {
+    function loopExistente(nodo) { // Verificar si no hay arista loop en el mismo nodo
         const loops = aristas.get({
             filter: function(item) {
                 return item.from === nodo && item.to === nodo;
@@ -174,11 +184,11 @@ document.addEventListener('DOMContentLoaded', function() {
         return loops.length > 0;
     }
 
-    function comprobarVisibilidadMatriz() {
+    function comprobarVisibilidadMatriz() { // Comprobar si la matriz está vacía o no
         matrizContainer.style.display = nodos.length === 0 && aristas.length === 0 ? 'none' : 'block';
     }
 
-    function actualizarMatriz() {
+    function actualizarMatriz() { // Actualización de datos en la matriz
         const nodosArray = nodos.get().map(nodo => nodo.id);
         let matriz = {};
 
@@ -196,7 +206,7 @@ document.addEventListener('DOMContentLoaded', function() {
         generarHTMLMatriz(matriz, nodosArray);
     }
 
-    function generarHTMLMatriz(matriz, nodosIds) {
+    function generarHTMLMatriz(matriz, nodosIds) { // Generar HTML de la matriz según datos
         const nodosLabels = nodosIds.map(id => nodos.get(id).label);
         matrizHeader.innerHTML = '<th></th>' + nodosLabels.map(label => `<th>${label}</th>`).join('') + '<th>Suma</th>';
         matrizBody.innerHTML = nodosIds.map(id => {
@@ -210,25 +220,17 @@ document.addEventListener('DOMContentLoaded', function() {
         matrizBody.innerHTML += `<tr><th>Suma</th>${sumaColumna.map(suma => `<td>${suma}</td>`).join('')}<td>${total}</td></tr>`;
     }
 
-    function exportarComoPNG(nombreArchivo) {
-        matrizHeader.style.color = 'black'; // Cambiar temporalmente el color del texto de la matriz
-        matrizBody.style.color = 'black'; // Cambiar temporalmente el color del texto de la matriz
+    function exportarComoPNG(nombreArchivo) { // Exportar imagen del grafo
         html2canvas(grafoContainer).then(canvas => {
             let enlace = document.createElement('a');
             enlace.download = nombreArchivo || 'grafo.png';
             enlace.href = canvas.toDataURL('image/png');
             enlace.click();
             enlace.remove();
-            setTimeout(() => {
-                matrizHeader.style.color = ''; // Restaurar el color original del texto de la matriz
-                matrizBody.style.color = ''; // Restaurar el color original del texto de la matriz
-            }, 100); // Ajustar según sea necesario para asegurar que se restaura después de la exportación
         });
     }
 
-    async function exportarComoPDF(nombreArchivo) {
-        matrizHeader.style.color = 'black'; // Cambiar temporalmente el color del texto de la matriz
-        matrizBody.style.color = 'black'; // Cambiar temporalmente el color del texto de la matriz
+    async function exportarComoPDF(nombreArchivo) { // Exportar PDF del grafo
         const canvas = await html2canvas(grafoContainer);
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jspdf.jsPDF({
@@ -236,13 +238,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         pdf.addImage(imgData, 'PNG', 10, 10);
         pdf.save(nombreArchivo || 'grafo.pdf');
-        setTimeout(() => {
-            matrizHeader.style.color = ''; // Restaurar el color original del texto de la matriz
-            matrizBody.style.color = ''; // Restaurar el color original del texto de la matriz
-        }, 100); // Ajustar según sea necesario para asegurar que se restaura después de la exportación
     }
 
-    function exportarGrafo(nombreArchivo) {
+    function exportarGrafo(nombreArchivo) { // Exportar el archivo JSON del grafo y la matriz
         const datosExportar = {
             nodos: nodos.get({ returnType: "Object" }),
             aristas: aristas.get(),
@@ -253,14 +251,14 @@ document.addEventListener('DOMContentLoaded', function() {
         
         let exportarLink = document.createElement('a');
         exportarLink.setAttribute('href', dataUri);
-        exportarLink.setAttribute('download', nombreArchivo || 'grafo.json');
+        exportarLink.setAttribute('download', nombreArchivo || 'grafo.png');
         document.body.appendChild(exportarLink);
         
         exportarLink.click();
         document.body.removeChild(exportarLink);
     }
 
-    function importarGrafo(event) {
+    function importarGrafo(event) { // Importar un archivo JSON de algún grafo
         const archivo = event.target.files[0];
         if (!archivo) {
             return;
@@ -286,46 +284,46 @@ document.addEventListener('DOMContentLoaded', function() {
         reader.readAsText(archivo);
     }
 
-    guardarBtn.addEventListener('click', function() {
+    guardarBtn.addEventListener('click', function() { // Se apreta el botón de exportar
         exportOptions.style.display = 'block';
     });
 
-    exportPNG.addEventListener('click', function() {
+    exportPNG.addEventListener('click', function() { // Se apreta el botón de exportar como PNG
         let nombreArchivo = prompt("Ingrese el nombre del archivo:", "grafo.png");
         exportarComoPNG(nombreArchivo);
         exportOptions.style.display = 'none';
     });
 
-    exportPDF.addEventListener('click', function() {
+    exportPDF.addEventListener('click', function() { // Se apreta el botón de exportar como PDF
         let nombreArchivo = prompt("Ingrese el nombre del archivo:", "grafo.pdf");
         exportarComoPDF(nombreArchivo);
         exportOptions.style.display = 'none';
     });
 
-    exportJSON.addEventListener('click', function() {
+    exportJSON.addEventListener('click', function() { // Se apreta el botón de exportar como JSON (editable)
         let nombreArchivo = prompt("Ingrese el nombre del archivo:", "grafo.json");
-        exportarGrafo();
+        exportarGrafo(nombreArchivo);
         exportOptions.style.display = 'none';
     });
 
-    cargarBtn.addEventListener('click', () => importarArchivo.click());
+    cargarBtn.addEventListener('click', () => importarArchivo.click()); // Se apreta el botón de importar
     importarArchivo.addEventListener('change', importarGrafo);
 
-    document.getElementById('eliminarBtn').addEventListener('click', function() {
+    document.getElementById('eliminarBtn').addEventListener('click', function() { // Cambia el cursor en modo eliminar
         estado.modoEliminar = !estado.modoEliminar;
         grafoContainer.style.cursor = estado.modoEliminar ? 'crosshair' : '';
     });
 
-    document.getElementById('cambiarColorBtn').addEventListener('input', function(event) {
+    document.getElementById('cambiarColorBtn').addEventListener('input', function(event) { // Cambiar color de nodos 
         estado.colorActual = event.target.value;
     });
 
-    document.getElementById('limpiarBtn').addEventListener('click', function() {
+    document.getElementById('limpiarBtn').addEventListener('click', function() { // Limpiar grafo completo y actualizar matriz
         nodos.clear();
         aristas.clear();
         estado = { seleccionando: false, nodoOrigen: null, colorActual: estado.colorActual, modoEliminar: false };
         ultimoIdNodo = 0; // Restablecer el contador de ID de nodos al limpiar
-        actualizarMatriz(); // Asegurar que la matriz se actualiza al limpiar
+        actualizarMatriz(); // La matriz se actualiza al limpiar
         comprobarVisibilidadMatriz();
     });
 
