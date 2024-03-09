@@ -768,3 +768,32 @@ Estilo de botón HELP
 .tooltip, .resaltar {
     z-index: 10000; /* Mayor que el z-index de #capaDesenfoque para asegurar que se muestren por encima */
 }
+#botonVideo {
+    position: absolute;
+    right: -10px; /* Ajusta este valor para mover horizontalmente */
+    top: -20px; /* Ajusta este valor para mover verticalmente */
+    z-index: 1007; /* Asegúrate de que esté por encima del tooltip */
+    cursor: pointer;
+    background-color: #7e22ce; /* Color de fondo */
+    border-radius: 50%; /* Botón redondo */
+    padding: 10px; /* Tamaño del botón */
+    border: none; /* Sin borde */
+    outline: none; /* Sin resplandor al hacer clic */
+    display: flex; /* Centrar el ícono dentro del botón */
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 15px #7e22ce; /* Sombra para efecto resplandeciente */
+}
+
+.boton-resplandor {
+    animation: resplandor 1.5s infinite alternate;
+}
+
+@keyframes resplandor {
+    0% {
+        box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #7e22ce, 0 0 20px #7e22ce;
+    }
+    100% {
+        box-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #7e22ce, 0 0 40px #7e22ce;
+    }
+}

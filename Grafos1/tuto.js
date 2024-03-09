@@ -54,9 +54,12 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             tooltip.innerHTML += `<button onclick="finalizarTutorial()"><span style="margin-left: 5px;">✓</span></button>`;
         }
-
+        if (pasoActual === 1) { // Recordando que los índices comienzan en 0
+            agregarBotonVideo(paso.elemento);
+        }
         tooltip.innerHTML += `</div>`;
         document.body.appendChild(tooltip);
+
         ajustarZIndex(paso.elemento, tooltip);
 
 
@@ -69,11 +72,41 @@ document.addEventListener('DOMContentLoaded', function() {
             tooltip.style.left = `${rect.left + rect.width / 2 - tooltip.offsetWidth / 2}px`;
             tooltip.style.top = `${rect.top + window.scrollY + rect.height / 2 - tooltip.offsetHeight / 2}px`;
         }
-
+        const botonExistente = document.getElementById('botonVideo');
+        if (botonExistente) {
+            botonExistente.remove(); // Eliminar el botón existente antes de crear uno nuevo
+        }
+        if (pasoActual === 1) {
+            agregarBotonVideo(tooltip); // Agregar el botón de video al tooltip
+        }
         paso.elemento.classList.add('resaltar');
         aplicarDesenfoque();
     }
+    function agregarBotonVideo(tooltip) {
+        const botonVideo = document.createElement('button');
+        botonVideo.id = 'botonVideo'; // Agregar un ID para referencia de estilos CSS
+        botonVideo.classList.add('boton-resplandor'); // Clase para animación de resplandor
+        
+        // Crear el ícono de video y añadirlo al botón
+        const iconoVideo = document.createElement('i');
+        iconoVideo.className = 'bx bxs-videos'; // Usa la clase del icono de Boxicons
+        iconoVideo.style.color = 'white'; // Color del ícono
+        iconoVideo.style.fontSize = '30px'; // Tamaño del ícono
+    
+        botonVideo.appendChild(iconoVideo);
+    
+        botonVideo.onclick = function() {
+            reproducirVideo();
+        };
 
+    
+        tooltip.appendChild(botonVideo); // Añade el botón al tooltip en lugar de al body
+    }
+    
+    
+    function reproducirVideo() {
+        alert('Reproduciendo video...'); // Placeholder, reemplaza con tu lógica para reproducir el video
+    }
     function ocultarPasos() {
         document.querySelectorAll('.tooltip').forEach(tooltip => tooltip.remove());
         document.querySelectorAll('.resaltar').forEach(elemento => elemento.classList.remove('resaltar'));
@@ -86,22 +119,22 @@ document.addEventListener('DOMContentLoaded', function() {
         tooltip.style.zIndex = '1001';
     }
     function aplicarDesenfoque() {
-        // Crear o reutilizar la capa de desenfoque
-        let capaDesenfoque = document.getElementById('capaDesenfoque');
-        if (!capaDesenfoque) {
-            capaDesenfoque = document.createElement('div');
-            capaDesenfoque.id = 'capaDesenfoque';
-            capaDesenfoque.style.position = 'fixed';
-            capaDesenfoque.style.top = '0';
-            capaDesenfoque.style.left = '0';
-            capaDesenfoque.style.width = '100vw';
-            capaDesenfoque.style.height = '100vh';
-            capaDesenfoque.style.backgroundColor = 'rgba(0,0,0,0.5)';
-            capaDesenfoque.style.zIndex = '999';
-            capaDesenfoque.style.backdropFilter = 'blur(4px)';
-            document.body.appendChild(capaDesenfoque);
-        }
+    // Asegúrate de que la capa de desenfoque esté al fondo de todos los elementos excepto el fondo mismo
+    let capaDesenfoque = document.getElementById('capaDesenfoque');
+    if (!capaDesenfoque) {
+        capaDesenfoque = document.createElement('div');
+        capaDesenfoque.id = 'capaDesenfoque';
+        document.body.appendChild(capaDesenfoque);
     }
+    capaDesenfoque.style.zIndex = "998"; // Asegura que esto sea menor que el tooltip y resaltar pero mayor que el fondo
+    capaDesenfoque.style.position = 'fixed';
+    capaDesenfoque.style.width = '100vw';
+    capaDesenfoque.style.height = '100vh';
+    capaDesenfoque.style.top = '0';
+    capaDesenfoque.style.left = '0';
+    capaDesenfoque.style.background = 'rgba(0,0,0,0.5)';
+    capaDesenfoque.style.backdropFilter = 'blur(4px)';
+}
 
     function removerDesenfoque() {
         const capaDesenfoque = document.getElementById('capaDesenfoque');
