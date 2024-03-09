@@ -30,43 +30,35 @@ document.addEventListener('DOMContentLoaded', function() {
             mensaje: 'Limpia el lienzo y empieza de nuevo.',
         }
     ];
-
     let pasoActual = 0;
-
-    function agregarOverlay() {
-        const overlay = document.createElement('div');
-        overlay.id = 'tutorial-overlay';
-        overlay.className = 'overlay';
-        document.body.appendChild(overlay);
-    }
-
-    function quitarOverlay() {
-        const overlay = document.getElementById('tutorial-overlay');
-        if (overlay) {
-            overlay.remove();
-        }
-    }
 
     function mostrarPaso(paso) {
         ocultarPasos();
-        agregarOverlay();
+        removerDesenfoque();
+        aplicarDesenfoque();
+        paso.elemento.style.position = 'relative'; // Importante para que z-index funcione
+        paso.elemento.style.zIndex = '1006'; // Asegúrate de que esté por encima de la capa de desenfoque
 
         const tooltip = document.createElement('div');
         tooltip.className = 'tooltip';
+        // Agrega tu HTML de tooltip aquí
+        tooltip.style.zIndex = '1006';
         tooltip.innerHTML = `<p>${paso.mensaje}</p><div style="margin-top: 10px;">`;
 
         if (pasoActual > 0) {
-            tooltip.innerHTML += `<button onclick="anteriorPaso()"><span>←</span></button>`;
+            tooltip.innerHTML += `<button onclick="anteriorPaso()" style="margin-right: 5px;"><span style="margin-right: 5px;">←</span></button>`;
         }
 
         if (pasoActual < pasos.length - 1) {
-            tooltip.innerHTML += `<button onclick="siguientePaso()"><span>✓</span></button>`;
+            tooltip.innerHTML += `<button onclick="siguientePaso()"><span style="margin-left: 5px;">✓</span></button>`;
         } else {
-            tooltip.innerHTML += `<button onclick="finalizarTutorial()"><span>✓</span></button>`;
+            tooltip.innerHTML += `<button onclick="finalizarTutorial()"><span style="margin-left: 5px;">✓</span></button>`;
         }
-        tooltip.style.zIndex = '10001';
+
         tooltip.innerHTML += `</div>`;
         document.body.appendChild(tooltip);
+        ajustarZIndex(paso.elemento, tooltip);
+
 
         const rect = paso.elemento.getBoundingClientRect();
         tooltip.style.position = 'absolute';
@@ -79,17 +71,43 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         paso.elemento.classList.add('resaltar');
-        paso.elemento.style.position = 'relative';
-        paso.elemento.style.zIndex = '10001'; // Ensure the highlighted part is above the overlay
+        aplicarDesenfoque();
     }
 
     function ocultarPasos() {
         document.querySelectorAll('.tooltip').forEach(tooltip => tooltip.remove());
-        document.querySelectorAll('.resaltar').forEach(elemento => {
-            elemento.classList.remove('resaltar');
-            elemento.style.zIndex = ''; // Reset custom z-index after highlighting
-        });
-        quitarOverlay();
+        document.querySelectorAll('.resaltar').forEach(elemento => elemento.classList.remove('resaltar'));
+        removerDesenfoque();
+    }
+    function ajustarZIndex(elemento, tooltip) {
+        elemento.style.position = 'relative';
+        elemento.style.zIndex = '1001';
+        tooltip.style.position = 'absolute';
+        tooltip.style.zIndex = '1001';
+    }
+    function aplicarDesenfoque() {
+        // Crear o reutilizar la capa de desenfoque
+        let capaDesenfoque = document.getElementById('capaDesenfoque');
+        if (!capaDesenfoque) {
+            capaDesenfoque = document.createElement('div');
+            capaDesenfoque.id = 'capaDesenfoque';
+            capaDesenfoque.style.position = 'fixed';
+            capaDesenfoque.style.top = '0';
+            capaDesenfoque.style.left = '0';
+            capaDesenfoque.style.width = '100vw';
+            capaDesenfoque.style.height = '100vh';
+            capaDesenfoque.style.backgroundColor = 'rgba(0,0,0,0.5)';
+            capaDesenfoque.style.zIndex = '999';
+            capaDesenfoque.style.backdropFilter = 'blur(4px)';
+            document.body.appendChild(capaDesenfoque);
+        }
+    }
+
+    function removerDesenfoque() {
+        const capaDesenfoque = document.getElementById('capaDesenfoque');
+        if (capaDesenfoque) {
+            capaDesenfoque.remove();
+        }
     }
 
     window.anteriorPaso = function() {
@@ -108,6 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.finalizarTutorial = function() {
         ocultarPasos();
+        removerDesenfoque();
         pasoActual = 0;
         alert('Fin del tutorial. Gracias por participar.');
     };
