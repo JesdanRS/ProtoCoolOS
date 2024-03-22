@@ -3,14 +3,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const matrizContainer = document.getElementById('matriz-container');
     const matrizHeader = document.getElementById('matriz-header');
     const matrizBody = document.getElementById('matriz-body');
-    const exportarBtn = document.getElementById('exportarBtn');
-    const importarBtn = document.getElementById('importarBtn');
     const importarArchivo = document.getElementById('importarArchivo');
     const colorPicker = document.getElementById('cambiarColorBtn');
+    const cambiarColorTextoBtn = document.getElementById('cambiarColorTextoBtn');
+    let estado = {
+        seleccionando: false,
+        nodoOrigen: null,
+        colorActual: '#d2e5ff',
+        colorTextoActual: '#ffffff', // Color de texto predeterminado
+        modoEliminar: false
+    };
     let nodos = new vis.DataSet();
     let aristas = new vis.DataSet();
     let network = null;
-    let estado = { seleccionando: false, nodoOrigen: null, colorActual: '#d2e5ff', modoEliminar: false };
     let ultimoIdNodo = 0; // Mantener el control del último ID de nodo utilizado
 
     const opciones = { //Opciones de grafo
@@ -18,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
             shape: 'circle',
             font: {
                 size: 14,
-                color: '#ffffff',
+                color: estado.colorTextoActual,
                 multi: true
             },
             borderWidth: 2,
@@ -141,7 +146,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function crearNodo(x, y, color, nombre) { //Crear nodo
+    cambiarColorTextoBtn.addEventListener('input', function(event) {
+        estado.colorTextoActual = event.target.value;
+        nodos.forEach((nodo) => {
+            nodos.update({ id: nodo.id, font: { color: estado.colorTextoActual } });
+        });
+    });
+
+    // Asegúrate de actualizar la sección donde creas nodos para usar el estado.colorTextoActual
+    function crearNodo(x, y, color, nombre) {
         ultimoIdNodo++; // Incrementar el ID del último nodo para asegurar que sea único
         nodos.add({
             id: ultimoIdNodo,
@@ -149,6 +162,7 @@ document.addEventListener('DOMContentLoaded', function() {
             x: x,
             y: y,
             color: color,
+            font: { color: estado.colorTextoActual }, // Se establece el color del texto para el nuevo nodo
             physics: false
         });
     }
