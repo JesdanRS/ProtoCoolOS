@@ -82,35 +82,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (estado.seleccionando) { // Verificación de nodo seleccionado
                     const nodoOrigen = estado.nodoOrigen;
                     const nodoDestino = nodeId;
-                    if (nodoOrigen !== nodoDestino && !aristaDuplicada(nodoOrigen, nodoDestino)) { // Acción para creación arista ida o vuelta
+                    // Solo permitir la creación si no es un loop y no existe arista duplicada
+                    if (nodoOrigen !== nodoDestino && !aristaDuplicada(nodoOrigen, nodoDestino)) {
                         let atributoArista;
                         do {
                             atributoArista = prompt("Ingrese el atributo de la arista (ej. peso):", "");
-                            if (atributoArista === null) break; // El usuario canceló el prompt
-                        } while (isNaN(atributoArista) || atributoArista.trim() === ""); // Repetir mientras la entrada no sea un número o esté vacía
-                    
-                        if (atributoArista !== null) { // Verificar nuevamente por si el usuario canceló el prompt
+                            if (atributoArista === null) break;
+                        } while (isNaN(atributoArista) || atributoArista.trim() === "");
+                        
+                        if (atributoArista !== null) {
                             aristas.add({
                                 from: nodoOrigen,
                                 to: nodoDestino,
                                 label: atributoArista
                             });
                         }
-                    } else if(nodoOrigen === nodoDestino && !loopExistente(nodoOrigen)) { // Acción para creación arista loop
-                        let atributoArista;
-                        do {
-                            atributoArista = prompt("Ingrese el atributo de la arista (loop):", "");
-                            if (atributoArista === null) break; // El usuario canceló el prompt
-                        } while (isNaN(atributoArista) || atributoArista.trim() === ""); // Repetir mientras la entrada no sea un número o esté vacía
-                    
-                        if (atributoArista !== null) { // Verificar nuevamente por si el usuario canceló el prompt
-                            aristas.add({
-                                from: nodoOrigen,
-                                to: nodoDestino,
-                                label: atributoArista
-                            });
-                        }
-                    }                    
+                    }
                     estado.seleccionando = false;
                     estado.nodoOrigen = null;
                 } else {
@@ -166,22 +153,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function aristaDuplicada(origen, destino) { // Verificar si no existe ya una arista en la misma dirección al mismo nodo
+    function aristaDuplicada(origen, destino) {
         const aristasExistentes = aristas.get({
             filter: function(item) {
-                return (item.from === origen && item.to === destino);
+                return (item.from === origen && item.to === destino) || (item.from === destino && item.to === origen);
             }
         });
         return aristasExistentes.length > 0;
-    }
-
-    function loopExistente(nodo) { // Verificar si no hay arista loop en el mismo nodo
-        const loops = aristas.get({
-            filter: function(item) {
-                return item.from === nodo && item.to === nodo;
-            }
-        });
-        return loops.length > 0;
     }
 
     function comprobarVisibilidadMatriz() { // Comprobar si la matriz está vacía o no
