@@ -166,17 +166,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 ctx.beginPath();
                 ctx.moveTo(x - nodeWidth / 2, y);
                 ctx.lineTo(x + nodeWidth / 2, y);
-                ctx.strokeStyle = estado.colorTextoActual; // Cambia al color deseado
+                ctx.strokeStyle = nodo.font.color; // Usa el color del texto almacenado en la propiedad del nodo
                 ctx.stroke();
         
                 // Ejemplo adicional: Dibuja una línea vertical en el medio del nodo
                 ctx.beginPath();
                 ctx.moveTo(x, y);
                 ctx.lineTo(x, y + nodeWidth / 2);
-                ctx.strokeStyle = estado.colorTextoActual; // Cambia al color deseado
+                ctx.strokeStyle = nodo.font.color; // Usa el mismo color para la línea vertical
                 ctx.stroke();
             });
-        });        
+        });
+               
 
         nodos.on("*", function() { // Verificar acciones sobre nodo
             actualizarMatriz();
@@ -190,9 +191,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     cambiarColorTextoBtn.addEventListener('input', function(event) {
         estado.colorTextoActual = event.target.value;
-        nodos.forEach((nodo) => {
-            nodos.update({ id: nodo.id, font: { color: estado.colorTextoActual } });
-        });
+        // Se elimina el recorrido y actualización de nodos existentes
+        // Ahora solo se actualiza el estado para que los nuevos nodos usen este color
     });
 
     // Asegúrate de actualizar la sección donde creas nodos para usar el estado.colorTextoActual
