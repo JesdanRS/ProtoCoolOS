@@ -357,5 +357,167 @@ document.addEventListener('DOMContentLoaded', function() {
         comprobarVisibilidadMatriz();
     });
 
+
+
+
+    function hungarianAlgorithm(costMatrix) {
+        const numRows = costMatrix.length;
+        const numCols = costMatrix[0].length;
+    
+        // Paso 1: Restar el mínimo de cada fila
+        const minRowValues = costMatrix.map(row => Math.min(...row));
+        for (let i = 0; i < numRows; i++) {
+            for (let j = 0; j < numCols; j++) {
+                costMatrix[i][j] -= minRowValues[i];
+            }
+        }
+    
+        // Paso 2: Restar el mínimo de cada columna
+        const minColValues = Array.from({ length: numCols }, (_, colIndex) => {
+            let min = Infinity;
+            for (let i = 0; i < numRows; i++) {
+                min = Math.min(min, costMatrix[i][colIndex]);
+            }
+            return min;
+        });
+        for (let j = 0; j < numCols; j++) {
+            for (let i = 0; i < numRows; i++) {
+                costMatrix[i][j] -= minColValues[j];
+            }
+        }
+    
+        // Paso 3: Realizar asignaciones óptimas
+        const assignedRows = new Set();
+        const assignedCols = new Set();
+        const assignments = [];
+        while (assignedRows.size < numRows && assignedCols.size < numCols) {
+            let minUncoveredValue = Infinity;
+            let minUncoveredPosition = { row: -1, col: -1 };
+            for (let i = 0; i < numRows; i++) {
+                for (let j = 0; j < numCols; j++) {
+                    if (!assignedRows.has(i) && !assignedCols.has(j) && costMatrix[i][j] < minUncoveredValue) {
+                        minUncoveredValue = costMatrix[i][j];
+                        minUncoveredPosition = { row: i, col: j };
+                    }
+                }
+            }
+    
+            if (minUncoveredValue === 0) {
+                const { row, col } = minUncoveredPosition;
+                assignedRows.add(row);
+                assignedCols.add(col);
+                assignments.push({ row, col });
+            } else {
+                // Paso 4: Encontrar el camino de aumento
+                let minDelta = Infinity;
+                for (let i = 0; i < numRows; i++) {
+                    if (assignedRows.has(i)) continue;
+                    for (let j = 0; j < numCols; j++) {
+                        if (!assignedCols.has(j)) {
+                            minDelta = Math.min(minDelta, costMatrix[i][j]);
+                        }
+                    }
+                }
+                for (let i = 0; i < numRows; i++) {
+                    if (assignedRows.has(i)) continue;
+                    for (let j = 0; j < numCols; j++) {
+                        if (assignedCols.has(j)) {
+                            costMatrix[i][j] += minDelta;
+                        } else {
+                            costMatrix[i][j] -= minDelta;
+                        }
+                    }
+                }
+            }
+        }
+    
+        return assignments;
+    }
+
+    document.getElementById('minimizarBtn').addEventListener('click', function() {
+    // Obtener la matriz actual y minimizarla
+    const matriz = obtenerMatrizActual();
+    if (!matriz) {
+        console.error('No se pudo generar la matriz.');
+        return;
+    }
+
+    const resultado = hungarianAlgorithm(matriz); // Aplicar el algoritmo húngaro
+    if (!resultado || resultado.length === 0 || resultado[0].length === 0) {
+        console.error('No se pudo calcular el resultado.');
+        return;
+    }
+    
+    // Mostrar el resultado en pantalla
+    mostrarResultado(resultado);
+});
+
+    // Función para mostrar el resultado en pantalla
+    function mostrarResultado(resultado) {
+        const resultadoContainer = document.getElementById('resultado-container');
+        resultadoContainer.innerHTML = '<h3>Resultado:</h3>' + JSON.stringify(resultado);
+    }
+
+    function obtenerMatrizActual() {
+        if (nodos.length === 0 || aristas.length === 0) {
+            console.error('No hay nodos o aristas para generar la matriz.');
+            return null; // Retornar null en lugar de una matriz vacía
+        }
+    
+        // Crear una matriz vacía
+        const matriz = [];
+    
+        // Obtener los nodos únicos (trabajadores)
+        const trabajadores = new Set(aristas.get().map(arista => arista.from));
+        const tareas = new Set(aristas.get().map(arista => arista.to));
+    
+        // Convertir los conjuntos a arrays para poder iterar
+        const trabajadoresArray = [...trabajadores];
+        const tareasArray = [...tareas];
+    
+        // Llenar la matriz con los valores de las aristas
+        trabajadoresArray.forEach((trabajador, i) => {
+            const fila = [];
+            tareasArray.forEach((tarea, j) => {
+                // Buscar la arista que conecta este trabajador con esta tarea
+                const arista = aristas.get({
+                    filter: function (item) {
+                        return item.from === trabajador && item.to === tarea;
+                    }
+                })[0]; // Suponiendo que solo hay una arista que conecta un trabajador con una tarea
+    
+                // Obtener el valor de la arista (costo)
+                const costo = arista ? parseInt(arista.label) : 0;
+                fila.push(costo);
+            });
+            matriz.push(fila);
+        });
+    
+        return matriz;
+    }
+    
+    document.getElementById('minimizarBtn').addEventListener('click', function() {
+        // Obtener la matriz actual y minimizarla
+        const matriz = obtenerMatrizActual();
+        if (!matriz) {
+            console.error('No se pudo generar la matriz.');
+            return;
+        }
+    
+        const resultado = hungarianAlgorithm(matriz); // Aplicar el algoritmo húngaro
+        if (!resultado || resultado.length === 0 || resultado[0].length === 0) {
+            console.error('No se pudo calcular el resultado.');
+            return;
+        }
+        
+        // Mostrar el resultado en pantalla
+        mostrarResultado(resultado);
+    });
+    
+    // Función para mostrar el resultado en pantalla
+    function mostrarResultado(resultado) {
+        const resultadoContainer = document.getElementById('resultado-container');
+        resultadoContainer.innerHTML = '<h3>Resultado:</h3>' + JSON.stringify(resultado);
+    }
     inicializarRed();
 });
