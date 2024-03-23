@@ -24,19 +24,30 @@ document.addEventListener('DOMContentLoaded', function() {
             font: {
                 size: 14,
                 color: estado.colorTextoActual,
-                multi: true
+                multi: true,
+                vadjust: -15
             },
             borderWidth: 2,
             scaling: {
                 min: 16,
                 max: 32,
                 label: {
+                    heightConstraint: { valign: 'top' },
                     enabled: true,
                     min: 14,
                     max: 30,
                     drawThreshold: 8,
                     maxVisible: 20
                 }
+            },
+            shapeProperties: {
+                useBorderWithImage: true
+            },
+            margin: {
+                top: 20,
+                right: 20,
+                bottom: 20,
+                left: 20
             }
         },
         edges: {
@@ -135,6 +146,37 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
+
+        network.on("afterDrawing", function (ctx) {
+            nodos.forEach((nodo) => {
+                const nodeId = nodo.id;
+                const nodePosition = network.getPositions([nodeId])[nodeId];
+                const x = nodePosition.x;
+                const y = nodePosition.y;
+        
+                // Utiliza el contexto del canvas (ctx) para medir el texto
+                ctx.font = `${opciones.nodes.font.size}px Arial`;
+                const textWidth = ctx.measureText(nodo.label).width;
+                const textHeight = opciones.nodes.font.size; // Aproximación del alto del texto
+        
+                // Calcula el tamaño del nodo basándose en el texto y el margen
+                const nodeWidth = textWidth + opciones.nodes.margin.left + opciones.nodes.margin.right;
+        
+                // Dibuja una línea horizontal en el medio del nodo
+                ctx.beginPath();
+                ctx.moveTo(x - nodeWidth / 2, y);
+                ctx.lineTo(x + nodeWidth / 2, y);
+                ctx.strokeStyle = estado.colorTextoActual; // Cambia al color deseado
+                ctx.stroke();
+        
+                // Ejemplo adicional: Dibuja una línea vertical en el medio del nodo
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x, y + nodeWidth / 2);
+                ctx.strokeStyle = estado.colorTextoActual; // Cambia al color deseado
+                ctx.stroke();
+            });
+        });        
 
         nodos.on("*", function() { // Verificar acciones sobre nodo
             actualizarMatriz();
