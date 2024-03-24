@@ -451,7 +451,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('limpiarBtn').addEventListener('click', function() { // Limpiar grafo completo y actualizar matriz
         nodos.clear();
         aristas.clear();
-        estado = { seleccionando: false, nodoOrigen: null, colorActual: estado.colorActual, modoEliminar: false };
+        estado = { seleccionando: false, nodoOrigen: null, colorActual: estado.colorActual, colorTextoActual: estado.colorTextoActual, modoEliminar: false };
         ultimoIdNodo = 0; // Restablecer el contador de ID de nodos al limpiar
         actualizarMatriz(); // La matriz se actualiza al limpiar
         comprobarVisibilidadMatriz();
