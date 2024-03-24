@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const textOffsetXLeft = -nodeWidth/3; // Posición X para el contador de la izquierda
 
                 // Dibuja el contador de la parte baja izquierda
-                ctx.fillStyle = estado.colorTextoActual;
+                ctx.fillStyle = nodo.font.color;
                 ctx.font = "14px Arial";
                 ctx.align = 'left';
                 ctx.fillText(valorAcumuladoNodo.toString(), x + textOffsetXLeft, y + textOffsetY);
