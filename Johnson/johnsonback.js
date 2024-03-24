@@ -194,6 +194,59 @@ document.addEventListener('DOMContentLoaded', function() {
                 ctx.strokeStyle = nodo.font.color; // Usa el mismo color para la línea vertical
                 ctx.stroke();
             });
+
+            aristas.forEach((arista) => {
+                const fromId = arista.from;
+                const toId = arista.to;
+                const fromNodePosition = network.getPositions([fromId])[fromId];
+                const toNodePosition = network.getPositions([toId])[toId];
+        
+                // Calcula la holgura
+                const valorArista = parseFloat(arista.label) || 0;
+                const sumaFromNode = calcularValorAcumuladoNodo(fromId);
+                const restaToNode = calcularValoresResta(toId);
+                const holgura = restaToNode - sumaFromNode - valorArista;
+
+                // Calcula ángulo de inclinación para el texto
+                let angle = Math.atan2(toNodePosition.y - fromNodePosition.y, toNodePosition.x - fromNodePosition.x);
+                if (angle > Math.PI / 2 || angle < -Math.PI / 2) {
+                    angle += Math.PI; // Ajusta el ángulo si es necesario
+                }
+        
+                // Configura la posición para dibujar la holgura debajo de la arista
+                const medioX = (fromNodePosition.x + toNodePosition.x) / 2;
+                const medioY = (fromNodePosition.y + toNodePosition.y) / 2 + 15; // Ajusta según sea necesario
+        
+                // Define el estilo de la fuente para la holgura desde cero
+                const holguraFont = "bold 14px Arial";
+                const holguraStrokeWidth = 2;
+                const holguraStrokeColor = "#ffffff";
+        
+                // Dibuja la holgura
+                ctx.font = holguraFont;
+                ctx.fillStyle = '#343434';
+                ctx.textAlign = "center";
+                ctx.textBaseline = 'middle'; // Alinea el texto verticalmente en el centro
+
+                // Guarda el estado actual del contexto antes de la transformación
+                ctx.save();
+
+                // Translada y rota el contexto para dibujar el texto perpendicular a la arista
+                ctx.translate(medioX, medioY);
+                ctx.rotate(angle);
+
+                // Dibuja el contorno del texto si es necesario
+                if (holguraStrokeWidth > 0) {
+                    ctx.strokeStyle = holguraStrokeColor;
+                    ctx.lineWidth = holguraStrokeWidth;
+                    ctx.strokeText(`h=${holgura}`, 0, 0);
+                }
+
+                // Dibuja el texto de la holgura
+                ctx.fillText(`h=${holgura}`, 0, 0);
+
+                ctx.restore();
+            });
         });
                
 
