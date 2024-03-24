@@ -25,7 +25,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 size: 14,
                 color: estado.colorTextoActual,
                 multi: true,
-                vadjust: -15
+                vadjust: -15,
+                align: 'center'
             },
             borderWidth: 2,
             scaling: {
@@ -37,7 +38,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     min: 14,
                     max: 30,
                     drawThreshold: 8,
-                    maxVisible: 20
+                    maxVisible: 20,
+                    align: 'center'
                 }
             },
             shapeProperties: {
@@ -45,9 +47,9 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             margin: {
                 top: 20,
+                left: 20,
                 right: 20,
-                bottom: 20,
-                left: 20
+                bottom: 20
             }
         },
         edges: {
@@ -57,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 angle: Math.PI / 4
             },
             font: {
-                align: 'middle'
+                align: 'top'
             }
         },
         physics: {
@@ -153,14 +155,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 const nodePosition = network.getPositions([nodeId])[nodeId];
                 const x = nodePosition.x;
                 const y = nodePosition.y;
+
+                // Calcula el valor acumulado del nodo
+                let valorAcumuladoNodo = calcularValorAcumuladoNodo(nodeId);
         
                 // Utiliza el contexto del canvas (ctx) para medir el texto
                 ctx.font = `${opciones.nodes.font.size}px Arial`;
                 const textWidth = ctx.measureText(nodo.label).width;
-                const textHeight = opciones.nodes.font.size; // Aproximación del alto del texto
         
                 // Calcula el tamaño del nodo basándose en el texto y el margen
                 const nodeWidth = textWidth + opciones.nodes.margin.left + opciones.nodes.margin.right;
+
+                // Ajusta aquí para cambiar la posición del contador
+                const textOffsetY = nodeWidth /4; // Posición Y debajo del nodo
+                const textOffsetXLeft = -nodeWidth/3; // Posición X para el contador de la izquierda
+
+                // Dibuja el contador de la parte baja izquierda
+                ctx.fillStyle = estado.colorTextoActual;
+                ctx.font = "14px Arial";
+                ctx.align = 'left';
+                ctx.fillText(valorAcumuladoNodo.toString(), x + textOffsetXLeft, y + textOffsetY);
         
                 // Dibuja una línea horizontal en el medio del nodo
                 ctx.beginPath();
@@ -182,11 +196,50 @@ document.addEventListener('DOMContentLoaded', function() {
         nodos.on("*", function() { // Verificar acciones sobre nodo
             actualizarMatriz();
             comprobarVisibilidadMatriz();
+            network.redraw();
         });
         aristas.on("*", function() { // Verificar acciones sobre aristas
             actualizarMatriz();
             comprobarVisibilidadMatriz();
+            network.redraw();
         });
+    }
+
+    // Función para calcular el valor acumulado para cada nodo
+    function calcularValorAcumuladoNodo(nodoId) {
+        let valoresAcumulativos = {};
+
+        // Inicializar todos los valores acumulativos a 0
+        nodos.getIds().forEach(nodeId => {
+            valoresAcumulativos[nodeId] = 0;
+        });
+
+        // Función para calcular de forma recursiva
+        function calcularValorParaNodo(nodoId) {
+            // Obtener todas las aristas entrantes al nodo
+            let aristasEntrantes = aristas.get({
+                filter: arista => arista.to === nodoId
+            });
+
+            let maxValorEntrante = 0;
+            aristasEntrantes.forEach(arista => {
+                let valorArista = parseFloat(arista.label) || 0;
+                let valorOrigen = valoresAcumulativos[arista.from] || 0;
+                let suma = valorOrigen + valorArista;
+                if (suma > maxValorEntrante) {
+                    maxValorEntrante = suma;
+                }
+            });
+
+            valoresAcumulativos[nodoId] = maxValorEntrante;
+        }
+
+        // Calcular el valor para cada nodo
+        nodos.getIds().forEach(nodeId => {
+            calcularValorParaNodo(nodeId);
+        });
+
+        return valoresAcumulativos[nodoId];
     }
 
     cambiarColorTextoBtn.addEventListener('input', function(event) {
