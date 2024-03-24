@@ -156,8 +156,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const x = nodePosition.x;
                 const y = nodePosition.y;
 
-                // Calcula el valor acumulado del nodo
+                // Calcula el valor acumulado y de resta del nodo
                 let valorAcumuladoNodo = calcularValorAcumuladoNodo(nodeId);
+                let valorRestadoNodo = calcularValoresResta(nodeId);
         
                 // Utiliza el contexto del canvas (ctx) para medir el texto
                 ctx.font = `${opciones.nodes.font.size}px Arial`;
@@ -169,12 +170,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Ajusta aquí para cambiar la posición del contador
                 const textOffsetY = nodeWidth /4; // Posición Y debajo del nodo
                 const textOffsetXLeft = -nodeWidth/3; // Posición X para el contador de la izquierda
+                const textOffsetXRight = nodeWidth/6;
 
                 // Dibuja el contador de la parte baja izquierda
                 ctx.fillStyle = nodo.font.color;
                 ctx.font = "14px Arial";
                 ctx.align = 'left';
                 ctx.fillText(valorAcumuladoNodo.toString(), x + textOffsetXLeft, y + textOffsetY);
+                ctx.align = 'right';
+                ctx.fillText(valorRestadoNodo.toString(), x + textOffsetXRight, y + textOffsetY);
         
                 // Dibuja una línea horizontal en el medio del nodo
                 ctx.beginPath();
@@ -233,13 +237,52 @@ document.addEventListener('DOMContentLoaded', function() {
 
             valoresAcumulativos[nodoId] = maxValorEntrante;
         }
-
         // Calcular el valor para cada nodo
         nodos.getIds().forEach(nodeId => {
             calcularValorParaNodo(nodeId);
         });
 
         return valoresAcumulativos[nodoId];
+    }
+
+    function calcularValoresResta(nodeId) {
+        // Diccionario para almacenar el valor más bajo de las aristas salientes de cada nodo
+        let valoresResta = {};
+
+        // Inicializar valores de resta basándose en valores acumulativos
+        nodos.getIds().forEach(nodeId => {
+            valoresResta[nodeId] = calcularValorAcumuladoNodo(nodeId); // Inicializa con el valor acumulado
+        });
+
+        // Función recursiva para calcular el valor de resta
+        function actualizarValorResta(nodoId) {
+            let aristasSalientes = aristas.get({
+                filter: arista => arista.from === nodoId
+            });
+
+            if (aristasSalientes.length > 0) {
+                let minResta = Number.MAX_SAFE_INTEGER;
+
+                aristasSalientes.forEach(arista => {
+                    let valorArista = parseFloat(arista.label) || 0;
+                    let valorRestaDestino = valoresResta[arista.to];
+                    let resta = valorRestaDestino - valorArista;
+
+                    if (resta < minResta) {
+                        minResta = resta;
+                    }
+                });
+
+                valoresResta[nodoId] = minResta;
+            }
+        }
+
+        // Actualizar el valor de resta para todos los nodos, en orden inverso
+        nodos.getIds().reverse().forEach(nodeId => {
+            actualizarValorResta(nodeId);
+        });
+
+        return valoresResta[nodeId];
     }
 
     cambiarColorTextoBtn.addEventListener('input', function(event) {
