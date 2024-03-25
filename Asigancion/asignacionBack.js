@@ -517,7 +517,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // Función para mostrar el resultado en pantalla
     function mostrarResultado(resultado) {
         const resultadoContainer = document.getElementById('resultado-container');
-        resultadoContainer.innerHTML = '<h3>Resultado:</h3>' + JSON.stringify(resultado);
+        resultadoContainer.innerHTML = '<h3>Resultado:</h3>';
+    
+        const matrizAdyacencia = obtenerMatrizActual(); // Obtener la matriz de adyacencia
+        
+        // Recorrer cada asignación en el resultado y mostrarla en el contenedor
+        resultado.forEach(asignacion => {
+            const trabajador = asignacion.row; // Obtener el índice de fila de la asignación
+            const tarea = asignacion.col; // Obtener el índice de columna de la asignación
+            const costo = matrizAdyacencia[trabajador][tarea]; // Obtener el costo de la asignación desde la matriz de adyacencia
+            resultadoContainer.innerHTML += `<p>Trabajador ${trabajador + 1} se asigna a tarea ${tarea + 1} con un costo de ${costo}</p>`;
+        });
+    
+        resultadoContainer.style.display = 'block'; // Mostrar el contenedor
     }
+    
+    
     inicializarRed();
 });

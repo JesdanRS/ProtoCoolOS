@@ -663,7 +663,20 @@ Estilo de botón HELP
     background: linear-gradient(95deg, #7e22ce 3.2%, #3b82f6 99.5%);
     font-family: 'Poppins', sans-serif;
 }
-
+#minimizarBtn{
+    margin-top: 15px;
+    margin-left: 10px;
+    cursor: pointer;
+    padding: 8px 38px;
+    border-radius: 18px;
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: -1px;
+    color: #fff;
+    border: none;
+    background: linear-gradient(95deg, #6bcff4 3.2%, #3b82f6 99.5%);
+    font-family: 'Poppins', sans-serif;
+}
 #guardarBtn{
     cursor: pointer;
     padding: 8px 38px;
@@ -703,6 +716,19 @@ Estilo de botón HELP
     border: none;
     background: linear-gradient(95deg, #7e22ce 3.2%, #3b82f6 99.5%);
     font-family: 'Poppins', sans-serif;
+}
+#resultado-container {
+    position: fixed;
+    bottom: 80px; /* Distancia desde la parte inferior de la ventana */
+    right: 20px; /* Distancia desde el borde derecho de la ventana */
+    width: 500px;
+    background: linear-gradient(95deg, #6bcff4 3.2%, #3b82f6 99.5%);
+    color: white;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    padding: 20px;
+    border-radius: 10px;
+    display: none;
+    z-index: 1; /* Asegura que esté por encima de otros elementos */
 }
 
 .atributo-text {
