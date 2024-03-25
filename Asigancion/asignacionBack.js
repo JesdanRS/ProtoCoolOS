@@ -434,30 +434,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return assignments;
     }
 
-    document.getElementById('minimizarBtn').addEventListener('click', function() {
-    // Obtener la matriz actual y minimizarla
-    const matriz = obtenerMatrizActual();
-    if (!matriz) {
-        console.error('No se pudo generar la matriz.');
-        return;
-    }
-
-    const resultado = hungarianAlgorithm(matriz); // Aplicar el algoritmo húngaro
-    if (!resultado || resultado.length === 0 || resultado[0].length === 0) {
-        console.error('No se pudo calcular el resultado.');
-        return;
-    }
-    
-    // Mostrar el resultado en pantalla
-    mostrarResultado(resultado);
-});
-
-    // Función para mostrar el resultado en pantalla
-    function mostrarResultado(resultado) {
-        const resultadoContainer = document.getElementById('resultado-container');
-        resultadoContainer.innerHTML = '<h3>Resultado:</h3>' + JSON.stringify(resultado);
-    }
-
     function obtenerMatrizActual() {
         if (nodos.length === 0 || aristas.length === 0) {
             console.error('No hay nodos o aristas para generar la matriz.');
@@ -515,22 +491,43 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Función para mostrar el resultado en pantalla
-    function mostrarResultado(resultado) {
-        const resultadoContainer = document.getElementById('resultado-container');
-        resultadoContainer.innerHTML = '<h3>Resultado:</h3>';
+    // Función para mostrar el resultado en pantalla
+// Función para mostrar el resultado en pantalla
+function mostrarResultado(resultado) {
+    const resultadoContainer = document.getElementById('resultado-container');
+    resultadoContainer.innerHTML = '<h3>Resultado:</h3>';
+
+    const matrizAdyacencia = obtenerMatrizActual(); // Obtener la matriz de adyacencia
     
-        const matrizAdyacencia = obtenerMatrizActual(); // Obtener la matriz de adyacencia
-        
-        // Recorrer cada asignación en el resultado y mostrarla en el contenedor
-        resultado.forEach(asignacion => {
-            const trabajador = asignacion.row; // Obtener el índice de fila de la asignación
-            const tarea = asignacion.col; // Obtener el índice de columna de la asignación
-            const costo = matrizAdyacencia[trabajador][tarea]; // Obtener el costo de la asignación desde la matriz de adyacencia
-            resultadoContainer.innerHTML += `<p>Trabajador ${trabajador + 1} se asigna a tarea ${tarea + 1} con un costo de ${costo}</p>`;
-        });
+    // Obtener los nombres de las filas y columnas
+    const nombresFilas = obtenerNombresFilas();
+    const nombresColumnas = obtenerNombresColumnas();
     
-        resultadoContainer.style.display = 'block'; // Mostrar el contenedor
-    }
+    // Recorrer cada asignación en el resultado y mostrarla en el contenedor
+    resultado.forEach(asignacion => {
+        const filaNombre = nombresFilas[asignacion.row]; // Obtener el nombre de la fila
+        const columnaNombre = nombresColumnas[asignacion.col]; // Obtener el nombre de la columna
+        const costo = matrizAdyacencia[asignacion.row][asignacion.col]; // Obtener el costo de la asignación desde la matriz de adyacencia
+        resultadoContainer.innerHTML += `<p>${filaNombre} se asigna a ${columnaNombre} con un costo de ${costo}</p>`;
+    });
+
+    resultadoContainer.style.display = 'block'; // Mostrar el contenedor
+}
+
+// Función para obtener los nombres de las filas
+function obtenerNombresFilas() {
+    const filas = document.querySelectorAll('#matriz-body tr');
+    const nombresFilas = Array.from(filas).map(fila => fila.firstChild.textContent.trim());
+    return nombresFilas;
+}
+
+// Función para obtener los nombres de las columnas
+function obtenerNombresColumnas() {
+    const encabezados = document.querySelectorAll('#matriz-header th');
+    const nombresColumnas = Array.from(encabezados).slice(1).map(encabezado => encabezado.textContent.trim());
+    return nombresColumnas;
+}
+
     
     
     inicializarRed();
