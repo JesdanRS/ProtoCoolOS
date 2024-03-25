@@ -446,7 +446,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Obtener los nodos únicos (trabajadores)
         const trabajadores = new Set(aristas.get().map(arista => arista.from));
         const tareas = new Set(aristas.get().map(arista => arista.to));
-    
+
         // Convertir los conjuntos a arrays para poder iterar
         const trabajadoresArray = [...trabajadores];
         const tareasArray = [...tareas];
@@ -488,6 +488,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Mostrar el resultado en pantalla
         mostrarResultado(resultado);
+        mostrarResultado(resultado);
+// Resaltar las asignaciones en la matriz
+        resaltarAsignaciones(resultado);
     });
     
     // Función para mostrar el resultado en pantalla
@@ -527,7 +530,40 @@ function obtenerNombresColumnas() {
     const nombresColumnas = Array.from(encabezados).slice(1).map(encabezado => encabezado.textContent.trim());
     return nombresColumnas;
 }
-
+function resaltarAsignaciones(resultado) {
+    const matrizBody = document.getElementById('matriz-body');
+    
+    // Obtener las filas y columnas de la matriz
+    const filas = matrizBody.querySelectorAll('tr');
+    
+    // Obtener los nombres de las filas y columnas
+    const nombresFilas = obtenerNombresFilas();
+    const nombresColumnas = obtenerNombresColumnas();
+    
+    // Iterar sobre cada asignación en el resultado
+    resultado.forEach(asignacion => {
+        const filaNombre = nombresFilas[asignacion.row];
+        const columnaNombre = nombresColumnas[asignacion.col];
+        
+        // Encontrar la celda correspondiente en la matriz y resaltarla cambiando el color de fondo
+        for (let i = 0; i < filas.length; i++) {
+            const fila = filas[i];
+            const nombreFila = fila.querySelector('th').textContent.trim();
+            if (nombreFila === filaNombre) {
+                const celdas = fila.querySelectorAll('td');
+                for (let j = 0; j < celdas.length; j++) {
+                    const celda = celdas[j];
+                    const nombreColumna = nombresColumnas[j];
+                    if (nombreColumna === columnaNombre) {
+                        celda.style.backgroundColor = '#7E22CE'; // Cambiar el color de fondo de la celda
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+    });
+}
     
     
     inicializarRed();
