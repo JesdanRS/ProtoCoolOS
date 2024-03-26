@@ -434,6 +434,63 @@ document.addEventListener('DOMContentLoaded', function() {
         return assignments;
     }
 
+    function hungarianAlgorithmaxim(costMatrix) {
+        const numRows = costMatrix.length;
+        const numCols = costMatrix[0].length;
+    
+        // Paso 1: Encontrar el máximo de cada fila y restarlo de cada elemento
+        const maxRowValues = costMatrix.map(row => Math.max(...row));
+        for (let i = 0; i < numRows; i++) {
+            for (let j = 0; j < numCols; j++) {
+                costMatrix[i][j] = maxRowValues[i] - costMatrix[i][j];
+            }
+        }
+    
+        // Paso 2: Encontrar el máximo de cada columna y restarlo de cada elemento
+        const maxColValues = Array.from({ length: numCols }, (_, colIndex) => {
+            let max = -Infinity;
+            for (let i = 0; i < numRows; i++) {
+                max = Math.max(max, costMatrix[i][colIndex]);
+            }
+            return max;
+        });
+        for (let j = 0; j < numCols; j++) {
+            for (let i = 0; i < numRows; i++) {
+                costMatrix[i][j] = maxColValues[j] - costMatrix[i][j];
+            }
+        }
+    
+        // Paso 3: Realizar asignaciones óptimas
+        const assignedRows = new Set();
+        const assignedCols = new Set();
+        const assignments = [];
+        while (assignedRows.size < numRows && assignedCols.size < numCols) {
+            let maxUncoveredValue = -Infinity;
+            let maxUncoveredPosition = { row: -1, col: -1 };
+            for (let i = 0; i < numRows; i++) {
+                for (let j = 0; j < numCols; j++) {
+                    if (!assignedRows.has(i) && !assignedCols.has(j) && costMatrix[i][j] > maxUncoveredValue) {
+                        maxUncoveredValue = costMatrix[i][j];
+                        maxUncoveredPosition = { row: i, col: j };
+                    }
+                }
+            }
+    
+            if (maxUncoveredValue !== -Infinity) {
+                const { row, col } = maxUncoveredPosition;
+                assignedRows.add(row);
+                assignedCols.add(col);
+                assignments.push({ row, col });
+            } else {
+                // No se encontró ninguna asignación, el algoritmo ha fallado
+                console.error('No se pudo encontrar ninguna asignación válida.');
+                return null;
+            }
+        }
+    
+        return assignments;
+    }
+
     function obtenerMatrizActual() {
         if (nodos.length === 0 || aristas.length === 0) {
             console.error('No hay nodos o aristas para generar la matriz.');
@@ -481,6 +538,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     
         const resultado = hungarianAlgorithm(matriz); // Aplicar el algoritmo húngaro
+        if (!resultado || resultado.length === 0 || resultado[0].length === 0) {
+            console.error('No se pudo calcular el resultado.');
+            return;
+        }
+        
+        // Mostrar el resultado en pantalla
+        mostrarResultado(resultado);
+        mostrarResultado(resultado);
+// Resaltar las asignaciones en la matriz
+        resaltarAsignaciones(resultado);
+    });
+
+    document.getElementById('maximizarBtn').addEventListener('click', function() {
+        // Obtener la matriz actual y minimizarla
+        const matriz = obtenerMatrizActual();
+        if (!matriz) {
+            console.error('No se pudo generar la matriz.');
+            return;
+        }
+    
+        const resultado = hungarianAlgorithmaxim(matriz); // Aplicar el algoritmo húngaro
         if (!resultado || resultado.length === 0 || resultado[0].length === 0) {
             console.error('No se pudo calcular el resultado.');
             return;
