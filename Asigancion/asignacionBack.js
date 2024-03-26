@@ -355,9 +355,12 @@ document.addEventListener('DOMContentLoaded', function() {
         ultimoIdNodo = 0; // Restablecer el contador de ID de nodos al limpiar
         actualizarMatriz(); // La matriz se actualiza al limpiar
         comprobarVisibilidadMatriz();
+
+        // limpiar el contenedor de la respuesta
+        const resultadoContainer = document.getElementById('resultado-container');
+        resultadoContainer.innerHTML = ''; // Vaciar el contenido del contenedor de resultados
+        resultadoContainer.style.display = 'none'; // Opcional: Ocultar el contenedor hasta nuevos resultados
     });
-
-
 
 
     function hungarianAlgorithm(costMatrix) {
