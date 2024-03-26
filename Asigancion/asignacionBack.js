@@ -531,6 +531,7 @@ document.addEventListener('DOMContentLoaded', function() {
         mostrarResultado(resultado);
         mostrarResultado(resultado);
 // Resaltar las asignaciones en la matriz
+        limpiarResaltadosMatriz(); // Limpiar campos resaltados de la matriz
         resaltarAsignaciones(resultado);
     });
 
@@ -552,6 +553,7 @@ document.addEventListener('DOMContentLoaded', function() {
         mostrarResultado(resultado);
         mostrarResultado(resultado);
 // Resaltar las asignaciones en la matriz
+        limpiarResaltadosMatriz(); // Limpiar campos resaltados de la matriz
         resaltarAsignaciones(resultado);
     });
     
@@ -624,6 +626,13 @@ function resaltarAsignaciones(resultado) {
                 break;
             }
         }
+    });
+}
+
+function limpiarResaltadosMatriz() {
+    const celdas = document.querySelectorAll('#matriz-body td');
+    celdas.forEach(celda => {
+        celda.style.backgroundColor = ''; // Restablece el color de fondo original
     });
 }
     
