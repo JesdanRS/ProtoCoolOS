@@ -368,7 +368,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const minRowValues = costMatrix.map(row => Math.min(...row));
         for (let i = 0; i < numRows; i++) {
             for (let j = 0; j < numCols; j++) {
-                costMatrix[i][j] -= minRowValues[i];
+                costMatrix[i][j] = minRowValues[i] - costMatrix[i][j];
             }
         }
     
@@ -382,7 +382,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         for (let j = 0; j < numCols; j++) {
             for (let i = 0; i < numRows; i++) {
-                costMatrix[i][j] -= minColValues[j];
+                costMatrix[i][j] = minColValues[j] - costMatrix[i][j];
             }
         }
     
@@ -402,35 +402,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
     
-            if (minUncoveredValue === 0) {
+            if (minUncoveredValue !== Infinity) {
                 const { row, col } = minUncoveredPosition;
                 assignedRows.add(row);
                 assignedCols.add(col);
                 assignments.push({ row, col });
             } else {
-                // Paso 4: Encontrar el camino de aumento
-                let minDelta = Infinity;
-                for (let i = 0; i < numRows; i++) {
-                    if (assignedRows.has(i)) continue;
-                    for (let j = 0; j < numCols; j++) {
-                        if (!assignedCols.has(j)) {
-                            minDelta = Math.min(minDelta, costMatrix[i][j]);
-                        }
-                    }
-                }
-                for (let i = 0; i < numRows; i++) {
-                    if (assignedRows.has(i)) continue;
-                    for (let j = 0; j < numCols; j++) {
-                        if (assignedCols.has(j)) {
-                            costMatrix[i][j] += minDelta;
-                        } else {
-                            costMatrix[i][j] -= minDelta;
-                        }
-                    }
-                }
+            return null;
             }
         }
-    
+
         return assignments;
     }
 
