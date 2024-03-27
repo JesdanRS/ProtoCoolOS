@@ -569,15 +569,21 @@ function mostrarResultado(resultado) {
     // Obtener los nombres de las filas y columnas
     const nombresFilas = obtenerNombresFilas();
     const nombresColumnas = obtenerNombresColumnas();
+
+    let sumaTotal = 0; // Inicializar la suma total de los costos de las asignaciones
     
     // Recorrer cada asignación en el resultado y mostrarla en el contenedor
     resultado.forEach(asignacion => {
         const filaNombre = nombresFilas[asignacion.row]; // Obtener el nombre de la fila
         const columnaNombre = nombresColumnas[asignacion.col]; // Obtener el nombre de la columna
         const costo = matrizAdyacencia[asignacion.row][asignacion.col]; // Obtener el costo de la asignación desde la matriz de adyacencia
-        resultadoContainer.innerHTML += `<p>${filaNombre} se asigna a ${columnaNombre} con un costo de ${costo}</p>`;
+        resultadoContainer.innerHTML += `<p>${filaNombre} se asigna a ${columnaNombre} con un valor de ${costo}</p>`;
+
+        sumaTotal += costo; // Sumar el costo de esta asignación a la suma tota
     });
 
+    // Mostrar la suma total de los costos de las asignaciones
+    resultadoContainer.innerHTML += `<h4>Suma total de los costos de las asignaciones: ${sumaTotal}</h4>`;
     resultadoContainer.style.display = 'block'; // Mostrar el contenedor
 }
 
