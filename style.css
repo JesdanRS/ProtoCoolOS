@@ -549,11 +549,13 @@ Función agregada para quitar el subrayao de las etiquetas a
     width: 190px;
     height: 254px;
     transition: 200ms;
+    align-items: center;
   }
   
   .container:active {
     width: 180px;
     height: 245px;
+    align-items: center;
   }
   
   #card {
@@ -565,7 +567,9 @@ Función agregada para quitar el subrayao de las etiquetas a
     align-items: center;
     border-radius: 20px;
     transition: 700ms;
+    overflow: hidden;
     background: linear-gradient(43deg, #7e22ce 0%, #8d4ecc 46%, #3b82f6 100%);
+    align-items: center;
 
   }
   
@@ -574,6 +578,12 @@ Función agregada para quitar el subrayao de las etiquetas a
     color: rgb(134, 110, 221);
     text-align: center;
     width: 100%;
+    font-size: 14px;
+    line-height: 1.5; /* Espacio entre líneas */
+    max-height: 100%; /* Asegura que el texto no se desborde verticalmente */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Recorta el texto con puntos suspensivos si es necesario */
+    white-space: nowrap;
   }
   
   .title {
@@ -585,6 +595,8 @@ Función agregada para quitar el subrayao de las etiquetas a
     font-size: small;
     font-weight: bold;
     color: white;
+    max-height: 100%; /* Asegura que el texto no se desborde verticalmente */
+
   }
   
   .tracker:hover ~ #card .title {
@@ -627,6 +639,7 @@ Función agregada para quitar el subrayao de las etiquetas a
     transition: 200ms;
     content: '';
     opacity: 80%;
+    align-items: center;
   }
   
   .canvas {
@@ -899,6 +912,7 @@ Función agregada para quitar el subrayao de las etiquetas a
   .container-wrapper {
     display: flex;
     justify-content: space-around;
+    align-items: center;
   }
   
   .container {
@@ -907,6 +921,6 @@ Función agregada para quitar el subrayao de las etiquetas a
     vertical-align: top;
     width: calc(25% - 15px); /* Calcula el ancho de cada tarjeta para ocupar aproximadamente un tercio del contenedor, considerando el margen */
     box-sizing: border-box; /* Incluye el padding y el borde en el ancho de la tarjeta */
+    align-items: center;
   }
-  
   
