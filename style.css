@@ -923,4 +923,13 @@ Función agregada para quitar el subrayao de las etiquetas a
     box-sizing: border-box; /* Incluye el padding y el borde en el ancho de la tarjeta */
     align-items: center;
   }
-  
+  /* Estilos adicionales según tus necesidades */
+#abrirChat {
+  position: fixed;
+  bottom: 20px; /* Ajusta la posición según sea necesario */
+  right: 20px; /* Ajusta la posición según sea necesario */
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 9999; /* Asegúrate de que el icono esté por encima de otros elementos */
+}
+
