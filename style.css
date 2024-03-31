@@ -596,6 +596,8 @@ Función agregada para quitar el subrayao de las etiquetas a
     font-weight: bold;
     color: white;
     max-height: 100%; /* Asegura que el texto no se desborde verticalmente */
+    margin: 15px; /* Ajusta este valor según necesites */
+    text-align: justify;
 
   }
   
@@ -924,6 +926,8 @@ Función agregada para quitar el subrayao de las etiquetas a
     align-items: center;
   }
   /* Estilos adicionales según tus necesidades */
+
+/* Estilo para el botón del bot Yamil */
 #abrirChat {
   position: fixed;
   bottom: 20px;
