@@ -262,79 +262,135 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    function destacarRutaCritica() {
+        const colorRutaCritica = 'Green'; // Define un color para la ruta crítica
+    
+        // Identificar el nodo final (nodo sin aristas salientes)
+        let nodoFinal = null;
+        nodos.forEach(nodo => {
+            if (!aristas.get({ filter: arista => arista.from === nodo.id }).length) {
+                nodoFinal = nodo.id;
+            }
+        });
+    
+        // Recopilar IDs de los nodos que están en la ruta crítica para cambiar su color
+        let nodosEnRutaCritica = new Set();
+    
+        aristas.forEach((arista) => {
+            const valorArista = parseFloat(arista.label) || 0;
+            const sumaFromNode = calcularValorAcumuladoNodo(arista.from);
+            const restaToNode = calcularValoresResta(arista.to);
+            const holgura = restaToNode - sumaFromNode - valorArista;
+    
+            if (holgura === 0) { // Si la holgura es cero, es parte de la ruta crítica
+                // Añadir nodos al conjunto
+                nodosEnRutaCritica.add(arista.from);
+                nodosEnRutaCritica.add(arista.to);
+            }
+        });
+    
+        // Ahora actualizamos el color de las aristas que están en la ruta crítica
+        aristas.forEach((arista) => {
+            const valorArista = parseFloat(arista.label) || 0;
+            const sumaFromNode = calcularValorAcumuladoNodo(arista.from);
+            const restaToNode = calcularValoresResta(arista.to);
+            const holgura = restaToNode - sumaFromNode - valorArista;
+    
+            if (holgura === 0) { // Si la holgura es cero, es parte de la ruta crítica
+                aristas.update({ id: arista.id, color: colorRutaCritica });
+            }
+        });
+    
+        // Cambiar el color del nodo final
+        if (nodoFinal !== null) {
+            nodos.update({ id: nodoFinal, color: colorRutaCritica });
+        }
+
+    
+        // Mostrar el nombre del nodo de inicio y final
+        const nodoInicio = nodos.getIds()[0]; // Suponiendo que el primer nodo es el nodo de inicio
+        const nombreNodoInicio = nodos.get(nodoInicio).label;
+        const nombreNodoFinal = nodos.get(nodoFinal).label;
+    
+        alert(`Nodo de inicio: ${nombreNodoInicio}\nNodo final: ${nombreNodoFinal}`);
+    }
+    
+    
+
     // Función para calcular el valor acumulado para cada nodo
     function calcularValorAcumuladoNodo(nodoId) {
-        let valoresAcumulativos = {};
-
-        // Inicializar todos los valores acumulativos a 0
-        nodos.getIds().forEach(nodeId => {
-            valoresAcumulativos[nodeId] = 0;
-        });
-
-        // Función para calcular de forma recursiva
-        function calcularValorParaNodo(nodoId) {
-            // Obtener todas las aristas entrantes al nodo
-            let aristasEntrantes = aristas.get({
-                filter: arista => arista.to === nodoId
+        const nodosIds = nodos.getIds();
+        const nodosVisitados = new Set(); // Conjunto para evitar ciclos infinitos
+        let valorAcumulado = 0;
+    
+        function dfs(currentNodeId) {
+            if (nodosVisitados.has(currentNodeId)) return; // Evitar ciclos infinitos
+            nodosVisitados.add(currentNodeId);
+    
+            const aristasEntrantes = aristas.get({
+                filter: arista => arista.to === currentNodeId
             });
-
+    
             let maxValorEntrante = 0;
             aristasEntrantes.forEach(arista => {
-                let valorArista = parseFloat(arista.label) || 0;
-                let valorOrigen = valoresAcumulativos[arista.from] || 0;
-                let suma = valorOrigen + valorArista;
+                const valorArista = parseFloat(arista.label) || 0;
+                const valorOrigen = calcularValorAcumuladoNodo(arista.from); // Utilizar la recursión para obtener el valor acumulado del nodo origen
+                const suma = valorOrigen + valorArista;
                 if (suma > maxValorEntrante) {
                     maxValorEntrante = suma;
                 }
             });
-
-            valoresAcumulativos[nodoId] = maxValorEntrante;
+    
+            valorAcumulado = maxValorEntrante;
         }
-        // Calcular el valor para cada nodo
-        nodos.getIds().forEach(nodeId => {
-            calcularValorParaNodo(nodeId);
-        });
-
-        return valoresAcumulativos[nodoId];
+    
+        dfs(nodoId);
+    
+        return valorAcumulado;
     }
 
     function calcularValoresResta(nodeId) {
-        // Diccionario para almacenar el valor más bajo de las aristas salientes de cada nodo
-        let valoresResta = {};
-
+        const nodosIds = nodos.getIds();
+        const nodosVisitados = new Set(); // Conjunto para evitar ciclos infinitos
+        const valoresResta = {};
+    
         // Inicializar valores de resta basándose en valores acumulativos
-        nodos.getIds().forEach(nodeId => {
-            valoresResta[nodeId] = calcularValorAcumuladoNodo(nodeId); // Inicializa con el valor acumulado
+        nodosIds.forEach(id => {
+            valoresResta[id] = calcularValorAcumuladoNodo(id); // Inicializa con el valor acumulado
         });
-
-        // Función recursiva para calcular el valor de resta
-        function actualizarValorResta(nodoId) {
-            let aristasSalientes = aristas.get({
-                filter: arista => arista.from === nodoId
+    
+        function dfs(currentNodeId) {
+            if (nodosVisitados.has(currentNodeId)) return; // Evitar ciclos infinitos
+            nodosVisitados.add(currentNodeId);
+    
+            const aristasSalientes = aristas.get({
+                filter: arista => arista.from === currentNodeId
             });
-
+    
             if (aristasSalientes.length > 0) {
                 let minResta = Number.MAX_SAFE_INTEGER;
-
+    
                 aristasSalientes.forEach(arista => {
-                    let valorArista = parseFloat(arista.label) || 0;
-                    let valorRestaDestino = valoresResta[arista.to];
-                    let resta = valorRestaDestino - valorArista;
-
+                    const valorArista = parseFloat(arista.label) || 0;
+                    const valorRestaDestino = valoresResta[arista.to];
+                    const resta = valorRestaDestino - valorArista;
+    
                     if (resta < minResta) {
                         minResta = resta;
                     }
                 });
-
-                valoresResta[nodoId] = minResta;
+    
+                valoresResta[currentNodeId] = minResta;
+    
+                // Recursivamente llamar para nodos de destino
+                aristasSalientes.forEach(arista => {
+                    dfs(arista.to);
+                });
             }
         }
-
-        // Actualizar el valor de resta para todos los nodos, en orden inverso
-        nodos.getIds().reverse().forEach(nodeId => {
-            actualizarValorResta(nodeId);
-        });
-
+    
+        dfs(nodeId);
+    
         return valoresResta[nodeId];
     }
 
@@ -391,17 +447,52 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function generarHTMLMatriz(matriz, nodosIds) { // Generar HTML de la matriz según datos
         const nodosLabels = nodosIds.map(id => nodos.get(id).label);
-        matrizHeader.innerHTML = '<th></th>' + nodosLabels.map(label => `<th>${label}</th>`).join('') + '<th>Suma</th>';
-        matrizBody.innerHTML = nodosIds.map(id => {
-            const fila = nodosIds.map(idInterno => matriz[id][idInterno]).join('</td><td>');
-            const sumaFila = nodosIds.reduce((acc, idInterno) => acc + matriz[id][idInterno], 0);
-            return `<tr><th>${nodos.get(id).label}</th><td>${fila}</td><td>${sumaFila}</td></tr>`;
-        }).join('');
-
-        const sumaColumna = nodosIds.map(idInterno => nodosIds.reduce((acc, id) => acc + matriz[id][idInterno], 0));
-        const total = sumaColumna.reduce((acc, val) => acc + val, 0);
-        matrizBody.innerHTML += `<tr><th>Suma</th>${sumaColumna.map(suma => `<td>${suma}</td>`).join('')}<td>${total}</td></tr>`;
+        const sumaFilas = {};
+        const sumaColumnas = {};
+    
+        nodosIds.forEach(id => {
+            sumaFilas[id] = 0;
+            sumaColumnas[id] = 0;
+        });
+    
+        nodosIds.forEach(id => {
+            nodosIds.forEach(idInterno => {
+                sumaFilas[id] += matriz[id][idInterno];
+                sumaColumnas[idInterno] += matriz[id][idInterno];
+            });
+        });
+    
+        const colorInicio = 'Green'; // Verde para el nodo de inicio
+        const colorFinal = 'Green'; // Rojo para el nodo final
+    
+        let encabezadoHTML = '<th></th>';
+        nodosLabels.forEach((label, index) => {
+            const id = nodosIds[index];
+            const color = sumaColumnas[id] === 0 ? colorInicio : (sumaFilas[id] === 0 ? colorFinal : '');
+            encabezadoHTML += `<th style="background-color:${color}">${label}</th>`;
+        });
+        encabezadoHTML += '<th>Suma</th>';
+        matrizHeader.innerHTML = encabezadoHTML;
+    
+        let cuerpoHTML = '';
+        nodosIds.forEach(id => {
+            const color = sumaFilas[id] === 0 ? colorFinal : '';
+            cuerpoHTML += `<tr><th style="background-color:${color}">${nodos.get(id).label}</th>`;
+            nodosIds.forEach(idInterno => {
+                cuerpoHTML += `<td>${matriz[id][idInterno]}</td>`;
+            });
+            cuerpoHTML += `<td>${sumaFilas[id]}</td></tr>`;
+        });
+    
+        cuerpoHTML += '<tr><th>Suma</th>';
+        nodosIds.forEach(id => {
+            cuerpoHTML += `<td>${sumaColumnas[id]}</td>`;
+        });
+        const total = nodosIds.reduce((acc, id) => acc + sumaFilas[id], 0);
+        cuerpoHTML += `<td>${total}</td></tr>`;
+        matrizBody.innerHTML = cuerpoHTML;
     }
+    
 
     function exportarComoPNG(nombreArchivo) { // Exportar imagen del grafo
         html2canvas(grafoContainer).then(canvas => {
@@ -476,6 +567,7 @@ document.addEventListener('DOMContentLoaded', function() {
         exportarComoPNG(nombreArchivo);
         exportOptions.style.display = 'none';
     });
+    document.getElementById('rutaCriticaBtn').addEventListener('click', destacarRutaCritica);
 
     exportPDF.addEventListener('click', function() { // Se apreta el botón de exportar como PDF
         let nombreArchivo = prompt("Ingrese el nombre del archivo:", "grafo.pdf");
