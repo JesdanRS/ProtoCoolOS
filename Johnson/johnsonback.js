@@ -315,7 +315,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const nombreNodoInicio = nodos.get(nodoInicial).label;
         const nombreNodoFinal = nodos.get(nodoFinal).label;
     
-        alert(`Nodo de inicio: ${nombreNodoInicio}\nNodo final: ${nombreNodoFinal}`);
+        alert(`Nodo de inicio(Color Verde): ${nombreNodoInicio}\nNodo final(Color  Rojo): ${nombreNodoFinal}`);
     }
     
     function hexToRGBA(hex, alpha) {
