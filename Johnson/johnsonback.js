@@ -263,50 +263,45 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function destacarRutaCritica() {
-        const colorRutaCritica = 'Green'; // Define un color para la ruta crítica
-    
-        // Identificar el nodo final (nodo sin aristas salientes)
-        let nodoFinal = null;
-        nodos.forEach(nodo => {
-            if (!aristas.get({ filter: arista => arista.from === nodo.id }).length) {
-                nodoFinal = nodo.id;
-            }
-        });
-    
-        // Recopilar IDs de los nodos que están en la ruta crítica para cambiar su color
-        let nodosEnRutaCritica = new Set();
-    
-        aristas.forEach((arista) => {
-            const valorArista = parseFloat(arista.label) || 0;
-            const sumaFromNode = calcularValorAcumuladoNodo(arista.from);
-            const restaToNode = calcularValoresResta(arista.to);
-            const holgura = restaToNode - sumaFromNode - valorArista;
-    
-            if (holgura === 0) { // Si la holgura es cero, es parte de la ruta crítica
-                // Añadir nodos al conjunto
-                nodosEnRutaCritica.add(arista.from);
-                nodosEnRutaCritica.add(arista.to);
-            }
-        });
-    
-        // Ahora actualizamos el color de las aristas que están en la ruta crítica
-        aristas.forEach((arista) => {
-            const valorArista = parseFloat(arista.label) || 0;
-            const sumaFromNode = calcularValorAcumuladoNodo(arista.from);
-            const restaToNode = calcularValoresResta(arista.to);
-            const holgura = restaToNode - sumaFromNode - valorArista;
-    
-            if (holgura === 0) { // Si la holgura es cero, es parte de la ruta crítica
-                aristas.update({ id: arista.id, color: colorRutaCritica });
-            }
-        });
-    
-        // Cambiar el color del nodo final
-        if (nodoFinal !== null) {
-            nodos.update({ id: nodoFinal, color: colorRutaCritica });
-        }
+        const colorRutaCritica = document.getElementById('colorRutaCritica').value;
 
-    
+        // Conjuntos para almacenar los IDs de los nodos y aristas que forman parte de la ruta crítica
+        const nodosRutaCritica = new Set();
+        const aristasRutaCritica = new Set();
+        const coloresAristas = new Set();
+
+        // Recorrer todas las aristas para verificar la holgura
+        aristas.forEach((arista) => {
+            const valorArista = parseFloat(arista.label) || 0;
+            const sumaFromNode = calcularValorAcumuladoNodo(arista.from);
+            const restaToNode = calcularValoresResta(arista.to);
+            const holgura = restaToNode - sumaFromNode - valorArista;
+            coloresAristas.add(arista.color);
+
+            // Si la holgura es cero, la arista es parte de la ruta crítica
+            if (holgura === 0) {
+                aristasRutaCritica.add(arista.id);
+                nodosRutaCritica.add(arista.from);
+                nodosRutaCritica.add(arista.to);
+            }
+        });
+
+        // Colorear las aristas de la ruta crítica
+        aristasRutaCritica.forEach((aristaId) => {
+            aristas.update({ id: aristaId, color: {color: colorRutaCritica, highlight: colorRutaCritica} });
+        });
+
+        // Colorear los nodos de la ruta crítica
+        nodosRutaCritica.forEach((nodoId) => {
+            nodos.update({ id: nodoId, color: colorRutaCritica });
+        });
+
+        aristas.forEach((arista) => {
+            if (arista.id in aristasRutaCritica === false){
+                arista.color.coloresAristas[arista.id];
+            }
+        });
+
         // Mostrar el nombre del nodo de inicio y final
         const nodoInicio = nodos.getIds()[0]; // Suponiendo que el primer nodo es el nodo de inicio
         const nombreNodoInicio = nodos.get(nodoInicio).label;
@@ -314,8 +309,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
         alert(`Nodo de inicio: ${nombreNodoInicio}\nNodo final: ${nombreNodoFinal}`);
     }
-    
-    
 
     // Función para calcular el valor acumulado para cada nodo
     function calcularValorAcumuladoNodo(nodoId) {
@@ -445,55 +438,65 @@ document.addEventListener('DOMContentLoaded', function() {
         generarHTMLMatriz(matriz, nodosArray);
     }
 
-    function generarHTMLMatriz(matriz, nodosIds) { // Generar HTML de la matriz según datos
-        const nodosLabels = nodosIds.map(id => nodos.get(id).label);
-        const sumaFilas = {};
-        const sumaColumnas = {};
-    
+    function generarHTMLMatriz(matriz, nodosIds) {
+        // Identificar el nodo inicial y final basándose en las aristas
+        let nodoInicial = null;
+        let nodoFinal = null;
+        
         nodosIds.forEach(id => {
-            sumaFilas[id] = 0;
-            sumaColumnas[id] = 0;
+            if (aristas.get({ filter: (arista) => arista.from === id }).length === 0) {
+                nodoFinal = id;
+            }
+            if (aristas.get({ filter: (arista) => arista.to === id }).length === 0) {
+                nodoInicial = id;
+            }
         });
     
-        nodosIds.forEach(id => {
-            nodosIds.forEach(idInterno => {
-                sumaFilas[id] += matriz[id][idInterno];
-                sumaColumnas[idInterno] += matriz[id][idInterno];
-            });
-        });
-    
-        const colorInicio = 'Green'; // Verde para el nodo de inicio
-        const colorFinal = 'Green'; // Rojo para el nodo final
+        // Aquí podrías establecer los colores que deseas utilizar
+        const colorInicio = '#00B32C'; // Verde para el nodo inicial
+        const colorFinal = '#DC3D2A'; // Rojo para el nodo final
     
         let encabezadoHTML = '<th></th>';
-        nodosLabels.forEach((label, index) => {
-            const id = nodosIds[index];
-            const color = sumaColumnas[id] === 0 ? colorInicio : (sumaFilas[id] === 0 ? colorFinal : '');
+        let sumaTotalColumnas = 0;
+        
+        nodosIds.forEach((id, index) => {
+            const label = nodos.get(id).label;
+            const esNodoInicial = id === nodoInicial;
+            const color = esNodoInicial ? colorInicio : '';
             encabezadoHTML += `<th style="background-color:${color}">${label}</th>`;
+            if (esNodoInicial) {
+                sumaTotalColumnas += matriz[id][nodoFinal] ?? 0; // Asumiendo que nodoFinal está correctamente identificado
+            }
         });
         encabezadoHTML += '<th>Suma</th>';
         matrizHeader.innerHTML = encabezadoHTML;
     
         let cuerpoHTML = '';
         nodosIds.forEach(id => {
-            const color = sumaFilas[id] === 0 ? colorFinal : '';
+            const esNodoFinal = id === nodoFinal;
+            const color = esNodoFinal ? colorFinal : '';
             cuerpoHTML += `<tr><th style="background-color:${color}">${nodos.get(id).label}</th>`;
+            let sumaFila = 0;
             nodosIds.forEach(idInterno => {
-                cuerpoHTML += `<td>${matriz[id][idInterno]}</td>`;
+                const valor = matriz[id][idInterno];
+                cuerpoHTML += `<td>${valor}</td>`;
+                sumaFila += valor;
             });
-            cuerpoHTML += `<td>${sumaFilas[id]}</td></tr>`;
+            const colorSuma = esNodoFinal && sumaFila === 0 ? colorFinal : '';
+            cuerpoHTML += `<td style="background-color:${colorSuma}">${sumaFila}</td></tr>`;
         });
     
+        // Agregar la última fila para las sumas de las columnas
         cuerpoHTML += '<tr><th>Suma</th>';
         nodosIds.forEach(id => {
-            cuerpoHTML += `<td>${sumaColumnas[id]}</td>`;
+            const esNodoInicial = id === nodoInicial;
+            const color = esNodoInicial ? colorInicio : '';
+            cuerpoHTML += `<td style="background-color:${color}">${sumaTotalColumnas}</td>`;
         });
-        const total = nodosIds.reduce((acc, id) => acc + sumaFilas[id], 0);
-        cuerpoHTML += `<td>${total}</td></tr>`;
+        cuerpoHTML += `<td>${sumaTotalColumnas}</td></tr>`; // La suma total al final
         matrizBody.innerHTML = cuerpoHTML;
-    }
+    }    
     
-
     function exportarComoPNG(nombreArchivo) { // Exportar imagen del grafo
         html2canvas(grafoContainer).then(canvas => {
             let enlace = document.createElement('a');
@@ -558,8 +561,14 @@ document.addEventListener('DOMContentLoaded', function() {
         reader.readAsText(archivo);
     }
 
-    guardarBtn.addEventListener('click', function() { // Se apreta el botón de exportar
-        exportOptions.style.display = 'block';
+    document.getElementById('guardarBtn').addEventListener('click', function() {
+        // Alternar la visualización del contenedor de opciones de exportación
+        const exportOptions = document.getElementById('exportOptions');
+        exportOptions.style.display = exportOptions.style.display === 'none' ? 'block' : 'none';
+        // Posicionamiento debajo del botón Exportar, si es necesario
+        const rect = this.getBoundingClientRect();
+        exportOptions.style.left = rect.left + 'px';
+        exportOptions.style.top = (rect.top + rect.height) + 'px';
     });
 
     exportPNG.addEventListener('click', function() { // Se apreta el botón de exportar como PNG
@@ -567,7 +576,6 @@ document.addEventListener('DOMContentLoaded', function() {
         exportarComoPNG(nombreArchivo);
         exportOptions.style.display = 'none';
     });
-    document.getElementById('rutaCriticaBtn').addEventListener('click', destacarRutaCritica);
 
     exportPDF.addEventListener('click', function() { // Se apreta el botón de exportar como PDF
         let nombreArchivo = prompt("Ingrese el nombre del archivo:", "grafo.pdf");
@@ -583,6 +591,56 @@ document.addEventListener('DOMContentLoaded', function() {
 
     cargarBtn.addEventListener('click', () => importarArchivo.click()); // Se apreta el botón de importar
     importarArchivo.addEventListener('change', importarGrafo);
+
+    document.getElementById('rutaCriticaBtn').addEventListener('click', function() {
+        const coloresNodos = new Set();
+        const coloresAristas = new Set();
+
+        nodos.forEach((nodo) => {
+            coloresNodos.add(nodo.color);
+        });
+        aristas.forEach((arista) => {
+            coloresAristas.add(arista.color);
+        });
+        // Alternar la visualización del contenedor de opciones de ruta crítica
+        const rutaOptions = document.getElementById('rutaOptions');
+        if (rutaOptions.style.display === 'none') {
+            rutaOptions.style.display = 'block';
+        } else {
+            rutaOptions.style.display = 'none';
+            nodos.forEach((nodo) => {
+                nodo.color.coloresNodos[nodoId];
+            });
+            aristas.forEach((arista) => {
+                arista.color.coloresAristas[aristaId];
+            });
+        }
+        //rutaOptions.style.display = rutaOptions.style.display === 'none' ? 'block' : 'none';
+        // Asegúrate de posicionarlo correctamente debajo del botón de Ruta Crítica
+        const rect = this.getBoundingClientRect();
+        rutaOptions.style.left = rect.left + 'px';
+        rutaOptions.style.top = (rect.top + rect.height) + 'px';
+    });
+    
+    // Manejador para el botón de aplicar color de ruta crítica
+    document.getElementById('aplicarColorRutaCritica').addEventListener('click', function() {
+        const nodosIniciales = nodos.getIds().filter(id => aristas.get({
+            filter: arista => arista.to === id
+        }).length === 0);
+
+        const nodosFinales = nodos.getIds().filter(id => aristas.get({
+            filter: arista => arista.from === id
+        }).length === 0);
+
+        // Verificar que solo haya un nodo inicial y un nodo final
+        if (nodosIniciales.length !== 1 || nodosFinales.length !== 1) {
+            alert('Debe haber un único nodo de inicio y un único nodo final para calcular la ruta crítica.');
+            return;
+        }
+
+        destacarRutaCritica();
+        document.getElementById('rutaOptions').style.display = 'none';
+    });
 
     document.getElementById('eliminarBtn').addEventListener('click', function() { // Cambia el cursor en modo eliminar
         estado.modoEliminar = !estado.modoEliminar;

@@ -73,15 +73,17 @@
 
         <div style="margin-top: 20px;">
             <label for="cambiarColorTextoBtn" style="color: white; margin-right: 5px;">Color de Texto:</label>
-            <input type="color" id="cambiarColorTextoBtn" value="#ffffff"> <!-- Color blanco por defecto -->
+            <input type="color" id="cambiarColorTextoBtn" value="#ffffff">
             <label for="cambiarColorBtn" style="color: white; margin-right: 5px;">Color de Nodo:</label>
             <input type="color" id="cambiarColorBtn" value="#d2e5ff">
             <!-- Botón Eliminar -->
             <button id="eliminarBtn" style="margin-left: 10px;">Eliminar</button>
-            <button id="limpiarBtn" style="margin-left: 10px;">Limpiar</button>
             <button id="rutaCriticaBtn">Ruta Crítica</button>
-        </div>        
-
+            <div id="rutaOptions" style="display:none; position: absolute; background-color: #252954; padding: 10px; border-radius: 5px; margin-top: 5px;">
+                <input type="color" id="colorRutaCritica" value="#FF0000"> <!-- Rojo por defecto -->
+                <button id="aplicarColorRutaCritica">Aplicar</button>
+            </div>              
+        </div>
         <button id="guardarBtn">Exportar</button>
         <div id="exportOptions" style="display:none; position: absolute; background-color: #252954; padding: 10px; border-radius: 5px; margin-top: 5px;">
             <button id="exportPNG">PNG</button>
@@ -90,6 +92,7 @@
         </div>              
         <button id="cargarBtn">Importar</button>
         <input type="file" id="importarArchivo" style="display: none;" accept=".json">
+        <button id="limpiarBtn" style="margin-left: 10px;">Limpiar</button>
 
         <!-- End of Top Container -->
 
