@@ -263,61 +263,52 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function destacarRutaCritica() {
-        const colorRutaCritica = document.getElementById('colorRutaCritica').value;
-
-        // Conjuntos para almacenar los IDs de los nodos y aristas que forman parte de la ruta crítica
-        const nodosRutaCritica = new Set();
-        const aristasRutaCritica = new Set();
-        const coloresAristas = new Set();
-
-        // Recorrer todas las aristas para verificar la holgura
-        aristas.forEach((arista) => {
+        // Obtener el nodo inicial y final
+        const nodoInicial = nodos.getIds().filter(id => aristas.get({ filter: arista => arista.to === id }).length === 0)[0];
+        const nodoFinal = nodos.getIds().filter(id => aristas.get({ filter: arista => arista.from === id }).length === 0)[0];
+        
+        // Obtener la holgura para todas las aristas
+        const holguras = {};
+        aristas.forEach(arista => {
             const valorArista = parseFloat(arista.label) || 0;
             const sumaFromNode = calcularValorAcumuladoNodo(arista.from);
             const restaToNode = calcularValoresResta(arista.to);
-            const holgura = restaToNode - sumaFromNode - valorArista;
-            coloresAristas.add(arista.color);
-
-            // Si la holgura es cero, la arista es parte de la ruta crítica
-            if (holgura === 0) {
-                aristasRutaCritica.add(arista.id);
-                nodosRutaCritica.add(arista.from);
-                nodosRutaCritica.add(arista.to);
-            }
+            holguras[arista.id] = restaToNode - sumaFromNode - valorArista;
         });
-
-        // Colorear las aristas de la ruta crítica
-        aristasRutaCritica.forEach((aristaId) => {
-            aristas.update({ id: aristaId, color: {color: colorRutaCritica, highlight: colorRutaCritica} });
+        
+        // Obtener las aristas que tienen holgura 0
+        const aristasRutaCritica = Object.keys(holguras).filter(aristaId => holguras[aristaId] === 0);
+        
+        // Obtener los nodos conectados por estas aristas
+        const nodosRutaCritica = new Set();
+        aristasRutaCritica.forEach(aristaId => {
+            const arista = aristas.get(aristaId);
+            nodosRutaCritica.add(arista.from);
+            nodosRutaCritica.add(arista.to);
         });
-
-        // Colorear los nodos de la ruta crítica
-        nodosRutaCritica.forEach((nodoId) => {
-            nodos.update({ id: nodoId, color: colorRutaCritica });
+        
+        // Marcar los nodos de la ruta crítica con el mismo color que las aristas de la ruta crítica
+        const colorRutaCritica = '#FF0000'; // Color de la ruta crítica
+        nodosRutaCritica.forEach(nodoId => {
+            nodos.update({ id: nodoId, color: { background: colorRutaCritica } }); // Cambiar el color de fondo del nodo
         });
-
-        aristas.forEach((arista) => {
-            if (!aristasRutaCritica.has(arista.id)) {
-                aristas.update({ id: arista.id, color: {color: coloresAristas[arista.id], highlight: coloresAristas[arista.id]} });
-                console.log(coloresAristas[arista.id]);
-            }
-        });
-
-        // Identificar el nodo final (nodo sin aristas salientes)
-        let nodoFinal = null;
+        
+        // Restablecer el color de fondo de los nodos que no están en la ruta crítica
         nodos.forEach(nodo => {
-            if (!aristas.get({ filter: arista => arista.from === nodo.id }).length) {
-                nodoFinal = nodo.id;
-                nodos.update({ id: nodo.id, color: colorRutaCritica });
+            if (!nodosRutaCritica.has(nodo.id)) {
+                nodos.update({ id: nodo.id, color: { background: undefined } }); // Restablecer el color de fondo del nodo
             }
         });
-
-        let nodoInicial = null;
-        nodos.forEach(nodo => {
-            // Si un nodo no tiene aristas entrantes, podría ser el nodo inicial
-            if (!aristas.get({ filter: (arista) => arista.to === nodo.id }).length) {
-                nodoInicial = nodo.id; // Asignar el nodo actual como inicial
-                nodos.update({ id: nodo.id, color: colorRutaCritica });
+        
+        // Marcar las aristas de la ruta crítica con el color de la ruta crítica
+        aristasRutaCritica.forEach(aristaId => {
+            aristas.update({ id: aristaId, color: colorRutaCritica }); // Cambiar el color de la arista
+        });
+        
+        // Restablecer el color de las demás aristas que no están en la ruta crítica
+        aristas.forEach(arista => {
+            if (!aristasRutaCritica.includes(arista.id)) {
+                aristas.update({ id: arista.id, color: undefined }); // Restablecer el color de la arista
             }
         });
 
@@ -326,6 +317,20 @@ document.addEventListener('DOMContentLoaded', function() {
     
         alert(`Nodo de inicio: ${nombreNodoInicio}\nNodo final: ${nombreNodoFinal}`);
     }
+    
+    function hexToRGBA(hex, alpha) {
+        // Expresión regular para validar el formato hexadecimal
+        const hexRegex = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i;
+        const result = hexRegex.exec(hex);
+        
+        // Convertir el valor hexadecimal a decimal y luego a una cadena RGBA
+        return result
+            ? `rgba(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}, ${alpha})`
+            : null;
+    }
+    
+    
+    
 
     // Función para calcular el valor acumulado para cada nodo
     function calcularValorAcumuladoNodo(nodoId) {
@@ -610,37 +615,19 @@ document.addEventListener('DOMContentLoaded', function() {
     importarArchivo.addEventListener('change', importarGrafo);
 
     document.getElementById('rutaCriticaBtn').addEventListener('click', function() {
-        const coloresNodos = new Set();
-        const coloresAristas = new Set();
 
-        nodos.forEach((nodo) => {
-            coloresNodos.add(nodo.color);
-        });
-        aristas.forEach((arista) => {
-            coloresAristas.add(arista.color);
-        });
-        // Alternar la visualización del contenedor de opciones de ruta crítica
+
         const rutaOptions = document.getElementById('rutaOptions');
-        if (rutaOptions.style.display === 'none') {
-            rutaOptions.style.display = 'block';
-        } else {
-            rutaOptions.style.display = 'none';
-            nodos.forEach((nodo) => {
-                nodo.color.coloresNodos[nodoId];
-            });
-            aristas.forEach((arista) => {
-                arista.color.coloresAristas[aristaId];
-            });
-        }
-        //rutaOptions.style.display = rutaOptions.style.display === 'none' ? 'block' : 'none';
-        // Asegúrate de posicionarlo correctamente debajo del botón de Ruta Crítica
+        rutaOptions.style.display = rutaOptions.style.display === 'none' ? 'block' : 'none';
+    
+        // Aseguramos que el contenedor esté posicionado correctamente debajo del botón "Ruta Crítica"
         const rect = this.getBoundingClientRect();
         rutaOptions.style.left = rect.left + 'px';
         rutaOptions.style.top = (rect.top + rect.height) + 'px';
     });
-    
     // Manejador para el botón de aplicar color de ruta crítica
     document.getElementById('aplicarColorRutaCritica').addEventListener('click', function() {
+        destacarRutaCritica();
         const nodosIniciales = nodos.getIds().filter(id => aristas.get({
             filter: arista => arista.to === id
         }).length === 0);
@@ -654,8 +641,6 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Debe haber un único nodo de inicio y un único nodo final para calcular la ruta crítica.');
             return;
         }
-
-        destacarRutaCritica();
         document.getElementById('rutaOptions').style.display = 'none';
     });
 
