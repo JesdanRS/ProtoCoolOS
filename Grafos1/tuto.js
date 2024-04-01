@@ -28,7 +28,16 @@ document.addEventListener('DOMContentLoaded', function() {
         {
             elemento: document.getElementById('limpiarBtn'),
             mensaje: 'Limpia el lienzo y empieza de nuevo.',
+        },
+        {
+            elemento: document.getElementById('minimizarBtn'),
+            mensaje: 'Aplica el algoritmo al caso y asigna los valores minimos.',
+        },
+        {
+            elemento: document.getElementById('maximizarBtn'),
+            mensaje: 'Aplica el algoritmo al caso y asigna los valores maximos.',
         }
+
     ];
     let pasoActual = 0;
 
