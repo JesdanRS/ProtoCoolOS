@@ -623,7 +623,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Manejador para el botón de aplicar color de ruta crítica
     document.getElementById('aplicarColorRutaCritica').addEventListener('click', function() {
         const colorRuta = document.getElementById('colorRutaCritica');
-        destacarRutaCritica(colorRuta.value);
         const nodosIniciales = nodos.getIds().filter(id => aristas.get({
             filter: arista => arista.to === id
         }).length === 0);
@@ -637,6 +636,7 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Debe haber un único nodo de inicio y un único nodo final para calcular la ruta crítica.');
             return;
         }
+        destacarRutaCritica(colorRuta.value);
         document.getElementById('rutaOptions').style.display = 'none';
     });
 
