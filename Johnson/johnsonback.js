@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function destacarRutaCritica() {
+    function destacarRutaCritica(colorRuta) {
         // Obtener el nodo inicial y final
         const nodoInicial = nodos.getIds().filter(id => aristas.get({ filter: arista => arista.to === id }).length === 0)[0];
         const nodoFinal = nodos.getIds().filter(id => aristas.get({ filter: arista => arista.from === id }).length === 0)[0];
@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Marcar los nodos de la ruta crítica con el mismo color que las aristas de la ruta crítica
-        const colorRutaCritica = '#FF0000'; // Color de la ruta crítica
+        const colorRutaCritica = colorRuta; // Color de la ruta crítica
         nodosRutaCritica.forEach(nodoId => {
             nodos.update({ id: nodoId, color: { background: colorRutaCritica } }); // Cambiar el color de fondo del nodo
         });
@@ -328,9 +328,6 @@ document.addEventListener('DOMContentLoaded', function() {
             ? `rgba(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}, ${alpha})`
             : null;
     }
-    
-    
-    
 
     // Función para calcular el valor acumulado para cada nodo
     function calcularValorAcumuladoNodo(nodoId) {
@@ -615,8 +612,6 @@ document.addEventListener('DOMContentLoaded', function() {
     importarArchivo.addEventListener('change', importarGrafo);
 
     document.getElementById('rutaCriticaBtn').addEventListener('click', function() {
-
-
         const rutaOptions = document.getElementById('rutaOptions');
         rutaOptions.style.display = rutaOptions.style.display === 'none' ? 'block' : 'none';
     
@@ -627,7 +622,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     // Manejador para el botón de aplicar color de ruta crítica
     document.getElementById('aplicarColorRutaCritica').addEventListener('click', function() {
-        destacarRutaCritica();
+        const colorRuta = document.getElementById('colorRutaCritica');
+        destacarRutaCritica(colorRuta.value);
         const nodosIniciales = nodos.getIds().filter(id => aristas.get({
             filter: arista => arista.to === id
         }).length === 0);
