@@ -477,13 +477,13 @@ h2.separator{
     padding: 20px;
     background: rgba(255, 255, 255, 0.2);
     border-radius: 18px;
-    box-shadow: 0 10px 30px #f4f1f1;
     transition: all 0.3s ease;
 }
 
 
 .sl-nft .item:hover{
-    box-shadow: none;  
+    box-shadow: none;
+    box-shadow: 0 10px 30px #f4f1f1;  
 }
 
 .sl-nft .item .header{
