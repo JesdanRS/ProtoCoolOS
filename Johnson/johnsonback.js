@@ -297,14 +297,31 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         aristas.forEach((arista) => {
-            if (arista.id in aristasRutaCritica === false){
-                arista.color.coloresAristas[arista.id];
+            if (!aristasRutaCritica.has(arista.id)) {
+                aristas.update({ id: arista.id, color: {color: coloresAristas[arista.id], highlight: coloresAristas[arista.id]} });
+                console.log(coloresAristas[arista.id]);
             }
         });
 
-        // Mostrar el nombre del nodo de inicio y final
-        const nodoInicio = nodos.getIds()[0]; // Suponiendo que el primer nodo es el nodo de inicio
-        const nombreNodoInicio = nodos.get(nodoInicio).label;
+        // Identificar el nodo final (nodo sin aristas salientes)
+        let nodoFinal = null;
+        nodos.forEach(nodo => {
+            if (!aristas.get({ filter: arista => arista.from === nodo.id }).length) {
+                nodoFinal = nodo.id;
+                nodos.update({ id: nodo.id, color: colorRutaCritica });
+            }
+        });
+
+        let nodoInicial = null;
+        nodos.forEach(nodo => {
+            // Si un nodo no tiene aristas entrantes, podría ser el nodo inicial
+            if (!aristas.get({ filter: (arista) => arista.to === nodo.id }).length) {
+                nodoInicial = nodo.id; // Asignar el nodo actual como inicial
+                nodos.update({ id: nodo.id, color: colorRutaCritica });
+            }
+        });
+
+        const nombreNodoInicio = nodos.get(nodoInicial).label;
         const nombreNodoFinal = nodos.get(nodoFinal).label;
     
         alert(`Nodo de inicio: ${nombreNodoInicio}\nNodo final: ${nombreNodoFinal}`);
