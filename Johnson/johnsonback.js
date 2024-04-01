@@ -476,16 +476,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const colorFinal = '#DC3D2A'; // Rojo para el nodo final
     
         let encabezadoHTML = '<th></th>';
-        let sumaTotalColumnas = 0;
+        let sumaTotalColumnas = Array(nodosIds.length).fill(0); // Inicializa un array con ceros para las sumas de las columnas
         
         nodosIds.forEach((id, index) => {
             const label = nodos.get(id).label;
             const esNodoInicial = id === nodoInicial;
             const color = esNodoInicial ? colorInicio : '';
             encabezadoHTML += `<th style="background-color:${color}">${label}</th>`;
-            if (esNodoInicial) {
-                sumaTotalColumnas += matriz[id][nodoFinal] ?? 0; // Asumiendo que nodoFinal está correctamente identificado
-            }
         });
         encabezadoHTML += '<th>Suma</th>';
         matrizHeader.innerHTML = encabezadoHTML;
@@ -496,25 +493,28 @@ document.addEventListener('DOMContentLoaded', function() {
             const color = esNodoFinal ? colorFinal : '';
             cuerpoHTML += `<tr><th style="background-color:${color}">${nodos.get(id).label}</th>`;
             let sumaFila = 0;
-            nodosIds.forEach(idInterno => {
+            nodosIds.forEach((idInterno, index) => {
                 const valor = matriz[id][idInterno];
                 cuerpoHTML += `<td>${valor}</td>`;
+                sumaTotalColumnas[index] += valor; // Suma el valor actual al total de la columna
                 sumaFila += valor;
             });
             const colorSuma = esNodoFinal && sumaFila === 0 ? colorFinal : '';
-            cuerpoHTML += `<td style="background-color:${colorSuma}">${sumaFila}</td></tr>`;
+            cuerpoHTML += `<td style="background-color:${colorSuma}">${sumaFila}</td></tr>`;            
         });
     
         // Agregar la última fila para las sumas de las columnas
         cuerpoHTML += '<tr><th>Suma</th>';
-        nodosIds.forEach(id => {
-            const esNodoInicial = id === nodoInicial;
+        sumaTotalColumnas.forEach((sumaColumna, index) => {
+            const esNodoInicial = nodosIds[index] === nodoInicial;
             const color = esNodoInicial ? colorInicio : '';
-            cuerpoHTML += `<td style="background-color:${color}">${sumaTotalColumnas}</td>`;
+            cuerpoHTML += `<td style="background-color:${color}">${sumaColumna}</td>`;
         });
-        cuerpoHTML += `<td>${sumaTotalColumnas}</td></tr>`; // La suma total al final
+        const sumaTotal = sumaTotalColumnas.reduce((acc, current) => acc + current, 0); // Calcular la suma total de las columnas
+        cuerpoHTML += `<td>${sumaTotal}</td></tr>`; // La suma total al final
         matrizBody.innerHTML = cuerpoHTML;
-    }    
+    }
+    
     
     function exportarComoPNG(nombreArchivo) { // Exportar imagen del grafo
         html2canvas(grafoContainer).then(canvas => {
