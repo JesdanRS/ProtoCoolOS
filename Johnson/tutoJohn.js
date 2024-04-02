@@ -10,6 +10,10 @@ document.addEventListener('DOMContentLoaded', function() {
             posicionMedio: true,
         },
         {
+            elemento: document.getElementById('cambiarColorTextoBtn'),
+            mensaje: 'Aquí puedes cambiar el color del texto.',
+        },
+        {
             elemento: document.getElementById('cambiarColorBtn'),
             mensaje: 'Aquí puedes cambiar el color de los nodos seleccionados.',
         },
@@ -28,6 +32,10 @@ document.addEventListener('DOMContentLoaded', function() {
         {
             elemento: document.getElementById('limpiarBtn'),
             mensaje: 'Limpia el lienzo y empieza de nuevo.',
+        },
+        {
+            elemento: document.getElementById('rutaCriticaBtn'),
+            mensaje: 'Aplica el algoritmo al caso y se mostrará la ruta critica del caso.',
         }
 
     ];
