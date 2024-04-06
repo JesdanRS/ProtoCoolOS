@@ -50,40 +50,36 @@
         <!-- Top Container -->
 
         <div id="logo"></div>
-        <div id="contenedor-general">
-
+        <div class="content">
+            <!-- Button Container -->
+            <div class="buttons-container">
+                <button id="agregarListaBtn">Agregar Lista</button>
+                <button id="listaRandomBtn">Generar Random</button>
+                <button id="ordenarBtn">Ordenar Lista</button>
+                <button id="limpiarBtn">Limpiar</button>
+            </div>
+    
+            <!-- Graph and Performance Information Container -->
+            <div class="graph-and-info-container">
+                <!-- Graph Container -->
+                <div id="graficoBarrasContainer">
+                    <canvas id="graficoBarras"></canvas>
+                </div>
+                <!-- Performance Information -->
+                <div id="rendimientoContainer">
+                    <p>Tiempo de Ordenamiento: <span id="tiempoOrdenamiento"></span> Segundos</p>
+                </div>
+                <!-- Original List -->
+                <div id="listaOriginalContainer">
+                    <p>Lista Original: <span id="listaOriginal"></span></p>
+                </div>
+                <!-- Sorted List -->
+                <div id="listaOrdenadaContainer">
+                    <p>Lista Ordenada: <span id="listaOrdenada"></span></p>
+                </div>
+            </div>
         </div>
-        <!-- Contenedor del Gráfico de Barras -->
-        <div id="graficoBarrasContainer" style="width: 800px; height: 200px; margin: 10px auto;">
-            <canvas id="graficoBarras"></canvas>
-        </div>
-        <!-- Al lado de tu gráfico o donde prefieras mostrar la información -->
-        <div id="rendimientoContainer" style="color: white;">
-            <p>Tiempo de Ordenamiento: <span id="tiempoOrdenamiento"></span> Segundos</p>
-        </div>        
-        <div id="listaOriginalContainer" style="color: white;">
-            <p>Lista Original: <span id="listaOriginal"></span></p>
-        </div>
-        <div id="listaOrdenadaContainer" style="color: white;">
-            <p>Lista Ordenada: <span id="listaOrdenada"></span></p>
-        </div>
-        <div style="margin-top: 10px;">
-            <!-- Botón Eliminar -->
-            <button id="agregarListaBtn" style="margin-left: 10px;">Agregar Lista</button>
-            <button id="listaRandomBtn" style="margin-left: 10px;">Generar Random</button>
-            <button id="ordenarBtn" style="margin-left: 10px;">Ordenar Lista</button> <!-- Botón Ordenar Lista aquí -->
-            <button id="limpiarBtn" style="margin-left: 10px;">Limpiar</button>
-            <canvas id="graficoBarras" width="400" height="100"></canvas>
-            <button id="guardarBtn">Exportar</button>
-        <div id="exportOptions" style="display:none; position: absolute; background-color: #252954; padding: 10px; border-radius: 5px; margin-top: 5px;">
-            <button id="exportPNG">PNG</button>
-            <button id="exportPDF">PDF</button>
-            <button id="exportJSON">JSON (editable)</button>
-        </div>              
-        <button id="cargarBtn">Importar</button>
-        <input type="file" id="importarArchivo" style="display: none;" accept=".json">
-        </div>
-        </div>        
+          
 
         <!-- End of Top Container -->
 

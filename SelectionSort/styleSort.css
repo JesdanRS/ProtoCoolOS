@@ -750,6 +750,39 @@ Estilo de botón HELP
     font-family: 'Poppins', sans-serif;
 }
 
+.content {
+    display: flex;
+    justify-content: space-between; /* Alinea los contenedores a cada lado */
+}
+
+.buttons-container {
+    display: flex;
+    flex-direction: column; /* Organiza los botones en columna */
+    margin-right: 10px; /* Espacio entre los botones y el gráfico */
+}
+
+.buttons-container button {
+    margin-bottom: 5px; /* Espacio entre los botones */
+}
+
+.graph-and-info-container {
+    width: calc(100% - 200px); /* Asumiendo que el contenedor de botones es de 200px de ancho */
+    display: flex;
+    flex-direction: column; /* Organiza el gráfico y la información en columna */
+    align-items: center; /* Centra los elementos horizontalmente */
+}
+
+#graficoBarrasContainer {
+    width: 800px;
+    height: 400px;
+}
+
+/* Estilos para los textos de rendimiento y listas */
+#rendimientoContainer, #listaOriginalContainer, #listaOrdenadaContainer {
+    color: white;
+    margin: 10px 0;
+}
+
 .atributo-text {
     color: white;
     /* Otros estilos necesarios para posicionar y mostrar correctamente el texto del atributo */
