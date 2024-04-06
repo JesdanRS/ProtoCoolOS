@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let endTime = performance.now(); // Captura el tiempo de finalización
         let tiempoOrdenamiento = (endTime - startTime) / 1000; // Calcula la diferencia y convierte a segundos
         document.getElementById('tiempoOrdenamiento').textContent = tiempoOrdenamiento.toFixed(2); // Muestra el tiempo en el elemento del DOM
+        document.getElementById('listaOrdenada').textContent = arr.join(", ");
     }
 
     function dibujarGraficoBarras(datos, highlightIndexes = []) {
@@ -81,6 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
             }
+            document.getElementById('listaOriginal').textContent = listaNumeros.join(", ");
             dibujarGraficoBarras(listaNumeros);
         } else {
             alert('La cantidad debe ser un número mayor a cero.');
@@ -106,6 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const numeroAleatorio = Math.floor(Math.random() * (max - min + 1)) + min;
                     listaNumeros.push(numeroAleatorio);
                 }
+                document.getElementById('listaOriginal').textContent = listaNumeros.join(", ");
                 dibujarGraficoBarras(listaNumeros); // Dibujamos el gráfico con los números aleatorios
             } else {
                 alert('Por favor, introduce un rango mínimo y máximo válido.');
