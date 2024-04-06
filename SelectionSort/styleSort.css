@@ -692,6 +692,51 @@ Estilo de botón HELP
     font-family: 'Poppins', sans-serif;
 }
 
+#agregarListaBtn{
+    cursor: pointer;
+    margin-left: 10px;
+
+    padding: 8px 38px;
+    border-radius: 18px;
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: -1px;
+    color: #fff;
+    border: none;
+    background: linear-gradient(95deg, #7e22ce 3.2%, #3b82f6 99.5%);
+    font-family: 'Poppins', sans-serif;
+}
+
+#listaRandomBtn{
+    cursor: pointer;
+    margin-left: 10px;
+
+    padding: 8px 38px;
+    border-radius: 18px;
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: -1px;
+    color: #fff;
+    border: none;
+    background: linear-gradient(95deg, #7e22ce 3.2%, #3b82f6 99.5%);
+    font-family: 'Poppins', sans-serif;
+}
+
+#ordenarBtn{
+    cursor: pointer;
+    margin-left: 10px;
+
+    padding: 8px 38px;
+    border-radius: 18px;
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: -1px;
+    color: #fff;
+    border: none;
+    background: linear-gradient(95deg, #7e22ce 3.2%, #3b82f6 99.5%);
+    font-family: 'Poppins', sans-serif;
+}
+
 #eliminarBtn{
     cursor: pointer;
     padding: 8px 38px;
