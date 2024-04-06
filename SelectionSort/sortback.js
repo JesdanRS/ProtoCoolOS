@@ -129,6 +129,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         listaNumeros = [];
         document.getElementById('tiempoOrdenamiento').textContent = "";
+        document.getElementById('listaOriginal').textContent = ""; // Limpia la lista original
+        document.getElementById('listaOrdenada').textContent = ""; 
     });
 
     async function exportarComoPDF(nombreArchivo) { // Exportar PDF del grafo
