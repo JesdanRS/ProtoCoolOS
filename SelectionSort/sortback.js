@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function visualizarSelectionSort(arr) {
         let startTime = performance.now(); // Captura el tiempo de inicio
-
+    
         for (let i = 0; i < arr.length - 1; i++) {
             let min = i;
             for (let j = i + 1; j < arr.length; j++) {
@@ -28,9 +28,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 await sleep(100); // Pausa para visualización
             }
         }
-
+    
         let endTime = performance.now(); // Captura el tiempo de finalización
-        let tiempoOrdenamiento = endTime - startTime; // Calcula la diferencia
+        let tiempoOrdenamiento = (endTime - startTime) / 1000; // Calcula la diferencia y convierte a segundos
         document.getElementById('tiempoOrdenamiento').textContent = tiempoOrdenamiento.toFixed(2); // Muestra el tiempo en el elemento del DOM
     }
 
