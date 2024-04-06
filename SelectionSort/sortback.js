@@ -127,4 +127,58 @@ document.addEventListener('DOMContentLoaded', function() {
         listaNumeros = [];
         document.getElementById('tiempoOrdenamiento').textContent = "";
     });
+
+    async function exportarComoPDF(nombreArchivo) { // Exportar PDF del grafo
+        const canvas = await html2canvas(grafoContainer);
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jspdf.jsPDF({
+            orientation: 'landscape',
+        });
+        pdf.addImage(imgData, 'PNG', 10, 10);
+        pdf.save(nombreArchivo || 'grafo.pdf');
+    }
+
+    function exportarGrafo(nombreArchivo) { // Exportar el archivo JSON del grafo y la matriz
+        const datosExportar = {
+            nodos: nodos.get({ returnType: "Object" }),
+            aristas: aristas.get(),
+            estado: estado
+        };
+        const datosStr = JSON.stringify(datosExportar);
+        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(datosStr);
+        
+        let exportarLink = document.createElement('a');
+        exportarLink.setAttribute('href', dataUri);
+        exportarLink.setAttribute('download', nombreArchivo || 'grafo.png');
+        document.body.appendChild(exportarLink);
+        
+        exportarLink.click();
+        document.body.removeChild(exportarLink);
+    }
+
+    function importarGrafo(event) { // Importar un archivo JSON de algún grafo
+        const archivo = event.target.files[0];
+        if (!archivo) {
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(fileEvent) {
+            try {
+                const datos = JSON.parse(fileEvent.target.result);
+                nodos.clear();
+                aristas.clear();
+                nodos.add(Object.values(datos.nodos)); // Agrega nodos manteniendo posiciones
+                aristas.add(datos.aristas);
+                estado = datos.estado;
+                colorPicker.value = estado.colorActual;
+                ultimoIdNodo = Math.max(...Object.values(datos.nodos).map(nodo => nodo.id));
+                actualizarMatriz();
+                comprobarVisibilidadMatriz();
+            } catch (error) {
+                console.error('Error al importar el archivo', error);
+            }
+        };
+        reader.readAsText(archivo);
+    }
 });
