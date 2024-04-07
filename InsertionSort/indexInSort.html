@@ -2,11 +2,10 @@
 <html lang="en">
 
 <head>
-    <link rel="stylesheet" href="estilosJohnson.css">
+    <link rel="stylesheet" href="styleInSort.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
-    <script src="johnsonback.js"></script>
-    <script src="tutoJohn.js"></script>
-    
+    <script src="sortinback.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.2/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
     <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
@@ -14,7 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <title>Johnson</title>
+    <title>insertion Sort</title>
 </head>
     
 <body>
@@ -36,7 +35,7 @@
                     <button class="nav-btn">GRAFOS</button>
                 </a>
                 <a href="../Johnson/indexJohnson.html">
-                    <button class="nav-btn selected">JOHNSON</button>
+                    <button class="nav-btn">JOHNSON</button>
                 </a>
                 <a href="../Asigancion/indexAsignacion.html">
                     <button class="nav-btn">ASIGNACIÓN</button>
@@ -48,7 +47,7 @@
                     <button class="nav-btn">SELECTION SORT</button>
                 </a>
                 <a href="../InsertionSort/indexInSort.html">
-                    <button class="nav-btn">INSERTION SORT</button>
+                    <button class="nav-btn selected">INSERTION SORT</button>
                 </a>
                 <a href="../Contacto/indexContacto.html">
                     <button class="nav-btn">CONTACTO</button>
@@ -64,48 +63,28 @@
         <!-- Top Container -->
 
         <div id="logo"></div>
-        <div id="contenedor-general">
-
-            <div id="grafo-container"></div>
-            
-            <div id="matriz-container">
-                <table id="matriz-adyacencia">
-                    <thead>
-                        <tr id="matriz-header">
-                            <!-- Cabeceras de la matriz se llenarán dinámicamente -->
-                        </tr>
-                    </thead>
-                    <tbody id="matriz-body">
-                        <!-- Cuerpo de la matriz se llenará dinámicamente -->
-                    </tbody>
-                </table>
+        <div class="content">
+            <div class="buttons-container">
+                <!-- Botones aquí -->
+                <button id="agregarListaBtn">Agregar Lista</button>
+                <button id="listaRandomBtn">Generar Random</button>
+                <button id="ordenarBtn">Ordenar Lista</button>
+                <button id="limpiarBtn">Limpiar</button>
             </div>
-            <div id="flecha-punta"></div>
-
+    
+            <div class="graph-and-info-container">
+                <!-- Contenedor del Gráfico de Barras -->
+                <div id="graficoBarrasContainer">
+                    <canvas id="graficoBarras"></canvas>
+                </div>
+                <!-- Contenedor de resultados visible desde el inicio -->
+                <div id="resultado-container">
+                    <p>Tiempo de Ordenamiento: <span id="tiempoOrdenamiento">--</span> Segundos</p>
+                    <p>Lista Original: <span id="listaOriginal">--</span></p>
+                    <p>Lista Ordenada: <span id="listaOrdenada">--</span></p>
+                </div>
+            </div>
         </div>
-
-        <div style="margin-top: 20px;">
-            <label for="cambiarColorTextoBtn" style="color: white; margin-right: 5px;">Color de Texto:</label>
-            <input type="color" id="cambiarColorTextoBtn" value="#ffffff">
-            <label for="cambiarColorBtn" style="color: white; margin-right: 5px;">Color de Nodo:</label>
-            <input type="color" id="cambiarColorBtn" value="#d2e5ff">
-            <!-- Botón Eliminar -->
-            <button id="eliminarBtn" style="margin-left: 10px;">Eliminar</button>
-            <button id="rutaCriticaBtn">Ruta Crítica</button>
-            <div id="rutaOptions" style="display:none; position: absolute; background-color: #252954; padding: 10px; border-radius: 5px; margin-top: 5px;">
-                <input type="color" id="colorRutaCritica" value="#FF0000"> <!-- Rojo por defecto -->
-                <button id="aplicarColorRutaCritica">Aplicar</button>
-            </div>              
-        </div>
-        <button id="guardarBtn">Exportar</button>
-        <div id="exportOptions" style="display:none; position: absolute; background-color: #252954; padding: 10px; border-radius: 5px; margin-top: 5px;">
-            <button id="exportPNG">PNG</button>
-            <button id="exportPDF">PDF</button>
-            <button id="exportJSON">JSON (editable)</button>
-        </div>              
-        <button id="cargarBtn">Importar</button>
-        <input type="file" id="importarArchivo" style="display: none;" accept=".json">
-        <button id="limpiarBtn" style="margin-left: 10px;">Limpiar</button>
 
         <!-- End of Top Container -->
 
