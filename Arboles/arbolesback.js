@@ -95,6 +95,28 @@ document.addEventListener('DOMContentLoaded', function() {
             if (hijoDerecho) recorridoPreOrder(hijoDerecho.to, listaVisitados);
         }
     }
+
+    function recorridoPostOrder(nodoId, listaVisitados) {
+        if (nodoId !== null) {
+            const nodoActual = nodos.get(nodoId);
+    
+            // Obtiene los hijos del nodo actual
+            const hijos = aristas.get({
+                filter: function (arista) {
+                    return arista.from === nodoId;
+                }
+            });
+    
+            // Recursivamente visita los hijos izquierdo y derecho
+            hijos.forEach(hijo => {
+                recorridoPostOrder(hijo.to, listaVisitados);
+            });
+    
+            // Agrega el valor del nodo a la lista de visitados
+            listaVisitados.push(nodoActual.value);
+        }
+    }    
+
     function recorridoInOrder(nodoId, resultado) {
         if (nodoId != null) {
             const nodo = nodos.get(nodoId);
@@ -401,6 +423,27 @@ document.addEventListener('DOMContentLoaded', function() {
     
         // Si deseas, puedes añadir más estilo o elementos HTML al contenedor para mejorar la presentación
     });
+
+    document.getElementById('postorderBtn').addEventListener('click', function() {
+        let listaVisitados = []; // Inicializa la lista de nodos visitados
+        recorridoPostOrder(1, listaVisitados); // Inicia el recorrido desde el nodo raíz
+    
+        // Convierte la lista de visitados a una cadena de texto para mostrarla
+        const listaVisitadosTexto = listaVisitados.join(', ');
+    
+        // Encuentra el contenedor donde se mostrará la lista del recorrido post-order
+        const contenedorPostorderList = document.getElementById('postorderList');
+    
+        // Actualiza el contenedor con los valores del recorrido post-order
+        contenedorPostorderList.textContent = `Recorrido Post-order: ${listaVisitadosTexto}`;
+    
+        // Cambia el display del contenedor a 'block' para mostrarlo
+        contenedorPostorderList.style.display = 'block';
+    
+        // Si deseas, puedes añadir más estilo o elementos HTML al contenedor para mejorar la presentación
+    });
+    
+
     document.getElementById('InOrderBtn').addEventListener('click', function() {
         let resultado = []; // Inicializa la lista para almacenar los nodos visitados
         recorridoInOrder(1, resultado); // Inicia el recorrido InOrder desde el nodo raíz

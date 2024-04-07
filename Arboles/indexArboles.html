@@ -80,13 +80,17 @@
             <label for="cambiarColorBtn" style="color: white; margin-right: 5px;">Color de Nodo:</label>
             <input type="color" id="cambiarColorBtn" value="#d2e5ff">
             <!-- Botón Eliminar -->
-            <button id="preorderBtn" style="margin-left: 10px;">PRE ORDER</button>
+            
             <button id="eliminarBtn" style="margin-left: 10px;">Eliminar</button>
             <button id="limpiarBtn" style="margin-left: 10px;">Limpiar</button>
-            <button id="InOrderBtn">Aplizar InOrder al arbol</button>
+            <button id="preorderBtn" style="margin-left: 10px;">PRE ORDER</button>
+            <button id="postorderBtn" style="margin-left: 10px;">POST ORDER</button>
+            <button id="InOrderBtn" style="margin-left: 10px;">IN ORDER</button>
+            
         </div>        
         <div id="preorderList"></div>  
         <div id="inorderList"></div>  
+        <div id="postorderList"></div>
 
         <button id="guardarBtn">Exportar</button>
         <div id="exportOptions" style="display:none; position: absolute; background-color: #252954; padding: 10px; border-radius: 5px; margin-top: 5px;">
