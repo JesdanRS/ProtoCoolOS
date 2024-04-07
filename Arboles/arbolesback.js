@@ -95,8 +95,37 @@ document.addEventListener('DOMContentLoaded', function() {
             if (hijoDerecho) recorridoPreOrder(hijoDerecho.to, listaVisitados);
         }
     }
-
+    function recorridoInOrder(nodoId, resultado) {
+        if (nodoId != null) {
+            const nodo = nodos.get(nodoId);
+            const hijos = aristas.get({
+                filter: function (arista) {
+                    return arista.from === nodoId;
+                }
+            });
     
+            const hijoIzquierdo = hijos.find(hijo => nodos.get(hijo.to).value < nodo.value);
+            const hijoDerecho = hijos.find(hijo => nodos.get(hijo.to).value >= nodo.value);
+    
+            // Visita el hijo izquierdo antes de agregar el nodo actual al resultado
+            if (hijoIzquierdo) {
+                recorridoInOrder(hijoIzquierdo.to, resultado);
+            }
+    
+            // Agrega el nodo actual al resultado
+            resultado.push(nodo.label);
+    
+            // Luego, visita el hijo derecho
+            if (hijoDerecho) {
+                recorridoInOrder(hijoDerecho.to, resultado);
+            }
+        }
+    }
+    
+    
+    
+    
+      
 
     function agregarNodoAlArbol(valorNodo) {
         ultimoIdNodo++;
@@ -372,6 +401,25 @@ document.addEventListener('DOMContentLoaded', function() {
     
         // Si deseas, puedes añadir más estilo o elementos HTML al contenedor para mejorar la presentación
     });
+    document.getElementById('InOrderBtn').addEventListener('click', function() {
+        let resultado = []; // Inicializa la lista para almacenar los nodos visitados
+        recorridoInOrder(1, resultado); // Inicia el recorrido InOrder desde el nodo raíz
+    
+        // Convierte la lista de nodos visitados a una cadena de texto
+        const resultadoTexto = resultado.join(', ');
+    
+        // Encuentra el contenedor donde se mostrará el recorrido InOrder
+        const contenedorInOrderList = document.getElementById('inorderList');
+    
+        // Actualiza el contenido del contenedor con los valores del recorrido InOrder
+        contenedorInOrderList.textContent = `Recorrido InOrder: ${resultadoTexto}`;
+    
+        // Cambia el estilo del contenedor para que sea visible
+        contenedorInOrderList.style.display = 'block';
+    
+        // Puedes añadir más estilos o elementos HTML al contenedor para mejorar la presentación
+    });
+    
 
     document.getElementById('cambiarColorBtn').addEventListener('input', function(event) { // Cambiar color de nodos 
         estado.colorActual = event.target.value;
