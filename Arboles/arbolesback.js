@@ -75,6 +75,26 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     
+    function recorridoPreOrder(nodoId, listaVisitados) {
+        if (nodoId !== null) {
+            const nodoActual = nodos.get(nodoId);
+            // Agrega el valor del nodo a la lista de visitados
+            listaVisitados.push(nodoActual.value);
+
+            // Obtiene los hijos del nodo actual
+            const hijos = aristas.get({
+                filter: function (arista) {
+                    return arista.from === nodoId;
+                }
+            });
+            const hijoIzquierdo = hijos.find(hijo => nodos.get(hijo.to).value < nodoActual.value);
+            const hijoDerecho = hijos.find(hijo => nodos.get(hijo.to).value >= nodoActual.value);
+
+            // Recursivamente visita los hijos izquierdo y derecho
+            if (hijoIzquierdo) recorridoPreOrder(hijoIzquierdo.to, listaVisitados);
+            if (hijoDerecho) recorridoPreOrder(hijoDerecho.to, listaVisitados);
+        }
+    }
 
     
 
@@ -331,6 +351,26 @@ document.addEventListener('DOMContentLoaded', function() {
             // Si estamos desactivando el modo eliminar, restaura el cursor predeterminado
             grafoContainer.style.cursor = '';
         }
+    });
+
+     // Vincula la función del recorrido pre-order al botón de pre-order
+     document.getElementById('preorderBtn').addEventListener('click', function() {
+        let listaVisitados = []; // Inicializa la lista de nodos visitados
+        recorridoPreOrder(1, listaVisitados); // Inicia el recorrido desde el nodo raíz
+    
+        // Convierte la lista de visitados a una cadena de texto para mostrarla
+        const listaVisitadosTexto = listaVisitados.join(', ');
+    
+        // Encuentra el contenedor donde se mostrará la lista del recorrido pre-order
+        const contenedorPreorderList = document.getElementById('preorderList');
+    
+        // Actualiza el contenedor con los valores del recorrido pre-order
+        contenedorPreorderList.textContent = `Recorrido Pre-order: ${listaVisitadosTexto}`;
+    
+        // Cambia el display del contenedor a 'block' para mostrarlo
+        contenedorPreorderList.style.display = 'block';
+    
+        // Si deseas, puedes añadir más estilo o elementos HTML al contenedor para mejorar la presentación
     });
 
     document.getElementById('cambiarColorBtn').addEventListener('input', function(event) { // Cambiar color de nodos 
