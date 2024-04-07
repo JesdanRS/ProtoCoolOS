@@ -16,90 +16,10 @@ html, body {
     font-family: 'Poppins', sans-serif;
 }
 
-#grafo-container {
-    position: relative;
-    width: 800px;
-    height: 430px;
-    border: 1px solid #ccc;
-
-}
 #contenedor-general {
     display: flex;
     align-items: flex-start; /* Para alinear los elementos en la parte superior */
 }
-
-#grafo-container,
-#matriz-container {
-    margin-right: 20px;
-}
-
-#matriz-adyacencia th,
-#matriz-adyacencia td,
-.nodo {
-    color: white;
-}
-
-
-#matriz-container {
-    margin-left: auto;
-    margin-top: 15px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-}
-
-#matriz-adyacencia {
-    border-collapse: collapse;
-}
-
-#matriz-adyacencia, #matriz-adyacencia th, #matriz-adyacencia td {
-    border: 1px solid #ccc;
-    padding: 11.3px;
-    text-align: center;
-}
-
-
-
-.nodo {
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    background: linear-gradient(95deg, #7e22ce 3.2%, #3b82f6 99.5%);
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    cursor: pointer;
-    z-index: 1; /* Ajusta el valor según sea necesario */
-}
-.flecha {
-    position: absolute;
-    border: 2px solid white;
-    transform-origin: 0 10%;
-    pointer-events: none;
-    z-index: 0; /* Ajusta el valor según sea necesario */
-}
-
-.flecha::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 8px 0 8px 14px; /* Ajusta según sea necesario para el tamaño del triángulo */
-    border-color: transparent transparent transparent white; /* Ajusta el color según tus preferencias */
-    top: -9.4px; /* Ajusta según sea necesario para la posición del triángulo */
-    right: 14px;
-    z-index: 0; /* Un valor mayor que el z-index del nodo */
-}
-
-
-
-/*
-Estilos agregados desde style.css
-*/
-
 
 .main{
     width: 100%; /* Ocupa el 100% del ancho de body */
@@ -649,34 +569,6 @@ Estilo de botón HELP
     display: none;
 }
 
-#cargarBtn{
-    margin-top: 15px;
-    margin-left: 10px;
-    cursor: pointer;
-    padding: 8px 38px;
-    border-radius: 18px;
-    font-weight: 500;
-    font-size: 13px;
-    letter-spacing: -1px;
-    color: #fff;
-    border: none;
-    background: linear-gradient(95deg, #7e22ce 3.2%, #3b82f6 99.5%);
-    font-family: 'Poppins', sans-serif;
-}
-
-#guardarBtn{
-    cursor: pointer;
-    padding: 8px 38px;
-    border-radius: 18px;
-    font-weight: 500;
-    font-size: 13px;
-    letter-spacing: -1px;
-    color: #fff;
-    border: none;
-    background: linear-gradient(95deg, #7e22ce 3.2%, #3b82f6 99.5%);
-    font-family: 'Poppins', sans-serif;
-}
-
 #limpiarBtn{
     cursor: pointer;
     margin-left: 10px;
@@ -692,8 +584,9 @@ Estilo de botón HELP
     font-family: 'Poppins', sans-serif;
 }
 
-#eliminarBtn{
+#agregarListaBtn, #listaRandomBtn, #ordenarPreBtn, #ordenarInBtn, #ordenarPostBtn{
     cursor: pointer;
+    margin-left: 10px;
     padding: 8px 38px;
     border-radius: 18px;
     font-weight: 500;
@@ -705,23 +598,60 @@ Estilo de botón HELP
     font-family: 'Poppins', sans-serif;
 }
 
-#agregarBtn{
-    cursor: pointer;
-    padding: 8px 38px;
-    border-radius: 18px;
-    font-weight: 500;
-    font-size: 13px;
-    letter-spacing: -1px;
-    color: #fff;
-    border: none;
-    background: linear-gradient(95deg, #7e22ce 3.2%, #3b82f6 99.5%);
-    font-family: 'Poppins', sans-serif;
+.content {
+    display: flex;
+    justify-content: space-between; /* Alinea los contenedores a cada lado */
 }
 
-.atributo-text {
+#opciones-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 15px;
+    padding: 0; /* Asegúrate de que no hay padding que esté empujando los elementos */
+    margin: 0; /* Asegúrate de que no hay margen que esté empujando los elementos */
+}
+
+#opciones-container button {
+    width: auto; /* Cambiado de 100% a auto para permitir que el botón sea del tamaño de su contenido */
+    margin: 5px 0; /* Agrega un pequeño margen arriba y abajo para separar los botones */
+    padding: 10px 15px; /* Ajusta el padding para cambiar el tamaño del botón si es necesario */
+    /* Resto de tus estilos de botón */
+}
+
+.arbol-container {
+    width: calc(100% - 200px); /* Asumiendo que el contenedor de botones es de 200px de ancho */
+    display: flex;
+    flex-direction: column; /* Organiza el gráfico y la información en columna */
+    align-items: center; /* Centra los elementos horizontalmente */
+}
+
+#arbolContainer {
+    width: 800px;
+    height: 400px;
+}
+
+#resultado-container {
+    position: 100px;
+    bottom: 80px;
+    right: 280px;
+    width: 500px;
+    background: linear-gradient(95deg, #6bcff4 3.2%, #3b82f6 99.5%);
     color: white;
-    /* Otros estilos necesarios para posicionar y mostrar correctamente el texto del atributo */
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    padding: 20px;
+    border-radius: 10px;
+    /* Quitar 'display: none;' para que sea visible desde el inicio */
+    z-index: 1;
 }
+
+#arbol-container {
+    width: 800px;
+    height: 400px;
+}
+
 .tooltip {
     background-color: #252954; /* Color de fondo como el cuadro de ayuda */
     color: white; /* Texto en color blanco */
