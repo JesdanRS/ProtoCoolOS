@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const grafoContainer = document.getElementById('grafo-container');
-    let nodos = new vis.DataSet([{id: 1, label: 'Nodo 1', value: 6, x: -150, y: 0, fixed: true, physics: false}]); // Inicializa con nodo raíz
+    let nodos = new vis.DataSet(); // Inicializa con nodo raíz
     let aristas = new vis.DataSet();
     let network = null;
     let ultimoIdNodo = 1;
@@ -25,19 +25,31 @@ document.addEventListener('DOMContentLoaded', function() {
         layout: {
             hierarchical: false
         },
-        physics: false // Deshabilitar la física para mantener la estructura del árbol
+        physics: true // Habilitar la física para permitir el movimiento de los nodos
     };
-
+    
     function inicializarRed() {
         network = new vis.Network(grafoContainer, {nodes: nodos, edges: aristas}, opciones);
-
+        
+        network.once("click", function(params) { // Usamos 'once' para que este evento se dispare solo la primera vez
+            const nombreNodoRaiz = prompt("Ingrese el valor del nodo raíz:", "");
+            if (nombreNodoRaiz !== null && nombreNodoRaiz.trim() !== "") {
+                nodos.add({id: 1, label: nombreNodoRaiz.trim(), value: parseInt(nombreNodoRaiz.trim(), 10), x: 0, y: 0, fixed: true, physics: false});
+            } else {
+                console.log("Debe ingresar un valor para el nodo raíz.");
+            }
+        });
+        
         network.on("click", function(params) {
-            const nombreNodo = prompt("Ingrese el valor del nodo:", "");
+            const nombreNodo = prompt("Ingrese el valor del nuevo nodo:", "");
             if (nombreNodo !== null) {
                 agregarNodoAlArbol(parseInt(nombreNodo, 10));
             }
         });
     }
+    
+
+    
 
     function agregarNodoAlArbol(valorNodo) {
         ultimoIdNodo++;
@@ -46,19 +58,43 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Buscar posición para el nuevo nodo
         let nodoPadreId = buscarNodoPadre(1, valorNodo); // Empezar búsqueda desde el nodo raíz
-
+    
         if(nodoPadreId !== null) {
             const nodoPadre = nodos.get(nodoPadreId);
             let direccion = valorNodo < nodoPadre.value ? -1 : 1; // Izquierda o derecha
-
-            posicionNodo.x = nodoPadre.x + (100 * direccion); // Ajustar posición x basada en la dirección
-            posicionNodo.y = nodoPadre.y + 100; // Ajustar posición y para bajar al siguiente nivel
-
-            nodos.add({id: nuevoNodoId, label: `${valorNodo}`, value: valorNodo, x: posicionNodo.x, y: posicionNodo.y, fixed: true, physics: false});
+            
+            // Calcular el nivel del nuevo nodo
+            const nivelPadre = obtenerNivel(nodoPadreId);
+            const nivelNuevoNodo = nivelPadre + 1;
+    
+            // Ajustar la posición vertical basada en el nivel del nodo
+            posicionNodo.x = nodoPadre.x + (150 * direccion); // Separación horizontal ajustable
+            posicionNodo.y = nivelNuevoNodo * 100; // Separación vertical ajustable
+            
+            nodos.add({id: nuevoNodoId, label: `${valorNodo}`, value: valorNodo, x: posicionNodo.x, y: posicionNodo.y, fixed: false, physics: false});
             aristas.add({from: nodoPadreId, to: nuevoNodoId});
         } else {
             console.log("No se encontró un lugar para el nodo. Esto no debería ocurrir en un árbol binario.");
         }
+    }
+    
+    
+    function obtenerNivel(nodoId) {
+        let nivel = 0;
+        let padreId = nodoId;
+        
+        while (padreId !== 1) { // Iterar hacia arriba hasta llegar al nodo raíz
+            const arista = aristas.get({
+                filter: function(item) {
+                    return item.to === padreId;
+                }
+            })[0]; // Obtener la arista que conecta al nodo padre
+            padreId = arista.from; // Obtener el ID del nodo padre
+            
+            nivel++; // Incrementar el nivel
+        }
+        
+        return nivel;
     }
 
     function buscarNodoPadre(nodoActualId, valorNodo) {

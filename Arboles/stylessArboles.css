@@ -18,8 +18,8 @@ html, body {
 
 #grafo-container {
     position: relative;
-    width: 800px;
-    height: 430px;
+    width: 1200px;
+    height: 450px;
     border: 1px solid #ccc;
 
 }
