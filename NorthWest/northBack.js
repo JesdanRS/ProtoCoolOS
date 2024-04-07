@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
     const grafoContainer = document.getElementById('grafo-container');
     const matrizContainer = document.getElementById('matriz-container');
     const matrizHeader = document.getElementById('matriz-header');
@@ -59,20 +59,20 @@ document.addEventListener('DOMContentLoaded', function () {
         };
         network = new vis.Network(grafoContainer, datos, opciones);
 
-        network.on("click", function (params) { // Entrar al modo eliminar
+        network.on("click", function(params) { // Entrar al modo eliminar
             if (estado.modoEliminar) {
                 const nodeId = this.getNodeAt(params.pointer.DOM);
                 const edgeId = this.getEdgeAt(params.pointer.DOM);
                 if (nodeId) {
-                    nodos.remove({ id: nodeId });
+                    nodos.remove({id: nodeId});
                     const aristasAsociadas = aristas.get({
-                        filter: function (arista) {
+                        filter: function(arista) {
                             return arista.from === nodeId || arista.to === nodeId;
                         }
                     });
                     aristas.remove(aristasAsociadas);
                 } else if (edgeId) {
-                    aristas.remove({ id: edgeId });
+                    aristas.remove({id: edgeId});
                 }
                 return;
             }
@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             atributoArista = prompt("Ingrese el atributo de la arista (ej. peso):", "");
                             if (atributoArista === null) break; // El usuario canceló el prompt
                         } while (isNaN(atributoArista) || atributoArista.trim() === ""); // Repetir mientras la entrada no sea un número o esté vacía
-
+                    
                         if (atributoArista !== null) { // Verificar nuevamente por si el usuario canceló el prompt
                             aristas.add({
                                 from: nodoOrigen,
@@ -96,13 +96,13 @@ document.addEventListener('DOMContentLoaded', function () {
                                 label: atributoArista
                             });
                         }
-                    } else if (nodoOrigen === nodoDestino && !loopExistente(nodoOrigen)) { // Acción para creación arista loop
+                    } else if(nodoOrigen === nodoDestino && !loopExistente(nodoOrigen)) { // Acción para creación arista loop
                         let atributoArista;
                         do {
                             atributoArista = prompt("Ingrese el atributo de la arista (loop):", "");
                             if (atributoArista === null) break; // El usuario canceló el prompt
                         } while (isNaN(atributoArista) || atributoArista.trim() === ""); // Repetir mientras la entrada no sea un número o esté vacía
-
+                    
                         if (atributoArista !== null) { // Verificar nuevamente por si el usuario canceló el prompt
                             aristas.add({
                                 from: nodoOrigen,
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 label: atributoArista
                             });
                         }
-                    }
+                    }                    
                     estado.seleccionando = false;
                     estado.nodoOrigen = null;
                 } else {
@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        network.on("oncontext", function (params) { // Cambiar nombre nodo o arista con click derecho
+        network.on("oncontext", function(params) { // Cambiar nombre nodo o arista con click derecho
             params.event.preventDefault();
             const nodeId = this.getNodeAt(params.pointer.DOM);
             const edgeId = this.getEdgeAt(params.pointer.DOM);
@@ -134,21 +134,21 @@ document.addEventListener('DOMContentLoaded', function () {
             if (nodeId !== undefined) {
                 const nuevoNombre = prompt("Ingrese el nuevo nombre del nodo:", "");
                 if (nuevoNombre !== null) {
-                    nodos.update({ id: nodeId, label: nuevoNombre });
+                    nodos.update({id: nodeId, label: nuevoNombre});
                 }
             } else if (edgeId !== undefined) {
                 const nuevoAtributo = prompt("Ingrese el nuevo atributo de la arista:", "");
                 if (nuevoAtributo !== null) {
-                    aristas.update({ id: edgeId, label: nuevoAtributo });
+                    aristas.update({id: edgeId, label: nuevoAtributo});
                 }
             }
         });
 
-        nodos.on("*", function () { // Verificar acciones sobre nodo
+        nodos.on("*", function() { // Verificar acciones sobre nodo
             actualizarMatriz();
             comprobarVisibilidadMatriz();
         });
-        aristas.on("*", function () { // Verificar acciones sobre aristas
+        aristas.on("*", function() { // Verificar acciones sobre aristas
             actualizarMatriz();
             comprobarVisibilidadMatriz();
         });
@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function aristaDuplicada(origen, destino) { // Verificar si no existe ya una arista en la misma dirección al mismo nodo
         const aristasExistentes = aristas.get({
-            filter: function (item) {
+            filter: function(item) {
                 return (item.from === origen && item.to === destino);
             }
         });
@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function loopExistente(nodo) { // Verificar si no hay arista loop en el mismo nodo
         const loops = aristas.get({
-            filter: function (item) {
+            filter: function(item) {
                 return item.from === nodo && item.to === nodo;
             }
         });
@@ -198,17 +198,17 @@ document.addEventListener('DOMContentLoaded', function () {
         // Crear un conjunto único para nodos de inicio y destino
         let nodosInicio = new Set();
         let nodosDestino = new Set();
-
+    
         // Llenar los conjuntos basados en las aristas actuales
         aristas.get().forEach(arista => {
             nodosInicio.add(arista.from);
             nodosDestino.add(arista.to);
         });
-
+    
         // Convertir a arrays para poder iterar y crear la matriz
         const nodosInicioArray = [...nodosInicio];
         const nodosDestinoArray = [...nodosDestino];
-
+    
         // Crear una matriz vacía basada en los nodos de inicio y destino
         let matriz = nodosInicioArray.reduce((acc, inicio) => ({
             ...acc,
@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 [destino]: 0
             }), {})
         }), {});
-
+    
         // Llenar la matriz con las aristas existentes
         aristas.get().forEach(arista => {
             const valor = arista.label ? parseInt(arista.label, 10) : 0;
@@ -225,11 +225,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 matriz[arista.from][arista.to] = isNaN(valor) ? 0 : valor;
             }
         });
-
+    
         // Generar el HTML de la matriz
         generarHTMLMatriz(matriz, nodosInicioArray, nodosDestinoArray);
     }
-
 
     function generarHTMLMatriz(matriz, nodosInicioIds, nodosDestinoIds) {
         if (nodosInicioIds.length === 0 || nodosDestinoIds.length === 0) {
@@ -237,52 +236,19 @@ document.addEventListener('DOMContentLoaded', function () {
             matrizBody.innerHTML = '';
             return;
         }
-
         const nodosInicioLabels = nodosInicioIds.map(id => nodos.get(id).label);
         const nodosDestinoLabels = nodosDestinoIds.map(id => nodos.get(id).label);
-
-        // Ajustar encabezado de la matriz para nodos destino, incluyendo la columna extra
-        matrizHeader.innerHTML = '<th></th>' + nodosDestinoLabels.map(label => `<th>${label}</th>`).join('') + '<th>Ingresar</th>';
-
-        // Ajustar cuerpo de la matriz para nodos inicio
-        let filasMatriz = '';
-        nodosInicioIds.forEach(idInicio => {
-            const fila = nodosDestinoIds.map(idDestino => `<td>${matriz[idInicio][idDestino]}</td>`).join('');
-            filasMatriz += `<tr><th>${nodos.get(idInicio).label}</th>${fila}<td><input type="text" class="input-data" size="2" data-fila="${idInicio}"></td></tr>`;
-        });
-
-        // Añadir una sola fila extra con sus celdas de entrada de texto para nodos destino
-        const inputsExtra = nodosDestinoIds.map(idDestino => {
-            // Asegúrate de que el atributo 'data-columna' tenga un valor único y que el input se cierre correctamente.
-            return `<td><input type="text" class="input-data" size="2" data-fila="extra" data-columna="${idDestino}"></td>`;
-        }).join('');
-
-        filasMatriz += `<tr><th>Extra</th>${inputsExtra}</tr>`;
-
-        // Añadir filas al cuerpo de la tabla
-        matrizBody.innerHTML = filasMatriz;
         
+        // Ajustar encabezado de la matriz para nodos destino
+        matrizHeader.innerHTML = '<th></th>' + nodosDestinoLabels.map(label => `<th>${label}</th>`).join('');
+        
+        // Ajustar cuerpo de la matriz para nodos inicio
+        matrizBody.innerHTML = nodosInicioIds.map(id => {
+            const fila = nodosDestinoIds.map(idDestino => matriz[id][idDestino]).join('</td><td>');
+            return `<tr><th>${nodos.get(id).label}</th><td>${fila}</td></tr>`;
+        }).join('');
     }
-
-    function sumarValores() {
-        let suma = 0;
-        const inputsData = document.querySelectorAll('.input-data');
-
-        inputsData.forEach(input => {
-            const valor = parseFloat(input.value);
-            if (!isNaN(valor)) { // Solo sumar si el valor es un número
-                suma += valor;
-            }
-        });
-
-        // Actualizar el espacio marcado con el ID 'suma'
-        const sumaEspacio = document.getElementById('suma');
-        sumaEspacio.textContent = suma;
-    }
-
-
-
-
+    
 
     function exportarComoPNG(nombreArchivo) { // Exportar imagen del grafo
         html2canvas(grafoContainer).then(canvas => {
@@ -312,12 +278,12 @@ document.addEventListener('DOMContentLoaded', function () {
         };
         const datosStr = JSON.stringify(datosExportar);
         const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(datosStr);
-
+        
         let exportarLink = document.createElement('a');
         exportarLink.setAttribute('href', dataUri);
         exportarLink.setAttribute('download', nombreArchivo || 'grafo.png');
         document.body.appendChild(exportarLink);
-
+        
         exportarLink.click();
         document.body.removeChild(exportarLink);
     }
@@ -329,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const reader = new FileReader();
-        reader.onload = function (fileEvent) {
+        reader.onload = function(fileEvent) {
             try {
                 const datos = JSON.parse(fileEvent.target.result);
                 nodos.clear();
@@ -348,23 +314,23 @@ document.addEventListener('DOMContentLoaded', function () {
         reader.readAsText(archivo);
     }
 
-    guardarBtn.addEventListener('click', function () { // Se apreta el botón de exportar
+    guardarBtn.addEventListener('click', function() { // Se apreta el botón de exportar
         exportOptions.style.display = 'block';
     });
 
-    exportPNG.addEventListener('click', function () { // Se apreta el botón de exportar como PNG
+    exportPNG.addEventListener('click', function() { // Se apreta el botón de exportar como PNG
         let nombreArchivo = prompt("Ingrese el nombre del archivo:", "grafo.png");
         exportarComoPNG(nombreArchivo);
         exportOptions.style.display = 'none';
     });
 
-    exportPDF.addEventListener('click', function () { // Se apreta el botón de exportar como PDF
+    exportPDF.addEventListener('click', function() { // Se apreta el botón de exportar como PDF
         let nombreArchivo = prompt("Ingrese el nombre del archivo:", "grafo.pdf");
         exportarComoPDF(nombreArchivo);
         exportOptions.style.display = 'none';
     });
 
-    exportJSON.addEventListener('click', function () { // Se apreta el botón de exportar como JSON (editable)
+    exportJSON.addEventListener('click', function() { // Se apreta el botón de exportar como JSON (editable)
         let nombreArchivo = prompt("Ingrese el nombre del archivo:", "grafo.json");
         exportarGrafo(nombreArchivo);
         exportOptions.style.display = 'none';
@@ -373,16 +339,16 @@ document.addEventListener('DOMContentLoaded', function () {
     cargarBtn.addEventListener('click', () => importarArchivo.click()); // Se apreta el botón de importar
     importarArchivo.addEventListener('change', importarGrafo);
 
-    document.getElementById('eliminarBtn').addEventListener('click', function () { // Cambia el cursor en modo eliminar
+    document.getElementById('eliminarBtn').addEventListener('click', function() { // Cambia el cursor en modo eliminar
         estado.modoEliminar = !estado.modoEliminar;
         grafoContainer.style.cursor = estado.modoEliminar ? 'crosshair' : '';
     });
 
-    document.getElementById('cambiarColorBtn').addEventListener('input', function (event) { // Cambiar color de nodos 
+    document.getElementById('cambiarColorBtn').addEventListener('input', function(event) { // Cambiar color de nodos 
         estado.colorActual = event.target.value;
     });
 
-    document.getElementById('limpiarBtn').addEventListener('click', function () { // Limpiar grafo completo y actualizar matriz
+    document.getElementById('limpiarBtn').addEventListener('click', function() { // Limpiar grafo completo y actualizar matriz
         nodos.clear();
         aristas.clear();
         estado = { seleccionando: false, nodoOrigen: null, colorActual: estado.colorActual, modoEliminar: false };
@@ -396,18 +362,44 @@ document.addEventListener('DOMContentLoaded', function () {
         resultadoContainer.style.display = 'none'; // Opcional: Ocultar el contenedor hasta nuevos resultados
     });
 
+    document.getElementById('minimizarBtn').addEventListener('click', function(){
+         // Obtener la última fila y la última columna de la matriz
+    const ultimaFila = [];
+    const ultimaColumna = [];
+    const matriz = obtenerMatrizActual(); // Función para obtener la matriz actual, deberás implementarla
 
+    // Llenar la última fila y la última columna
+    for (let i = 0; i < matriz.length; i++) {
+        ultimaFila.push(matriz[i][matriz[i].length - 1]);
+    }
+    for (let j = 0; j < matriz[0].length; j++) {
+        ultimaColumna.push(matriz[matriz.length - 1][j]);
+    }
 
+    // Sumar los elementos de la última fila y la última columna
+    const sumaUltimaFila = ultimaFila.reduce((acc, val) => acc + val, 0);
+    const sumaUltimaColumna = ultimaColumna.reduce((acc, val) => acc + val, 0);
+
+    // Verificar si las sumas son iguales
+    if (sumaUltimaFila === sumaUltimaColumna) {
+        // Realizar el algoritmo del método de esquina Noroeste
+        const resultado = metodoEsquinaNoroeste(matriz);
+        mostrarResultado(resultado);
+    } else {
+        // Mostrar un mensaje indicando que los costos son diferentes
+        alert('No se puede resolver con el método de esquina Noroeste porque las sumas de la última fila y columna son diferentes.');
+    }
+    });
 
     function obtenerMatrizActual() {
         if (nodos.length === 0 || aristas.length === 0) {
             console.error('No hay nodos o aristas para generar la matriz.');
             return null; // Retornar null en lugar de una matriz vacía
         }
-
+    
         // Crear una matriz vacía
         const matriz = [];
-
+    
         // Obtener los nodos únicos (trabajadores)
         const trabajadores = new Set(aristas.get().map(arista => arista.from));
         const tareas = new Set(aristas.get().map(arista => arista.to));
@@ -415,7 +407,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Convertir los conjuntos a arrays para poder iterar
         const trabajadoresArray = [...trabajadores];
         const tareasArray = [...tareas];
-
+    
         // Llenar la matriz con los valores de las aristas
         trabajadoresArray.forEach((trabajador, i) => {
             const fila = [];
@@ -426,21 +418,83 @@ document.addEventListener('DOMContentLoaded', function () {
                         return item.from === trabajador && item.to === tarea;
                     }
                 })[0]; // Suponiendo que solo hay una arista que conecta un trabajador con una tarea
-
+    
                 // Obtener el valor de la arista (costo)
                 const costo = arista ? parseInt(arista.label) : 0;
                 fila.push(costo);
             });
             matriz.push(fila);
         });
-
+    
         return matriz;
     }
 
-    document.getElementById('minimizarBtn').addEventListener('click', function () {
+    function metodoEsquinaNoroeste(matriz) {
+        const demandas = []; // Demanda de cada fila
+        const ofertas = []; // Oferta de cada columna
+        const asignaciones = []; // Asignaciones
+    
+        // Obtener la demanda de cada fila y la oferta de cada columna
+        for (let i = 0; i < matriz.length - 1; i++) {
+            demandas.push(matriz[i][matriz[i].length - 1]);
+        }
+        for (let j = 0; j < matriz[0].length - 1; j++) {
+            ofertas.push(matriz[matriz.length - 1][j]);
+        }
+    
+        // Inicializar la matriz de asignaciones con ceros
+        for (let i = 0; i < demandas.length; i++) {
+            asignaciones.push(new Array(ofertas.length).fill(0));
+        }
+    
+        // Ejecutar el algoritmo del método de esquina Noroeste
+        let i = 0;
+        let j = 0;
+        while (i < demandas.length && j < ofertas.length) {
+            const asignacion = Math.min(demandas[i], ofertas[j]); // Obtener el mínimo entre la demanda y la oferta
+            asignaciones[i][j] = asignacion; // Asignar la cantidad mínima en la posición (i, j)
+            demandas[i] -= asignacion; // Reducir la demanda
+            ofertas[j] -= asignacion; // Reducir la oferta
+            if (demandas[i] === 0) i++; // Pasar a la siguiente fila si la demanda se satisface
+            if (ofertas[j] === 0) j++; // Pasar a la siguiente columna si la oferta se satisface
+        }
+    
+        return asignaciones;
+    }
 
-    });
-
-
+    function mostrarResultado(asignaciones) {
+        // Obtener el contenedor donde se mostrará el resultado
+        const resultadoContainer = document.getElementById('resultado-container');
+    
+        // Crear una cadena para almacenar la salida formateada
+        let salida = '';
+    
+        // Obtener el número de filas y columnas de la matriz de asignaciones
+        const numFilas = asignaciones.length;
+        const numColumnas = asignaciones[0].length;
+    
+        // Iterar sobre las filas de la matriz de asignaciones
+        for (let i = 0; i < numFilas; i++) {
+            // Obtener la letra correspondiente a la fila
+            const letraFila = String.fromCharCode(65 + i);
+    
+            // Iterar sobre las columnas de la matriz de asignaciones
+            for (let j = 0; j < numColumnas; j++) {
+                // Obtener el número de columna y el valor de la asignación en la posición (i, j)
+                const numeroColumna = j + 1;
+                const asignacion = asignaciones[i][j];
+    
+                // Agregar la asignación formateada a la salida si hay una asignación en esta posición
+                if (asignacion > 0) {
+                    salida += `${letraFila}->${numeroColumna}(${asignacion})\t`;
+                }
+            }
+        }
+    
+        // Mostrar la salida en el contenedor
+        resultadoContainer.textContent = salida;
+        resultadoContainer.style.display = 'block'; // Mostrar el contenedor si estaba oculto
+    }
+    
     inicializarRed();
 });
