@@ -554,27 +554,29 @@ document.addEventListener('DOMContentLoaded', function() {
         // Obtener el contenedor donde se mostrará el resultado
         const resultadoContainer = document.getElementById('resultado-container');
     
+        // Obtener los nombres de las filas y las columnas
+        const nombresFilas = obtenerNombresFilas();
+        const nombresColumnas = obtenerNombresColumnas();
+    
         // Crear una cadena para almacenar la salida formateada
         let salida = '';
     
-        // Obtener el número de filas y columnas de la matriz de asignaciones
-        const numFilas = asignaciones.length;
-        const numColumnas = asignaciones[0].length;
-    
         // Iterar sobre las filas de la matriz de asignaciones
-        for (let i = 0; i < numFilas; i++) {
-            // Obtener la letra correspondiente a la fila
-            const letraFila = String.fromCharCode(65 + i);
+        for (let i = 0; i < asignaciones.length; i++) {
+            // Obtener el nombre de la fila actual
+            const nombreFila = nombresFilas[i];
     
             // Iterar sobre las columnas de la matriz de asignaciones
-            for (let j = 0; j < numColumnas; j++) {
-                // Obtener el número de columna y el valor de la asignación en la posición (i, j)
-                const numeroColumna = j + 1;
+            for (let j = 0; j < asignaciones[i].length; j++) {
+                // Obtener el nombre de la columna actual
+                const nombreColumna = nombresColumnas[j];
+    
+                // Obtener el valor de la asignación en la posición (i, j)
                 const asignacion = asignaciones[i][j];
     
                 // Agregar la asignación formateada a la salida si hay una asignación en esta posición
                 if (asignacion > 0) {
-                    salida += `${letraFila}->${numeroColumna}(${asignacion})\t`;
+                    salida += `${nombreFila}->${nombreColumna}(${asignacion})\t`;
                 }
             }
         }
@@ -582,6 +584,19 @@ document.addEventListener('DOMContentLoaded', function() {
         // Mostrar la salida en el contenedor
         resultadoContainer.textContent = salida;
         resultadoContainer.style.display = 'block'; // Mostrar el contenedor si estaba oculto
+    }
+
+    function obtenerNombresFilas() {
+        const filas = document.querySelectorAll('#matriz-body tr');
+        const nombresFilas = Array.from(filas).map(fila => fila.firstChild.textContent.trim());
+        return nombresFilas;
+    }
+    
+    // Función para obtener los nombres de las columnas
+    function obtenerNombresColumnas() {
+        const encabezados = document.querySelectorAll('#matriz-header th');
+        const nombresColumnas = Array.from(encabezados).slice(1).map(encabezado => encabezado.textContent.trim());
+        return nombresColumnas;
     }
     
     inicializarRed();
