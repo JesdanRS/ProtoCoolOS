@@ -10,61 +10,65 @@ document.addEventListener('DOMContentLoaded', function() {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    async function visualizarShellSort(listaNumeros) {
-        let n = listaNumeros.length;
-        let gap = prompt('Introduce el valor inicial del gap:');
-        gap = parseInt(gap, 10);
-        
-        let arr = [].concat(listaNumeros);
-        let startTime = performance.now(); // Captura el tiempo de inicio
-        
-        for (gap; gap > 0; gap = Math.floor(gap / 2)) {
-            for (let i = gap; i < n; i += 1) {
-                let temp = arr[i];
-                let j;
-                for (j = i; j >= gap && arr[j - gap] > temp; j -= gap) {
-                    arr[j] = arr[j - gap];
-                    dibujarGraficoBarras(arr, [j, j - gap]); // Visualizar el cambio
-                    await sleep(100); // Pausa para visualización
-                }
-                arr[j] = temp;
-                dibujarGraficoBarras(arr); // Visualizar el cambio
-                await sleep(100); // Pausa para visualización
+    async function merge(arr, l, m, r, ascendente = true) {
+        const n1 = m - l + 1;
+        const n2 = r - m;
+        let L = new Array(n1);
+        let R = new Array(n2);
+    
+        for (let i = 0; i < n1; i++)
+            L[i] = arr[l + i];
+        for (let j = 0; j < n2; j++)
+            R[j] = arr[m + 1 + j];
+    
+        let i = 0, j = 0, k = l;
+        while (i < n1 && j < n2) {
+            if (ascendente ? L[i] <= R[j] : L[i] >= R[j]) {
+                arr[k] = L[i];
+                i++;
+            } else {
+                arr[k] = R[j];
+                j++;
             }
+            await dibujarGraficoBarras(arr, [k]);
+            await sleep(50);
+            k++;
         }
-        
-        let endTime = performance.now(); // Captura el tiempo de finalización
-        let tiempoOrdenamiento = (endTime - startTime) / 1000; // Calcula la diferencia y convierte a segundos
-        document.getElementById('tiempoOrdenamiento').textContent = tiempoOrdenamiento.toFixed(2); // Muestra el tiempo en el elemento del DOM
-        document.getElementById('listaOrdenada').textContent = arr.join(", ");
+    
+        while (i < n1) {
+            arr[k] = L[i];
+            await dibujarGraficoBarras(arr, [k]);
+            await sleep(50);
+            i++;
+            k++;
+        }
+    
+        while (j < n2) {
+            arr[k] = R[j];
+            await dibujarGraficoBarras(arr, [k]);
+            await sleep(50);
+            j++;
+            k++;
+        }
     }
     
-    async function visualizarShellSortDesc(listaNumeros) {
-        let n = listaNumeros.length;
-        let gap = prompt('Introduce el valor inicial del gap:');
-        gap = parseInt(gap, 10);
-        
-        let arr = [].concat(listaNumeros);
-        let startTime = performance.now(); // Captura el tiempo de inicio
-        
-        for (gap; gap > 0; gap = Math.floor(gap / 2)) {
-            for (let i = gap; i < n; i += 1) {
-                let temp = arr[i];
-                let j;
-                for (j = i; j >= gap && arr[j - gap] < temp; j -= gap) {
-                    arr[j] = arr[j - gap];
-                    dibujarGraficoBarras(arr, [j, j - gap]); // Visualizar el cambio
-                    await sleep(100); // Pausa para visualización
-                }
-                arr[j] = temp;
-                dibujarGraficoBarras(arr); // Visualizar el cambio
-                await sleep(100); // Pausa para visualización
-            }
+    async function mergeSort(arr, l, r, ascendente = true) {
+        if (l >= r) {
+            return; //returns recursively
         }
-        
-        let endTime = performance.now(); // Captura el tiempo de finalización
-        let tiempoOrdenamiento = (endTime - startTime) / 1000; // Calcula la diferencia y convierte a segundos
-        document.getElementById('tiempoOrdenamiento').textContent = tiempoOrdenamiento.toFixed(2); // Muestra el tiempo en el elemento del DOM
+        const m = l + parseInt((r - l) / 2);
+        await mergeSort(arr, l, m, ascendente);
+        await mergeSort(arr, m + 1, r, ascendente);
+        await merge(arr, l, m, r, ascendente);
+    }
+    
+    async function visualizarMergeSort(listaNumeros, ascendente = true) {
+        let arr = [].concat(listaNumeros);
+        let startTime = performance.now();
+        await mergeSort(arr, 0, arr.length - 1, ascendente);
+        let endTime = performance.now();
+        let tiempoOrdenamiento = (endTime - startTime) / 1000;
+        document.getElementById('tiempoOrdenamiento').textContent = tiempoOrdenamiento.toFixed(2);
         document.getElementById('listaOrdenada').textContent = arr.join(", ");
     }    
 
@@ -189,13 +193,14 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('listaOrdenada').textContent = "--";
     });
 
+    // Actualización de los listeners para usar visualizarMergeSort
     ordenarBtn.addEventListener('click', async function() {
-        await visualizarShellSort(listaNumeros);
+        await visualizarMergeSort(listaNumeros, true);
         actualizarResultado();
     });
 
     ordenarDesBtn.addEventListener('click', async function() {
-        await visualizarShellSortDesc(listaNumeros);
+        await visualizarMergeSort(listaNumeros, false);
         actualizarResultado();
     });
 
