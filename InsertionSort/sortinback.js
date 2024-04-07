@@ -10,7 +10,8 @@ document.addEventListener('DOMContentLoaded', function() {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    async function visualizarInsertionSort(arr) {
+    async function visualizarInsertionSort(listaNumeros) {
+        let arr = [].concat(listaNumeros);
         let startTime = performance.now(); // Captura el tiempo de inicio
     
         for (let i = 1; i < arr.length; i++) {
@@ -36,7 +37,8 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('listaOrdenada').textContent = arr.join(", ");
     }
 
-    async function visualizarInsertionSortDesc(arr) {
+    async function visualizarInsertionSortDesc(listaNumeros) {
+        let arr = [].concat(listaNumeros);
         let startTime = performance.now(); // Captura el tiempo de inicio
         
         for (let i = 1; i < arr.length; i++) {
