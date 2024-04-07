@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let aristas = new vis.DataSet();
     let network = null;
     let ultimoIdNodo = 1;
+    let modoEliminar = false; // Variable para controlar el modo de eliminación
 
     const opciones = {
         nodes: {
@@ -12,7 +13,13 @@ document.addEventListener('DOMContentLoaded', function() {
             font: {
                 color: '#ffffff'
             },
-            borderWidth: 2
+            borderWidth: 2,
+            color: {
+                background: '#0040ff', // Azul oscuro
+                highlight: {
+                    background: '#0040ff' // Azul oscuro para nodos seleccionados
+                }
+            }
         },
         edges: {
             arrows: 'to',
@@ -40,13 +47,33 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
+        grafoContainer.addEventListener("click", function(event) {
+            if (!modoEliminar) {
+                // Si no estamos en modo eliminar, permitimos agregar nodos al hacer clic en el contenedor del grafo
+                const nombreNodo = prompt("Ingrese el valor del nuevo nodo:", "");
+                if (nombreNodo !== null) {
+                    agregarNodoAlArbol(parseInt(nombreNodo, 10));
+                }
+            }
+        });
+    
         network.on("click", function(params) {
-            const nombreNodo = prompt("Ingrese el valor del nuevo nodo:", "");
-            if (nombreNodo !== null) {
-                agregarNodoAlArbol(parseInt(nombreNodo, 10));
+            if (modoEliminar) {
+                // Si estamos en modo eliminar, eliminamos el nodo al que se le ha hecho clic
+                const nodoEliminado = params.nodes[0];
+                nodos.remove(nodoEliminado);
+                
+                // Eliminar las aristas conectadas al nodo eliminado
+                const aristasEliminadas = aristas.get({
+                    filter: function (arista) {
+                        return arista.from === nodoEliminado || arista.to === nodoEliminado;
+                    }
+                });
+                aristas.remove(aristasEliminadas);
             }
         });
     }
+    
     
 
     
@@ -104,7 +131,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return arista.from === nodoActualId;
             }
         });
-
+    
         // Determinar si el nodo debe ir a la izquierda o derecha
         if(valorNodo < nodoActual.value) {
             // Buscar a la izquierda
@@ -120,7 +147,17 @@ document.addEventListener('DOMContentLoaded', function() {
             if(hijoDerecho) {
                 return buscarNodoPadre(hijoDerecho.to, valorNodo);
             } else {
-                return nodoActualId;
+                // Si no hay nodo hijo a la derecha, se verifica si hay un nodo eliminado en esa rama
+                const nodoHermanoDerecho = nodos.get({
+                    filter: function (nodo) {
+                        return nodo.x > nodoActual.x && nodo.y === nodoActual.y;
+                    }
+                })[0];
+                if (nodoHermanoDerecho && nodoHermanoDerecho.value < valorNodo) {
+                    return buscarNodoPadre(nodoHermanoDerecho.id, valorNodo);
+                } else {
+                    return nodoActualId;
+                }
             }
         }
     }
@@ -200,30 +237,33 @@ document.addEventListener('DOMContentLoaded', function() {
         pdf.save(nombreArchivo || 'grafo.pdf');
     }
 
-    function exportarGrafo(nombreArchivo) { // Exportar el archivo JSON del grafo y la matriz
-        const datosExportar = {
-            nodos: nodos.get({ returnType: "Object" }),
-            aristas: aristas.get(),
-            estado: estado
-        };
-        const datosStr = JSON.stringify(datosExportar);
-        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(datosStr);
-        
-        let exportarLink = document.createElement('a');
-        exportarLink.setAttribute('href', dataUri);
-        exportarLink.setAttribute('download', nombreArchivo || 'grafo.png');
-        document.body.appendChild(exportarLink);
-        
-        exportarLink.click();
-        document.body.removeChild(exportarLink);
+    function exportarGrafo(nombreArchivo) {
+        try {
+            const datosExportar = {
+                nodos: nodos.get({ returnType: "Object" }),
+                aristas: aristas.get()
+            };
+            const datosStr = JSON.stringify(datosExportar);
+            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(datosStr);
+    
+            let exportarLink = document.createElement('a');
+            exportarLink.setAttribute('href', dataUri);
+            exportarLink.setAttribute('download', nombreArchivo || 'grafo.json');
+            document.body.appendChild(exportarLink);
+    
+            exportarLink.click();
+            document.body.removeChild(exportarLink);
+        } catch (error) {
+            console.error('Error al exportar el grafo como JSON:', error);
+        }
     }
 
-    function importarGrafo(event) { // Importar un archivo JSON de algún grafo
+    function importarGrafo(event) { 
         const archivo = event.target.files[0];
         if (!archivo) {
             return;
         }
-
+    
         const reader = new FileReader();
         reader.onload = function(fileEvent) {
             try {
@@ -232,17 +272,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 aristas.clear();
                 nodos.add(Object.values(datos.nodos)); // Agrega nodos manteniendo posiciones
                 aristas.add(datos.aristas);
-                estado = datos.estado;
-                colorPicker.value = estado.colorActual;
+                // No olvides volver a inicializar la red de visualización si es necesario
+                // network = new vis.Network(grafoContainer, { nodes: nodos, edges: aristas }, opciones);
                 ultimoIdNodo = Math.max(...Object.values(datos.nodos).map(nodo => nodo.id));
-                actualizarMatriz();
-                comprobarVisibilidadMatriz();
+
             } catch (error) {
                 console.error('Error al importar el archivo', error);
             }
         };
         reader.readAsText(archivo);
     }
+
+    function limpiarGrafo() {
+    nodos.clear(); // Limpiar nodos
+    aristas.clear(); // Limpiar aristas
+    // También puedes limpiar la visualización de la red si es necesario
+    // network.destroy();
+}
 
     guardarBtn.addEventListener('click', function() { // Se apreta el botón de exportar
         exportOptions.style.display = 'block';
@@ -269,9 +315,16 @@ document.addEventListener('DOMContentLoaded', function() {
     cargarBtn.addEventListener('click', () => importarArchivo.click()); // Se apreta el botón de importar
     importarArchivo.addEventListener('change', importarGrafo);
 
-    document.getElementById('eliminarBtn').addEventListener('click', function() { // Cambia el cursor en modo eliminar
-        estado.modoEliminar = !estado.modoEliminar;
-        grafoContainer.style.cursor = estado.modoEliminar ? 'crosshair' : '';
+    document.getElementById('eliminarBtn').addEventListener('click', function() {
+        // Al hacer clic en el botón de eliminar, cambia el modoEliminar a su estado opuesto
+        modoEliminar = !modoEliminar;
+        if (modoEliminar) {
+            // Si estamos activando el modo eliminar, cambia el cursor para indicar que estamos en modo eliminar
+            grafoContainer.style.cursor = 'crosshair';
+        } else {
+            // Si estamos desactivando el modo eliminar, restaura el cursor predeterminado
+            grafoContainer.style.cursor = '';
+        }
     });
 
     document.getElementById('cambiarColorBtn').addEventListener('input', function(event) { // Cambiar color de nodos 
@@ -279,12 +332,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.getElementById('limpiarBtn').addEventListener('click', function() { // Limpiar grafo completo y actualizar matriz
-        nodos.clear();
-        aristas.clear();
-        estado = { seleccionando: false, nodoOrigen: null, colorActual: estado.colorActual, modoEliminar: false };
-        ultimoIdNodo = 0; // Restablecer el contador de ID de nodos al limpiar
-        actualizarMatriz(); // La matriz se actualiza al limpiar
-        comprobarVisibilidadMatriz();
+        location.reload();
     });
 
     inicializarRed();
