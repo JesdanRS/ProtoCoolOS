@@ -51,6 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
             dragNodes: true
         }
     };
+    
 
     function inicializarRed() {
         const datos = {
@@ -71,8 +72,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     });
                     aristas.remove(aristasAsociadas);
+                    actualizarMatriz(); // Llamar a actualizarMatriz() después de eliminar el nodo
                 } else if (edgeId) {
                     aristas.remove({id: edgeId});
+                    actualizarMatriz(); // Llamar a actualizarMatriz() después de eliminar la arista
                 }
                 return;
             }
@@ -196,8 +199,10 @@ document.addEventListener('DOMContentLoaded', function() {
             return; // Salir de la función si no hay nodos o aristas
         }
         // Crear un conjunto único para nodos de inicio y destino
-        let nodosInicio = new Set();
-        let nodosDestino = new Set();
+
+        // Asegurándose de que solo se usan nodos existentes
+        let nodosInicio = new Set(aristas.get().map(arista => arista.from).filter(id => nodos.get(id)));
+        let nodosDestino = new Set(aristas.get().map(arista => arista.to).filter(id => nodos.get(id)));
     
         // Llenar los conjuntos basados en las aristas actuales
         aristas.get().forEach(arista => {
@@ -231,13 +236,33 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function generarHTMLMatriz(matriz, nodosInicioIds, nodosDestinoIds) {
+        // Filtrar IDs para asegurarse de que los nodos existen
+        nodosInicioIds = nodosInicioIds.filter(id => nodos.get(id) != null);
+        nodosDestinoIds = nodosDestinoIds.filter(id => nodos.get(id) != null);
+
         if (nodosInicioIds.length === 0 || nodosDestinoIds.length === 0) {
             matrizHeader.innerHTML = '';
             matrizBody.innerHTML = '';
             return;
         }
-        const nodosInicioLabels = nodosInicioIds.map(id => nodos.get(id).label);
-        const nodosDestinoLabels = nodosDestinoIds.map(id => nodos.get(id).label);
+
+        const nodosInicioLabels = nodosInicioIds.map(id => {
+            const nodo = nodos.get(id);
+            return nodo ? nodo.label : '';
+        });
+
+        //const nodosInicioLabels = nodosInicioIds.map(id => {
+        //    const nodo = nodos.get(id);
+        //    if (!nodo) {
+        //        console.error('Nodo no encontrado:', id);
+        //    }
+        //    return nodo ? nodo.label : 'N/A';
+        //});
+
+        const nodosDestinoLabels = nodosDestinoIds.map(id => {
+            const nodo = nodos.get(id);
+            return nodo ? nodo.label : '';
+        });
         
         // Ajustar encabezado de la matriz para nodos destino
         matrizHeader.innerHTML = '<th></th>' + nodosDestinoLabels.map(label => `<th>${label}</th>`).join('');
@@ -391,6 +416,35 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     });
 
+    document.getElementById('maximizarBtn').addEventListener('click', function(){
+        // Obtener la última fila y la última columna de la matriz
+        const ultimaFila = [];
+        const ultimaColumna = [];
+        const matriz = obtenerMatrizActual(); // Función para obtener la matriz actual, deberás implementarla
+    
+        // Llenar la última fila y la última columna
+        for (let i = 0; i < matriz.length; i++) {
+            ultimaFila.push(matriz[i][matriz[i].length - 1]);
+        }
+        for (let j = 0; j < matriz[0].length; j++) {
+            ultimaColumna.push(matriz[matriz.length - 1][j]);
+        }
+    
+        // Sumar los elementos de la última fila y la última columna
+        const sumaUltimaFila = ultimaFila.reduce((acc, val) => acc + val, 0);
+        const sumaUltimaColumna = ultimaColumna.reduce((acc, val) => acc + val, 0);
+    
+        // Verificar si las sumas son iguales
+        if (sumaUltimaFila === sumaUltimaColumna) {
+            // Realizar el algoritmo del método de esquina Noroeste
+            const resultado = metodoEsquinaNoroesteMaximizar(matriz); // Modificamos el nombre de la función para que se ajuste al nuevo algoritmo
+            mostrarResultado(resultado);
+        } else {
+            // Mostrar un mensaje indicando que los costos son diferentes
+            alert('No se puede resolver con el método de esquina Noroeste porque las sumas de la última fila y columna son diferentes.');
+        }
+    });
+
     function obtenerMatrizActual() {
         if (nodos.length === 0 || aristas.length === 0) {
             console.error('No hay nodos o aristas para generar la matriz.');
@@ -459,6 +513,40 @@ document.addEventListener('DOMContentLoaded', function() {
             if (ofertas[j] === 0) j++; // Pasar a la siguiente columna si la oferta se satisface
         }
     
+        return asignaciones;
+    }
+
+    function metodoEsquinaNoroesteMaximizar(matriz) {
+        // Cambios en la lógica para maximizar
+        const demandas = [];
+        const ofertas = [];
+        const asignaciones = [];
+
+        // Obtener la demanda de cada fila y la oferta de cada columna
+        for (let i = 0; i < matriz.length - 1; i++) {
+            demandas.push(matriz[i][matriz[i].length - 1]);
+        }
+        for (let j = 0; j < matriz[0].length - 1; j++) {
+            ofertas.push(matriz[matriz.length - 1][j]);
+        }
+
+        // Inicializar la matriz de asignaciones con ceros
+        for (let i = 0; i < demandas.length; i++) {
+            asignaciones.push(new Array(ofertas.length).fill(0));
+        }
+
+        // Ejecutar el algoritmo del método de esquina Noroeste para maximizar
+        let i = 0;
+        let j = 0;
+        while (i < demandas.length && j < ofertas.length) {
+            const asignacion = Math.max(demandas[i], ofertas[j]);
+            asignaciones[i][j] = asignacion;
+            demandas[i] -= asignacion;
+            ofertas[j] -= asignacion;
+            if (demandas[i] === 0) i++;
+            if (ofertas[j] === 0) j++;
+        }
+
         return asignaciones;
     }
 
