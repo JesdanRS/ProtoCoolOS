@@ -36,6 +36,32 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('listaOrdenada').textContent = arr.join(", ");
     }
 
+    async function visualizarInsertionSortDesc(arr) {
+        let startTime = performance.now(); // Captura el tiempo de inicio
+        
+        for (let i = 1; i < arr.length; i++) {
+            let key = arr[i];
+            let j = i - 1;
+    
+            // Mueve los elementos de arr[0..i-1] que son menores que
+            // key a una posición adelante de su posición actual
+            while (j >= 0 && arr[j] < key) {
+                arr[j + 1] = arr[j];
+                dibujarGraficoBarras(arr, [j + 1, j]); // Visualización de la posición que está siendo comparada
+                await sleep(100); // Pausa para visualización
+                j = j - 1;
+            }
+            arr[j + 1] = key;
+            dibujarGraficoBarras(arr, [j + 1]); // Visualización de la inserción
+            await sleep(100); // Pausa para visualización
+        }
+        
+        let endTime = performance.now(); // Captura el tiempo de finalización
+        let tiempoOrdenamiento = (endTime - startTime) / 1000; // Calcula la diferencia y convierte a segundos
+        document.getElementById('tiempoOrdenamiento').textContent = tiempoOrdenamiento.toFixed(2); // Muestra el tiempo en el elemento del DOM
+        document.getElementById('listaOrdenada').textContent = arr.join(", ");
+    }
+
     function actualizarResultado() {
         let listaOrdenadaHTML = listaNumeros.join(", ");
         let tiempoFinal = (performance.now() - tiempoInicio) / 1000;
@@ -155,6 +181,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     ordenarBtn.addEventListener('click', async function() {
         await visualizarInsertionSort(listaNumeros);
+        actualizarResultado();
+    });
+
+    ordenarDesBtn.addEventListener('click', async function() {
+        await visualizarInsertionSortDesc(listaNumeros);
         actualizarResultado();
     });
 
