@@ -82,6 +82,12 @@ document.addEventListener('DOMContentLoaded', function() {
         ultimoIdNodo++;
         const nuevoNodoId = ultimoIdNodo;
         let posicionNodo = {x: 0, y: 0};
+
+        const nodoExistente = nodos.get({ filter: node => node.value === valorNodo });
+        if (nodoExistente.length > 0) {
+            console.log(`El valor ${valorNodo} ya existe en el árbol.`);
+            return; // Salir de la función si el nodo ya existe
+        }
         
         // Buscar posición para el nuevo nodo
         let nodoPadreId = buscarNodoPadre(1, valorNodo); // Empezar búsqueda desde el nodo raíz
