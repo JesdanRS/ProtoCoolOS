@@ -35,6 +35,31 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('listaOrdenada').textContent = arr.join(", ");
     }
 
+    async function visualizarSelectionSortDes(arr) {
+        let startTime = performance.now(); // Captura el tiempo de inicio
+    
+        for (let i = 0; i < arr.length - 1; i++) {
+            let max = i;
+            for (let j = i + 1; j < arr.length; j++) {
+                if (arr[j] > arr[max]) {
+                    max = j;
+                }
+                dibujarGraficoBarras(arr, [max, j]);
+                await sleep(100); // Pausa para visualización
+            }
+            if (max !== i) {
+                [arr[i], arr[max]] = [arr[max], arr[i]];
+                dibujarGraficoBarras(arr, [i, max]);
+                await sleep(100); // Pausa para visualización
+            }
+        }
+    
+        let endTime = performance.now(); // Captura el tiempo de finalización
+        let tiempoOrdenamiento = (endTime - startTime) / 1000; // Calcula la diferencia y convierte a segundos
+        document.getElementById('tiempoOrdenamiento').textContent = tiempoOrdenamiento.toFixed(2); // Muestra el tiempo en el elemento del DOM
+        document.getElementById('listaOrdenada').textContent = arr.join(", ");
+    }
+
     function actualizarResultado() {
         let listaOrdenadaHTML = listaNumeros.join(", ");
         let tiempoFinal = (performance.now() - tiempoInicio) / 1000;
@@ -154,6 +179,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     ordenarBtn.addEventListener('click', async function() {
         await visualizarSelectionSort(listaNumeros);
+        actualizarResultado();
+    });
+
+    ordenarDesBtn.addEventListener('click', async function() {
+        await visualizarSelectionSortDes(listaNumeros);
         actualizarResultado();
     });
 
