@@ -32,10 +32,20 @@
                     <button class="nav-btn">HOME</button>
                 </a>
                 <a href="../Grafos1/indexGrafos.html">
-                    <button class="nav-btn selected">GRAFOS</button>
+                    <button class="nav-btn">GRAFOS</button>
                 </a>
-                <button class="nav-btn">JOHNSON</button>
-                <button class="nav-btn">ASIGNACIÓN</button>
+                <a href="../Johnson/indexJohnson.html">
+                    <button class="nav-btn">JOHNSON</button>
+                </a>
+                <a href="../Asigancion/indexAsignacion.html">
+                    <button class="nav-btn">ASIGNACIÓN</button>
+                </a>
+                <a href="../NorthWest/indexNorth.html">
+                    <button class="nav-btn">NORTH WEST</button>
+                </a>
+                <a href="../SelectionSort/indexSort.html">
+                    <button class="nav-btn selected">SELECTION SORT</button>
+                </a>
                 <a href="../Contacto/indexContacto.html">
                     <button class="nav-btn">CONTACTO</button>
                 </a>
@@ -51,35 +61,27 @@
 
         <div id="logo"></div>
         <div class="content">
-            <!-- Button Container -->
             <div class="buttons-container">
+                <!-- Botones aquí -->
                 <button id="agregarListaBtn">Agregar Lista</button>
                 <button id="listaRandomBtn">Generar Random</button>
                 <button id="ordenarBtn">Ordenar Lista</button>
                 <button id="limpiarBtn">Limpiar</button>
             </div>
     
-            <!-- Graph and Performance Information Container -->
             <div class="graph-and-info-container">
-                <!-- Graph Container -->
+                <!-- Contenedor del Gráfico de Barras -->
                 <div id="graficoBarrasContainer">
                     <canvas id="graficoBarras"></canvas>
                 </div>
-                <!-- Performance Information -->
-                <div id="rendimientoContainer">
-                    <p>Tiempo de Ordenamiento: <span id="tiempoOrdenamiento"></span> Segundos</p>
-                </div>
-                <!-- Original List -->
-                <div id="listaOriginalContainer">
-                    <p>Lista Original: <span id="listaOriginal"></span></p>
-                </div>
-                <!-- Sorted List -->
-                <div id="listaOrdenadaContainer">
-                    <p>Lista Ordenada: <span id="listaOrdenada"></span></p>
+                <!-- Contenedor de resultados visible desde el inicio -->
+                <div id="resultado-container">
+                    <p>Tiempo de Ordenamiento: <span id="tiempoOrdenamiento">--</span> Segundos</p>
+                    <p>Lista Original: <span id="listaOriginal">--</span></p>
+                    <p>Lista Ordenada: <span id="listaOrdenada">--</span></p>
                 </div>
             </div>
         </div>
-          
 
         <!-- End of Top Container -->
 

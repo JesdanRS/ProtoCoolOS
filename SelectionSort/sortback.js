@@ -35,6 +35,42 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('listaOrdenada').textContent = arr.join(", ");
     }
 
+    function actualizarResultado() {
+        let listaOrdenadaHTML = listaNumeros.join(", ");
+        let tiempoFinal = (performance.now() - tiempoInicio) / 1000;
+        resultadoContainer.innerHTML = `
+            <p>Tiempo de Ordenamiento: ${tiempoFinal.toFixed(2)} Segundos</p>
+            <p>Lista Original: ${listaOriginalHTML}</p>
+            <p>Lista Ordenada: ${listaOrdenadaHTML}</p>
+        `;
+        resultadoContainer.style.display = 'block'; // Muestra el contenedor con los resultados
+    }
+
+    async function visualizarSelectionSort(arr) {
+        let startTime = performance.now(); // Captura el tiempo de inicio
+    
+        for (let i = 0; i < arr.length - 1; i++) {
+            let min = i;
+            for (let j = i + 1; j < arr.length; j++) {
+                if (arr[j] < arr[min]) {
+                    min = j;
+                }
+                dibujarGraficoBarras(arr, [min, j]);
+                await sleep(100); // Pausa para visualización
+            }
+            if (min !== i) {
+                [arr[i], arr[min]] = [arr[min], arr[i]];
+                dibujarGraficoBarras(arr, [i, min]);
+                await sleep(100); // Pausa para visualización
+            }
+        }
+    
+        let endTime = performance.now(); // Captura el tiempo de finalización
+        let tiempoOrdenamiento = (endTime - startTime) / 1000; // Calcula la diferencia y convierte a segundos
+        document.getElementById('tiempoOrdenamiento').textContent = tiempoOrdenamiento.toFixed(2); // Muestra el tiempo en el elemento del DOM
+        document.getElementById('listaOrdenada').textContent = arr.join(", ");
+    }
+
     function dibujarGraficoBarras(datos, highlightIndexes = []) {
         const ctx = document.getElementById('graficoBarras').getContext('2d');
         if (miGrafico) {
@@ -43,27 +79,127 @@ document.addEventListener('DOMContentLoaded', function() {
         miGrafico = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: datos.map((_, i) => `Número ${i + 1}`),
+                labels: datos.map((_, i) => `${i + 1}`),
                 datasets: [{
-                    label: 'Valor',
+                    label: '', // Se deja el label vacío o se quita completamente esta línea
                     data: datos,
-                    backgroundColor: datos.map((_, i) => highlightIndexes.includes(i) ? 'rgba(255, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.2)'),
+                    backgroundColor: datos.map((_, i) => highlightIndexes.includes(i) ?  '#6bcff4' : '#581790'), //#7e22ce
                     borderColor: 'rgba(255, 255, 255, 1)',
                     borderWidth: 1
                 }]
             },
             options: {
                 scales: {
+                    x: {
+                        grid: {
+                            display: false, // Oculta la cuadrícula del eje X
+                        },
+                        ticks: {
+                            color: 'white' // Color de los ticks (marcas) del eje X
+                        },
+                        axis: 'x',
+                        borderColor: 'white' // Asegura que el borde del eje X sea visible
+                    },
                     y: {
-                        beginAtZero: true
+                        grid: {
+                            display: false, // Oculta la cuadrícula del eje Y
+                        },
+                        ticks: {
+                            color: 'white' // Color de los ticks (marcas) del eje Y
+                        },
+                        axis: 'y',
+                        borderColor: 'white' // Asegura que el borde del eje Y sea visible
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false // Asegura que la leyenda esté desactivada
                     }
                 },
                 animation: {
-                    duration: 0 // desactivar la animación estándar de Chart.js para la actualización de datos
-                },
+                    duration: 0
+                }
             }
         });
     }
+    
+    /*function dibujarGraficoBarras(datos, highlightIndexes = []) {
+        const svg = d3.select('#graficoBarrasContainer svg');
+        svg.selectAll("*").remove();
+    
+        const margin = {top: 20, right: 20, bottom: 30, left: 40},
+              width = +svg.attr("width") - margin.left - margin.right,
+              height = +svg.attr("height") - margin.top - margin.bottom;
+    
+        const x = d3.scaleBand()
+                    .range([0, width])
+                    .padding(0.1)
+                    .domain(datos.map((_, i) => i));
+    
+        const y = d3.scaleLinear()
+                    .range([height, 0])
+                    .domain([0, d3.max(datos, d => d)]);
+    
+        const g = svg.append("g")
+                     .attr("transform", `translate(${margin.left},${margin.top})`);
+    
+        g.selectAll(".bar")
+         .data(datos)
+         .enter().append("rect")
+           .attr("class", "bar")
+           .attr("x", (d, i) => x(i))
+           .attr("y", d => y(d))
+           .attr("width", x.bandwidth())
+           .attr("height", d => height - y(d))
+           .attr("fill", (_, i) => highlightIndexes.includes(i) ? '#581790' : '#3b82f6')
+           .on("mouseover", function(event, d) {
+               const [x, y] = d3.pointer(event, svg.node());
+    
+               // Crear un grupo para el tooltip
+               const tooltip = svg.append("g")
+                                  .attr("id", "tooltip")
+                                  .style("pointer-events", "none");
+    
+               // Agregar un rectángulo gris como fondo
+               tooltip.append("rect")
+                      .attr("x", x)
+                      .attr("y", y - 30)
+                      .attr("width", 60)
+                      .attr("height", 20)
+                      .attr("fill", "grey")
+                      .attr("rx", 4) // bordes redondeados
+                      .style("alignment-baseline", "middle");
+    
+               // Agregar texto mostrando el valor de la barra
+               tooltip.append("text")
+                      .attr("x", x + 30)
+                      .attr("y", y - 15)
+                      .attr("fill", "white")
+                      .attr("text-anchor", "middle")
+                      .text(d);
+           })
+           .on("mouseout", function() {
+               svg.select("#tooltip").remove();
+           });
+    
+        // Agregando ejes y cambiando su color a blanco
+        g.append("g")
+         .attr("transform", `translate(0,${height})`)
+         .call(d3.axisBottom(x).tickFormat(i => i + 1))
+         .selectAll("text")
+         .style("color", "white");
+    
+        g.append("g")
+         .call(d3.axisLeft(y))
+         .selectAll("text")
+         .style("color", "white");
+    
+        // Cambiar el color de las líneas de los ejes a blanco
+        svg.selectAll("path.domain")
+           .style("stroke", "white");
+        svg.selectAll(".tick line")
+           .style("stroke", "white");
+    }*/    
 
     agregarListaBtn.addEventListener('click', function() {
         let cantidad = prompt('¿Cuántos números deseas agregar a la lista?');
@@ -120,6 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     ordenarBtn.addEventListener('click', async function() {
         await visualizarSelectionSort(listaNumeros);
+        actualizarResultado();
     });
 
     limpiarBtn.addEventListener('click', function() {
@@ -132,58 +269,4 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('listaOriginal').textContent = ""; // Limpia la lista original
         document.getElementById('listaOrdenada').textContent = ""; 
     });
-
-    async function exportarComoPDF(nombreArchivo) { // Exportar PDF del grafo
-        const canvas = await html2canvas(grafoContainer);
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jspdf.jsPDF({
-            orientation: 'landscape',
-        });
-        pdf.addImage(imgData, 'PNG', 10, 10);
-        pdf.save(nombreArchivo || 'grafo.pdf');
-    }
-
-    function exportarGrafo(nombreArchivo) { // Exportar el archivo JSON del grafo y la matriz
-        const datosExportar = {
-            nodos: nodos.get({ returnType: "Object" }),
-            aristas: aristas.get(),
-            estado: estado
-        };
-        const datosStr = JSON.stringify(datosExportar);
-        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(datosStr);
-        
-        let exportarLink = document.createElement('a');
-        exportarLink.setAttribute('href', dataUri);
-        exportarLink.setAttribute('download', nombreArchivo || 'grafo.png');
-        document.body.appendChild(exportarLink);
-        
-        exportarLink.click();
-        document.body.removeChild(exportarLink);
-    }
-
-    function importarGrafo(event) { // Importar un archivo JSON de algún grafo
-        const archivo = event.target.files[0];
-        if (!archivo) {
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = function(fileEvent) {
-            try {
-                const datos = JSON.parse(fileEvent.target.result);
-                nodos.clear();
-                aristas.clear();
-                nodos.add(Object.values(datos.nodos)); // Agrega nodos manteniendo posiciones
-                aristas.add(datos.aristas);
-                estado = datos.estado;
-                colorPicker.value = estado.colorActual;
-                ultimoIdNodo = Math.max(...Object.values(datos.nodos).map(nodo => nodo.id));
-                actualizarMatriz();
-                comprobarVisibilidadMatriz();
-            } catch (error) {
-                console.error('Error al importar el archivo', error);
-            }
-        };
-        reader.readAsText(archivo);
-    }
 });
