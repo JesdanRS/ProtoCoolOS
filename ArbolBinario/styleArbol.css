@@ -584,7 +584,8 @@ Estilo de botón HELP
     font-family: 'Poppins', sans-serif;
 }
 
-#agregarListaBtn, #listaRandomBtn, #ordenarPreBtn, #ordenarInBtn, #ordenarPostBtn{
+#agregarNumBtn, #listaRandomBtn, #ordenarPreBtn, #ordenarInBtn, #ordenarPostBtn,
+#ingresarPreBtn, #ingresarInBtn, #ingresarPostBtn{
     cursor: pointer;
     margin-left: 10px;
     padding: 8px 38px;
@@ -631,6 +632,25 @@ Estilo de botón HELP
 #arbolContainer {
     width: 800px;
     height: 400px;
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.link {
+    stroke: #555;
+    stroke-width: 1px;
+}
+
+.node {
+    fill: #fff;
+    stroke: steelblue;
+    stroke-width: 3px;
+}
+
+.label {
+    font: 12px sans-serif;
+    fill: #555;
 }
 
 #resultado-container {
