@@ -150,6 +150,8 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             alert('La cantidad debe ser un número mayor a cero.');
         }
+        document.getElementById('tiempoOrdenamiento').textContent = "--";
+        document.getElementById('listaOrdenada').textContent = "--";
     });
 
     /*const listaRandomBtn = document.getElementById('listaRandomBtn');*/
@@ -179,14 +181,20 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             alert('Por favor, ingresa un número válido de elementos a generar.');
         }
+        document.getElementById('tiempoOrdenamiento').textContent = "--";
+        document.getElementById('listaOrdenada').textContent = "--";
     });
 
     ordenarBtn.addEventListener('click', async function() {
+        document.getElementById('tiempoOrdenamiento').textContent = "--";
+        document.getElementById('listaOrdenada').textContent = "--";
         await visualizarInsertionSort(listaNumeros);
         actualizarResultado();
     });
 
     ordenarDesBtn.addEventListener('click', async function() {
+        document.getElementById('tiempoOrdenamiento').textContent = "--";
+        document.getElementById('listaOrdenada').textContent = "--";
         await visualizarInsertionSortDesc(listaNumeros);
         actualizarResultado();
     });
@@ -197,9 +205,10 @@ document.addEventListener('DOMContentLoaded', function() {
             miGrafico = null;
         }
         listaNumeros = [];
-        document.getElementById('tiempoOrdenamiento').textContent = "";
-        document.getElementById('listaOriginal').textContent = ""; // Limpia la lista original
-        document.getElementById('listaOrdenada').textContent = ""; 
+        document.getElementById('tiempoOrdenamiento').textContent = "--";
+        document.getElementById('listaOriginal').textContent = "--"; // Limpia la lista original
+        document.getElementById('listaOrdenada').textContent = "--";
+        dibujarGraficoBarras(listaNumeros);
     });
 
     dibujarGraficoBarras(listaNumeros);

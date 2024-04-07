@@ -190,11 +190,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     ordenarBtn.addEventListener('click', async function() {
+        document.getElementById('tiempoOrdenamiento').textContent = "--";
+        document.getElementById('listaOrdenada').textContent = "--";
         await visualizarShellSort(listaNumeros);
         actualizarResultado();
     });
 
     ordenarDesBtn.addEventListener('click', async function() {
+        document.getElementById('tiempoOrdenamiento').textContent = "--";
+        document.getElementById('listaOrdenada').textContent = "--";
         await visualizarShellSortDesc(listaNumeros);
         actualizarResultado();
     });

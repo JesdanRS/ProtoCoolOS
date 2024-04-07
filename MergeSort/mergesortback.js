@@ -195,11 +195,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Actualización de los listeners para usar visualizarMergeSort
     ordenarBtn.addEventListener('click', async function() {
+        document.getElementById('tiempoOrdenamiento').textContent = "--";
+        document.getElementById('listaOrdenada').textContent = "--";
         await visualizarMergeSort(listaNumeros, true);
         actualizarResultado();
     });
 
     ordenarDesBtn.addEventListener('click', async function() {
+        document.getElementById('tiempoOrdenamiento').textContent = "--";
+        document.getElementById('listaOrdenada').textContent = "--";
         await visualizarMergeSort(listaNumeros, false);
         actualizarResultado();
     });
