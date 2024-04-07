@@ -569,6 +569,16 @@ Estilo de botón HELP
     display: none;
 }
 
+#text{
+    font-size: 13px;
+    letter-spacing: -1px;
+    color: #fff;
+    background-color: #555;
+    border-radius: 18px;
+    width: 100%;
+    align-self: center;
+} 
+
 #limpiarBtn{
     cursor: pointer;
     margin-left: 10px;
@@ -609,6 +619,7 @@ Estilo de botón HELP
     flex-direction: column;
     align-items: center;
     align-items: flex-start;
+    text-align: center;
     justify-content: flex-start;
     gap: 15px;
     padding: 0; /* Asegúrate de que no hay padding que esté empujando los elementos */

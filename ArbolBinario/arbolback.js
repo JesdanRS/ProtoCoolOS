@@ -136,33 +136,33 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Agregar evento para ingresar recorrido Pre-Order
-    document.getElementById('ingresarPreBtn').addEventListener('click', function() {
+    document.getElementById('ordenarPreBtn').addEventListener('click', function() {
         document.getElementById('tipoOrden').innerText = "Pre-Order";
         const result = [];
         bt.preOrderTraverse(bt.root, function(value) {
             result.push(value);
         });
-        document.getElementById('orden').innerText = result.join(' ');
+        document.getElementById('orden').innerText = result.join(', ');
     });
 
     // Agregar evento para ingresar recorrido In-Order
-    document.getElementById('ingresarInBtn').addEventListener('click', function() {
+    document.getElementById('ordenarInBtn').addEventListener('click', function() {
         document.getElementById('tipoOrden').innerText = "In-Order";
         const result = [];
         bt.inOrderTraverse(bt.root, function(value) {
             result.push(value);
         });
-        document.getElementById('orden').innerText = result.join(' ');
+        document.getElementById('orden').innerText = result.join(', ');
     });
 
     // Agregar evento para ingresar recorrido Post-Order
-    document.getElementById('ingresarPostBtn').addEventListener('click', function() {
+    document.getElementById('ordenarPostBtn').addEventListener('click', function() {
         document.getElementById('tipoOrden').innerText = "Post-Order";
         const result = [];
         bt.postOrderTraverse(bt.root, function(value) {
             result.push(value);
         });
-        document.getElementById('orden').innerText = result.join(' ');
+        document.getElementById('orden').innerText = result.join(', ');
     });
 
     function drawTree(){
