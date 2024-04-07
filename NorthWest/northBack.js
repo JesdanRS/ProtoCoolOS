@@ -543,8 +543,8 @@ document.addEventListener('DOMContentLoaded', function() {
             asignaciones[i][j] = asignacion;
             demandas[i] -= asignacion;
             ofertas[j] -= asignacion;
-            if (demandas[i] === 0) i++;
-            if (ofertas[j] === 0) j++;
+            if (demandas[i] < 0) i++;
+            if (ofertas[j] < 0) j++;
         }
 
         return asignaciones;
