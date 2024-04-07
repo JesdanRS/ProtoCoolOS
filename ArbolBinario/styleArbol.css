@@ -637,20 +637,20 @@ Estilo de botón HELP
     margin-top: 20px;
 }
 
-.link {
-    stroke: #555;
-    stroke-width: 1px;
-}
-
-.node {
+.node circle {
     fill: #fff;
     stroke: steelblue;
     stroke-width: 3px;
 }
 
-.label {
+.node text {
     font: 12px sans-serif;
     fill: #555;
+}
+
+.link {
+    stroke: white; /* Color de los enlaces */
+    stroke-width: 2px;
 }
 
 #resultado-container {
