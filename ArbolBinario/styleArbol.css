@@ -570,7 +570,7 @@ Estilo de botón HELP
 }
 
 #text{
-    font-size: 13px;
+    font-size: 11px;
     letter-spacing: -1px;
     color: #fff;
     background-color: #555;
@@ -583,21 +583,6 @@ Estilo de botón HELP
     cursor: pointer;
     margin-left: 10px;
 
-    padding: 8px 38px;
-    border-radius: 18px;
-    font-weight: 500;
-    font-size: 13px;
-    letter-spacing: -1px;
-    color: #fff;
-    border: none;
-    background: linear-gradient(95deg, #7e22ce 3.2%, #3b82f6 99.5%);
-    font-family: 'Poppins', sans-serif;
-}
-
-#agregarNumBtn, #listaRandomBtn, #ordenarPreBtn, #ordenarInBtn, #ordenarPostBtn,
-#ingresarPreBtn, #ingresarInBtn, #ingresarPostBtn{
-    cursor: pointer;
-    margin-left: 10px;
     padding: 8px 38px;
     border-radius: 18px;
     font-weight: 500;
@@ -627,12 +612,26 @@ Estilo de botón HELP
 }
 
 #opciones-container button {
-    width: auto; /* Cambiado de 100% a auto para permitir que el botón sea del tamaño de su contenido */
+    width: 100%; /* Cambiado de 100% a auto para permitir que el botón sea del tamaño de su contenido */
     margin: 5px 0; /* Agrega un pequeño margen arriba y abajo para separar los botones */
     padding: 10px 15px; /* Ajusta el padding para cambiar el tamaño del botón si es necesario */
     /* Resto de tus estilos de botón */
 }
 
+#agregarNumBtn, #listaRandomBtn, #ordenarPreBtn, #ordenarInBtn, #ordenarPostBtn,
+#ingresarPreBtn, #ingresarInBtn, #ingresarPostBtn{
+    cursor: pointer;
+    margin-left: 10px;
+    padding: 8px 38px;
+    border-radius: 18px;
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: -1px;
+    color: #fff;
+    border: none;
+    background: linear-gradient(95deg, #7e22ce 3.2%, #3b82f6 99.5%);
+    font-family: 'Poppins', sans-serif;
+}
 .arbol-container {
     width: calc(100% - 200px); /* Asumiendo que el contenedor de botones es de 200px de ancho */
     display: flex;
