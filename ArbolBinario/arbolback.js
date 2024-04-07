@@ -61,6 +61,14 @@ document.addEventListener('DOMContentLoaded', function() {
             callback(node.value);
           }
         }
+
+        // Método para insertar una lista de números aleatorios en el árbol
+        insertRandomList(quantity, min, max) {
+            for (let i = 0; i < quantity; i++) {
+              const randomValue = Math.floor(Math.random() * (max - min + 1) + min);
+              this.insert(randomValue);
+            }
+        }
     }
       
     // Initialize your tree
@@ -79,12 +87,52 @@ document.addEventListener('DOMContentLoaded', function() {
         const num = prompt('Introduce nuevo nodo:');
         const value = parseInt(num);
         if (!isNaN(value)) {
-            bt.insert(value);
-            // Actualiza la visualización del árbol
-            updateTree();
+            if (!bt.contains(value)) { // Verifica si el valor ya está presente en el árbol
+                bt.insert(value);
+                // Actualiza la visualización del árbol
+                updateTree();
+            }
         } else {
             alert('Por favor, ingresa un número válido.');
         }
+    });
+
+    // Método para verificar si un valor está presente en el árbol
+    BinaryTree.prototype.contains = function(value) {
+        return this.search(this.root, value);
+    };
+
+    // Método de búsqueda recursiva para verificar si un valor está presente en el árbol
+    BinaryTree.prototype.search = function(node, value) {
+        if (node === null) {
+            return false;
+        } else if (value < node.value) {
+            return this.search(node.left, value);
+        } else if (value > node.value) {
+            return this.search(node.right, value);
+        } else {
+            return true;
+        }
+    };
+
+    // Agregar evento para generar árbol a partir de lista aleatoria
+    document.getElementById('listaRandomBtn').addEventListener('click', function() {
+        const quantity = parseInt(prompt('Ingrese la cantidad de números aleatorios a generar:'));
+        const min = parseInt(prompt('Ingrese el número más pequeño:'));
+        const max = parseInt(prompt('Ingrese el número más grande:'));
+        
+        if (!isNaN(quantity) && !isNaN(min) && !isNaN(max)) {
+            bt.root = null; // Limpiar el árbol actual
+            bt.insertRandomList(quantity, min, max); // Insertar números aleatorios
+            updateTree(); // Actualizar la visualización del árbol
+        } else {
+            alert('Por favor, ingrese números válidos.');
+        }
+    });
+
+    // Agregar evento para limpiar y refrescar la página
+    document.getElementById('limpiarBtn').addEventListener('click', function() {
+        location.reload(); // Recargar la página para limpiar y refrescar el árbol
     });
 
     function drawTree(){
@@ -183,9 +231,5 @@ document.addEventListener('DOMContentLoaded', function() {
                     ${d.y} ${d.x}`;
             return path;
         }
-
-        // Example usage
-        const printNode = (value) => console.log(value);
-        bt.inOrderTraverse(bt.root, printNode); // In-order traversal
     }      
 });
