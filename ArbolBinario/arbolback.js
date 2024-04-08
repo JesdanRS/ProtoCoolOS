@@ -185,6 +185,11 @@ document.addEventListener('DOMContentLoaded', function() {
         function animateTraversal() {
             if (index < result.length) {
                 const currentValue = result[index];
+                const linksMust = d3.selectAll('.link').filter(function(d) {
+                    return d.target.data.value === currentValue && 
+                           (d.source.data.value === result[index + 1] || 
+                            (bt.root && bt.root.value === currentValue)); // Root has no parent
+                });
                 const currentNode = d3.selectAll('.node circle').filter(function(d) { return d.data.value === currentValue; });
                 const currentLink = d3.selectAll('.link').filter(function(d) {
                     return `${d.source.data.value}->${d.target.data.value}` === `${currentValue}->${result[index + 1]}`;
@@ -199,6 +204,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         .duration(900)
                         .style('stroke', '#6bcff4');
                 }
+
+                linksMust.transition()
+                    .duration(900)
+                    .style('stroke', '#6bcff4');
     
                 index++;
                 setTimeout(animateTraversal, 900); // Espera 1 segundo antes de continuar con el siguiente paso
@@ -255,6 +264,12 @@ document.addEventListener('DOMContentLoaded', function() {
         function animateTraversal() {
             if (index < result.length) {
                 const currentValue = result[index];
+                const linksMust = d3.selectAll('.link').filter(function(d) {
+                    // Color the link to the parent after visiting both children
+                    return d.target.data.value === currentValue && 
+                           (d.source.data.value === result[index + 1] || 
+                            (bt.root && bt.root.value === currentValue)); // Root has no parent
+                });
                 const currentNode = d3.selectAll('.node circle').filter(function(d) { return d.data.value === currentValue; });
                 const currentLink = d3.selectAll('.link').filter(function(d) {
                     return `${d.source.data.value}->${d.target.data.value}` === `${currentValue}->${result[index + 1]}`;
@@ -269,6 +284,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         .duration(900)
                         .style('stroke', '#6bcff4');
                 }
+
+                linksMust.transition()
+                    .duration(900)
+                    .style('stroke', '#6bcff4');
     
                 index++;
                 setTimeout(animateTraversal, 900); // Espera 1 segundo antes de continuar con el siguiente paso
@@ -325,6 +344,12 @@ document.addEventListener('DOMContentLoaded', function() {
         function animateTraversal() {
             if (index < result.length) {
                 const currentValue = result[index];
+                const linksMust = d3.selectAll('.link').filter(function(d) {
+                    // Color the link to the parent after visiting both children
+                    return d.target.data.value === currentValue && 
+                           (d.source.data.value === result[index + 1] || 
+                            (bt.root && bt.root.value === currentValue)); // Root has no parent
+                });
                 const currentNode = d3.selectAll('.node circle').filter(function(d) { return d.data.value === currentValue; });
                 const currentLink = d3.selectAll('.link').filter(function(d) {
                     return `${d.source.data.value}->${d.target.data.value}` === `${currentValue}->${result[index + 1]}`;
@@ -339,6 +364,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         .duration(900)
                         .style('stroke', '#6bcff4');
                 }
+
+                linksMust.transition()
+                    .duration(900)
+                    .style('stroke', '#6bcff4');
     
                 index++;
                 setTimeout(animateTraversal, 900); // Espera 1 segundo antes de continuar con el siguiente paso
@@ -375,7 +404,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Calcula el tamaño total necesario basado en la profundidad y el número de nodos
         const totalLevels = d3.max(nodesData.descendants(), d => d.depth) + 1;
         const nodeWidth = 20;
-        const nodeHeight = 150;
+        const nodeHeight = 120;
         const totalWidth = nodeWidth * nodesData.descendants().length;
         const totalHeight = nodeHeight * totalLevels;
     
