@@ -120,13 +120,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Agregar evento para generar árbol a partir de lista aleatoria
     document.getElementById('listaRandomBtn').addEventListener('click', function() {
         const quantity = parseInt(prompt('Ingrese la cantidad de números aleatorios a generar:'));
-        const min = parseInt(prompt('Ingrese el número más pequeño:'));
-        const max = parseInt(prompt('Ingrese el número más grande:'));
-        
-        if (!isNaN(quantity) && !isNaN(min) && !isNaN(max)) {
-            bt.root = null; // Limpiar el árbol actual
-            bt.insertRandomList(quantity, min, max); // Insertar números aleatorios
-            updateTree(); // Actualizar la visualización del árbol
+        if (!isNaN(quantity)) {
+            const min = parseInt(prompt('Ingrese el número más pequeño:'));
+            if (!isNaN(min)){
+                const max = parseInt(prompt('Ingrese el número más grande:'));
+                if (!isNaN(max)){
+                    bt.root = null; // Limpiar el árbol actual
+                    bt.insertRandomList(quantity, min, max); // Insertar números aleatorios
+                    updateTree(); // Actualizar la visualización del árbol
+                }
+            }
         } else {
             alert('Por favor, ingrese números válidos.');
         }
@@ -188,19 +191,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
     
                 currentNode.transition()
-                    .duration(1000)
+                    .duration(900)
                     .style('fill', '#6bcff4');
     
                 if (!currentLink.empty()) {
                     currentLink.transition()
-                        .duration(1000)
+                        .duration(900)
                         .style('stroke', '#6bcff4');
                 }
     
                 index++;
-                setTimeout(animateTraversal, 1000); // Espera 1 segundo antes de continuar con el siguiente paso
+                setTimeout(animateTraversal, 900); // Espera 1 segundo antes de continuar con el siguiente paso
             } else {
-                setTimeout(restoreOriginalColors, 1000); // Espera 1 segundo antes de restaurar los colores originales
+                setTimeout(restoreOriginalColors, 900); // Espera 1 segundo antes de restaurar los colores originales
             }
         }
     
@@ -258,19 +261,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
     
                 currentNode.transition()
-                    .duration(1000)
+                    .duration(900)
                     .style('fill', '#6bcff4');
     
                 if (!currentLink.empty()) {
                     currentLink.transition()
-                        .duration(1000)
+                        .duration(900)
                         .style('stroke', '#6bcff4');
                 }
     
                 index++;
-                setTimeout(animateTraversal, 1000); // Espera 1 segundo antes de continuar con el siguiente paso
+                setTimeout(animateTraversal, 900); // Espera 1 segundo antes de continuar con el siguiente paso
             } else {
-                setTimeout(restoreOriginalColors, 1000); // Espera 1 segundo antes de restaurar los colores originales
+                setTimeout(restoreOriginalColors, 900); // Espera 1 segundo antes de restaurar los colores originales
             }
         }
     
@@ -328,19 +331,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
     
                 currentNode.transition()
-                    .duration(1000)
+                    .duration(900)
                     .style('fill', '#6bcff4');
     
                 if (!currentLink.empty()) {
                     currentLink.transition()
-                        .duration(1000)
+                        .duration(900)
                         .style('stroke', '#6bcff4');
                 }
     
                 index++;
-                setTimeout(animateTraversal, 1000); // Espera 1 segundo antes de continuar con el siguiente paso
+                setTimeout(animateTraversal, 900); // Espera 1 segundo antes de continuar con el siguiente paso
             } else {
-                setTimeout(restoreOriginalColors, 1000); // Espera 1 segundo antes de restaurar los colores originales
+                setTimeout(restoreOriginalColors, 900); // Espera 1 segundo antes de restaurar los colores originales
             }
         }
     
