@@ -444,4 +444,53 @@ document.addEventListener('DOMContentLoaded', function() {
             return path;
         }
     }      
+
+
+    function exportarArbol(nombreArchivo) {
+        const datosExportar = {
+            root: bt.root
+        };
+        const datosStr = JSON.stringify(datosExportar);
+        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(datosStr);
+    
+        let exportarLink = document.createElement('a');
+        exportarLink.setAttribute('href', dataUri);
+        exportarLink.setAttribute('download', nombreArchivo || 'arbol_binario.json');
+        document.body.appendChild(exportarLink);
+    
+        exportarLink.click();
+        document.body.removeChild(exportarLink);
+    }
+    
+    document.getElementById('exportBtn').addEventListener('click', function() {
+        let nombreArchivo = prompt("Ingrese el nombre del archivo:", "arbol_binario.json");
+        exportarArbol(nombreArchivo);
+    });
+
+    function importarArbol(event) {
+        const archivo = event.target.files[0];
+        if (!archivo) {
+            return;
+        }
+    
+        const reader = new FileReader();
+        reader.onload = function(fileEvent) {
+            try {
+                const datos = JSON.parse(fileEvent.target.result);
+                bt.root = datos.root; // Asigna el árbol importado al árbol binario
+                updateTree(); // Actualiza la visualización del árbol
+            } catch (error) {
+                console.error('Error al importar el archivo', error);
+            }
+        };
+        reader.readAsText(archivo);
+    }
+
+    document.getElementById('importBtn').addEventListener('click', function() {
+        document.getElementById('importInput').click();
+    });
+    
+    document.getElementById('importInput').addEventListener('change', importarArbol);
+
+
 });
