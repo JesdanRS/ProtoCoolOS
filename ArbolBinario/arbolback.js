@@ -66,7 +66,9 @@ document.addEventListener('DOMContentLoaded', function() {
         insertRandomList(quantity, min, max) {
             for (let i = 0; i < quantity; i++) {
               const randomValue = Math.floor(Math.random() * (max - min + 1) + min);
-              this.insert(randomValue);
+              if (!bt.contains(randomValue)) {
+                this.insert(randomValue);
+              }
             }
         }
     }
@@ -135,35 +137,215 @@ document.addEventListener('DOMContentLoaded', function() {
         location.reload(); // Recargar la página para limpiar y refrescar el árbol
     });
 
-    // Agregar evento para ingresar recorrido Pre-Order
     document.getElementById('ordenarPreBtn').addEventListener('click', function() {
         document.getElementById('tipoOrden').innerText = "Pre-Order";
         const result = [];
+        const nodes = [];
         bt.preOrderTraverse(bt.root, function(value) {
             result.push(value);
         });
+    
         document.getElementById('orden').innerText = result.join(', ');
+    
+        // Colores originales de los nodos y enlaces
+        const originalColors = {
+            nodes: [],
+            links: []
+        };
+    
+        function saveOriginalColors() {
+            d3.selectAll('.node circle').each(function(d) {
+                originalColors.nodes.push({id: d.data.value, color: d3.select(this).style('fill')});
+            });
+    
+            d3.selectAll('.link').each(function(d) {
+                originalColors.links.push({id: `${d.source.data.value}->${d.target.data.value}`, color: d3.select(this).style('stroke')});
+            });
+        }
+    
+        function restoreOriginalColors() {
+            originalColors.nodes.forEach(function(node) {
+                d3.selectAll(`.node circle`).filter(function(d) { return d.data.value === node.id; })
+                    .style('fill', node.color);
+            });
+    
+            originalColors.links.forEach(function(link) {
+                d3.selectAll('.link').filter(function(d) { return `${d.source.data.value}->${d.target.data.value}` === link.id; })
+                    .style('stroke', link.color);
+            });
+        }
+    
+        saveOriginalColors();
+    
+        let index = 0;
+    
+        function animateTraversal() {
+            if (index < result.length) {
+                const currentValue = result[index];
+                const currentNode = d3.selectAll('.node circle').filter(function(d) { return d.data.value === currentValue; });
+                const currentLink = d3.selectAll('.link').filter(function(d) {
+                    return `${d.source.data.value}->${d.target.data.value}` === `${currentValue}->${result[index + 1]}`;
+                });
+    
+                currentNode.transition()
+                    .duration(1000)
+                    .style('fill', '#6bcff4');
+    
+                if (!currentLink.empty()) {
+                    currentLink.transition()
+                        .duration(1000)
+                        .style('stroke', '#6bcff4');
+                }
+    
+                index++;
+                setTimeout(animateTraversal, 1000); // Espera 1 segundo antes de continuar con el siguiente paso
+            } else {
+                setTimeout(restoreOriginalColors, 1000); // Espera 1 segundo antes de restaurar los colores originales
+            }
+        }
+    
+        animateTraversal();
     });
 
-    // Agregar evento para ingresar recorrido In-Order
     document.getElementById('ordenarInBtn').addEventListener('click', function() {
         document.getElementById('tipoOrden').innerText = "In-Order";
         const result = [];
+        const nodes = [];
         bt.inOrderTraverse(bt.root, function(value) {
             result.push(value);
         });
+    
         document.getElementById('orden').innerText = result.join(', ');
+    
+        // Colores originales de los nodos y enlaces
+        const originalColors = {
+            nodes: [],
+            links: []
+        };
+    
+        function saveOriginalColors() {
+            d3.selectAll('.node circle').each(function(d) {
+                originalColors.nodes.push({id: d.data.value, color: d3.select(this).style('fill')});
+            });
+    
+            d3.selectAll('.link').each(function(d) {
+                originalColors.links.push({id: `${d.source.data.value}->${d.target.data.value}`, color: d3.select(this).style('stroke')});
+            });
+        }
+    
+        function restoreOriginalColors() {
+            originalColors.nodes.forEach(function(node) {
+                d3.selectAll(`.node circle`).filter(function(d) { return d.data.value === node.id; })
+                    .style('fill', node.color);
+            });
+    
+            originalColors.links.forEach(function(link) {
+                d3.selectAll('.link').filter(function(d) { return `${d.source.data.value}->${d.target.data.value}` === link.id; })
+                    .style('stroke', link.color);
+            });
+        }
+    
+        saveOriginalColors();
+    
+        let index = 0;
+    
+        function animateTraversal() {
+            if (index < result.length) {
+                const currentValue = result[index];
+                const currentNode = d3.selectAll('.node circle').filter(function(d) { return d.data.value === currentValue; });
+                const currentLink = d3.selectAll('.link').filter(function(d) {
+                    return `${d.source.data.value}->${d.target.data.value}` === `${currentValue}->${result[index + 1]}`;
+                });
+    
+                currentNode.transition()
+                    .duration(1000)
+                    .style('fill', '#6bcff4');
+    
+                if (!currentLink.empty()) {
+                    currentLink.transition()
+                        .duration(1000)
+                        .style('stroke', '#6bcff4');
+                }
+    
+                index++;
+                setTimeout(animateTraversal, 1000); // Espera 1 segundo antes de continuar con el siguiente paso
+            } else {
+                setTimeout(restoreOriginalColors, 1000); // Espera 1 segundo antes de restaurar los colores originales
+            }
+        }
+    
+        animateTraversal();
     });
-
-    // Agregar evento para ingresar recorrido Post-Order
+    
     document.getElementById('ordenarPostBtn').addEventListener('click', function() {
         document.getElementById('tipoOrden').innerText = "Post-Order";
         const result = [];
+        const nodes = [];
         bt.postOrderTraverse(bt.root, function(value) {
             result.push(value);
         });
+    
         document.getElementById('orden').innerText = result.join(', ');
-    });
+    
+        // Colores originales de los nodos y enlaces
+        const originalColors = {
+            nodes: [],
+            links: []
+        };
+    
+        function saveOriginalColors() {
+            d3.selectAll('.node circle').each(function(d) {
+                originalColors.nodes.push({id: d.data.value, color: d3.select(this).style('fill')});
+            });
+    
+            d3.selectAll('.link').each(function(d) {
+                originalColors.links.push({id: `${d.source.data.value}->${d.target.data.value}`, color: d3.select(this).style('stroke')});
+            });
+        }
+    
+        function restoreOriginalColors() {
+            originalColors.nodes.forEach(function(node) {
+                d3.selectAll(`.node circle`).filter(function(d) { return d.data.value === node.id; })
+                    .style('fill', node.color);
+            });
+    
+            originalColors.links.forEach(function(link) {
+                d3.selectAll('.link').filter(function(d) { return `${d.source.data.value}->${d.target.data.value}` === link.id; })
+                    .style('stroke', link.color);
+            });
+        }
+    
+        saveOriginalColors();
+    
+        let index = 0;
+    
+        function animateTraversal() {
+            if (index < result.length) {
+                const currentValue = result[index];
+                const currentNode = d3.selectAll('.node circle').filter(function(d) { return d.data.value === currentValue; });
+                const currentLink = d3.selectAll('.link').filter(function(d) {
+                    return `${d.source.data.value}->${d.target.data.value}` === `${currentValue}->${result[index + 1]}`;
+                });
+    
+                currentNode.transition()
+                    .duration(1000)
+                    .style('fill', '#6bcff4');
+    
+                if (!currentLink.empty()) {
+                    currentLink.transition()
+                        .duration(1000)
+                        .style('stroke', '#6bcff4');
+                }
+    
+                index++;
+                setTimeout(animateTraversal, 1000); // Espera 1 segundo antes de continuar con el siguiente paso
+            } else {
+                setTimeout(restoreOriginalColors, 1000); // Espera 1 segundo antes de restaurar los colores originales
+            }
+        }
+    
+        animateTraversal();
+    });    
 
     function drawTree(){
         // Configura el lienzo SVG
