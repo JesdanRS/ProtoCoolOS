@@ -71,6 +71,33 @@ document.addEventListener('DOMContentLoaded', function() {
               }
             }
         }
+
+        remove(value) {
+            this.root = this.removeNode(this.root, value);
+        }
+    
+        // Método modificado para eliminar el nodo y sus hijos directamente
+        removeNode(node, value) {
+            if (node === null) {
+                return null;
+            }
+            if (value === node.value) {
+                // Si el nodo a eliminar es el que se buscaba, se elimina todo el subárbol
+                return null; // Elimina el nodo y sus hijos
+            } else if (value < node.value) {
+                node.left = this.removeNode(node.left, value);
+            } else {
+                node.right = this.removeNode(node.right, value);
+            }
+            return node;
+        }
+
+        findMinNode(node) {
+            if(node.left === null)
+                return node;
+            else
+                return this.findMinNode(node.left);
+        }
     }
       
     // Initialize your tree
@@ -515,8 +542,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const nodeEnter = node.enter().append('g')
         .attr('class', 'node')
         .attr("transform", (d) => { 
-            // Nota el intercambio de d.x por d.y para posicionar correctamente
             return "translate(" + d.y + "," + d.x + ")"; 
+        })
+        .on('contextmenu', function(event, d) {
+            event.preventDefault(); // Previene el menú contextual predeterminado
+            bt.remove(d.data.value); // Llama al método remove con el valor del nodo seleccionado
+            updateTree(); // Actualiza el árbol para reflejar los cambios
         });
 
         nodeEnter.append('circle')
