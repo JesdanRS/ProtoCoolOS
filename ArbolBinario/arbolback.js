@@ -375,9 +375,71 @@ document.addEventListener('DOMContentLoaded', function() {
                 setTimeout(restoreOriginalColors, 900); // Espera 1 segundo antes de restaurar los colores originales
             }
         }
-    
+
         animateTraversal();
-    });    
+    });
+
+    // Obtén el modal
+    var modal = document.getElementById("modalContainer");
+
+    document.getElementById('listaCompBtn').addEventListener('click', function() {
+        if (!bt.isEmpty()) { // Verifica si el árbol no está vacío
+            modal.style.display = "block";
+            compararInPost(bt);
+        } else {
+            alert('El árbol está vacío.');
+        }
+    });
+    
+    // Añadir método isEmpty a BinaryTree para verificar si el árbol está vacío
+    BinaryTree.prototype.isEmpty = function() {
+        return this.root === null;
+    };      
+
+    // Obtén el elemento <span> que cierra el modal
+    var span = document.getElementsByClassName("close")[0];
+
+    // Cuando el usuario haga clic en <span> (x), cierra el modal
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    // Cuando el usuario haga clic en cualquier lugar fuera del modal, ciérralo
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    function compararInPost(bt) {
+        const inOrder = [];
+        const postOrder = [];
+        
+        // Llenar las listas inOrder y postOrder
+        bt.inOrderTraverse(bt.root, value => inOrder.push(value));
+        bt.postOrderTraverse(bt.root, value => postOrder.push(value));
+        
+        function buildTree(inOrder, postOrder) {
+            if(inOrder.length === 0 || postOrder.length === 0) return null;
+            
+            const rootVal = postOrder[postOrder.length - 1];
+            const root = new TreeNode(rootVal);
+            
+            const index = inOrder.indexOf(rootVal);
+            
+            root.left = buildTree(inOrder.slice(0, index), postOrder.slice(0, index));
+            root.right = buildTree(inOrder.slice(index + 1), postOrder.slice(index, -1));
+            
+            return root;
+        }
+
+        document.getElementById('Inorden').innerText = inOrder.join(', ');
+        document.getElementById('Postorden').innerText = postOrder.join(', ');
+        
+        bt.root = buildTree(inOrder, postOrder);
+        // Suponiendo que existe una función updateTree para actualizar la visualización del árbol
+        updateTree();
+    }
 
     function drawTree(){
         // Configura el lienzo SVG
@@ -523,6 +585,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     document.getElementById('importInput').addEventListener('change', importarArbol);
-
-
 });
+    

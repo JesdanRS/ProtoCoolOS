@@ -17,7 +17,6 @@
 </head>
     
 <body>
-
     <div class="main">
         <!-- Navbar -->
         <div class="navbar">
@@ -78,6 +77,7 @@
                 <p id="text"> CREAR ÁRBOL</p>
                 <button id="agregarNumBtn">Agregar Número</button>
                 <button id="listaRandomBtn">Generar Random</button>
+                <button id="listaCompBtn">Comparar In y Post Order</button>
                 <!-- Creación árbol a partir de listas ordenadas -->
                 <!--
                 <p id="text"> CREAR CON LISTAS</p>
@@ -128,8 +128,20 @@
         <!-- End of Botón help -->
 
     </div>
-    <script src="tutoArBi.js"></script>
 
+    <div id="modalContainer" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="arbol-container">
+                <div id="tree"></div>
+                <div id="resultado-container">
+                    <p>In-Order: <span id="Inorden">--</span></p>
+                    <p>Post-Order: <span id="Postorden">--</span></p>
+                </div>
+            </div>
+        </div>
+    </div>    
+    <script src="tutoArBi.js"></script>    
 </body>
 
 </html>

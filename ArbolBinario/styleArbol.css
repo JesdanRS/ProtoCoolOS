@@ -619,7 +619,7 @@ Estilo de botón HELP
 }
 
 #agregarNumBtn, #listaRandomBtn, #ordenarPreBtn, #ordenarInBtn, #ordenarPostBtn,
-#ingresarPreBtn, #ingresarInBtn, #ingresarPostBtn, #importBtn, #exportBtn{
+#listaCompBtn, #importBtn, #exportBtn{
     cursor: pointer;
     margin-left: 10px;
     padding: 8px 38px;
@@ -680,7 +680,7 @@ Estilo de botón HELP
 
 #arbol-container {
     width: 800px;
-    height: 500px;
+    height: 600px;
 }
 
 .tooltip {
@@ -770,4 +770,39 @@ Estilo de botón HELP
     100% {
         box-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #7e22ce, 0 0 40px #7e22ce;
     }
+}
+
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
 }
