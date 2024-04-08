@@ -195,9 +195,10 @@ document.addEventListener('DOMContentLoaded', function() {
             matrizBody.innerHTML = '';
             return; // Salir de la función si no hay nodos o aristas
         }
-        // Crear un conjunto único para nodos de inicio y destino
-        let nodosInicio = new Set();
-        let nodosDestino = new Set();
+
+        // Asegurándose de que solo se usan nodos existentes
+        let nodosInicio = new Set(aristas.get().map(arista => arista.from).filter(id => nodos.get(id)));
+        let nodosDestino = new Set(aristas.get().map(arista => arista.to).filter(id => nodos.get(id)));
     
         // Llenar los conjuntos basados en las aristas actuales
         aristas.get().forEach(arista => {
@@ -231,6 +232,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function generarHTMLMatriz(matriz, nodosInicioIds, nodosDestinoIds) {
+        nodosInicioIds = nodosInicioIds.filter(id => nodos.get(id) != null);
+        nodosDestinoIds = nodosDestinoIds.filter(id => nodos.get(id) != null);
+
         if (nodosInicioIds.length === 0 || nodosDestinoIds.length === 0) {
             matrizHeader.innerHTML = '';
             matrizBody.innerHTML = '';
