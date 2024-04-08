@@ -816,3 +816,72 @@ Estilo de botón HELP
     /* Quitar 'display: none;' para que sea visible desde el inicio */
     z-index: 1;
 }
+.tooltip {
+    background-color: #252954; /* Color de fondo como el cuadro de ayuda */
+    color: white; /* Texto en color blanco */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    position: absolute;
+    z-index: 1000; /* Asegura que el tooltip esté por encima de otros elementos */
+    width: 300px; /* O ajusta según la necesidad */
+}
+.tooltip button {
+    cursor: pointer;
+    padding: 8px 38px;
+    border-radius: 18px;
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: -1px;
+    color: #fff;
+    border: none;
+    background: linear-gradient(95deg, #7e22ce 3.2%, #3b82f6 99.5%);
+    font-family: 'Poppins', sans-serif;
+    margin-top: 15px;
+}
+.tooltip button:not(:last-child) {
+    margin-right: 10px;
+}
+.resaltar {
+    outline: 2px solid #f2eff5; /* Añade un contorno para resaltar */
+    outline-offset: 2px;
+    box-shadow: 0 0 8px #f4f3f6; /* Añade un resplandor para mayor visibilidad */
+    z-index: 100000;
+}
+
+.tooltip button {
+    display: inline-block;
+    margin: 5px;
+    font-size: 16px;
+}
+/* Ajusta estos estilos según la librería de iconos que uses */
+.anterior-icono, .siguiente-icono, .finalizar-icono {
+    display: inline-block;
+    margin-right: 8px;
+}
+/* Estilos adicionales para los botones, si es necesario */
+
+#capaDesenfoque {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5); /* Usa un color de fondo semitransparente si deseas oscurecer el fondo junto con el desenfoque */
+    z-index: 999; /* Asegúrate de que esto sea menor que el z-index de .tooltip y .resaltar */
+    backdrop-filter: blur(4px);
+}
+
+.tooltip, .resaltar {
+    z-index: 10000; /* Mayor que el z-index de #capaDesenfoque para asegurar que se muestren por encima */
+}
+
+
+@keyframes resplandor {
+    0% {
+        box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #7e22ce, 0 0 20px #7e22ce;
+    }
+    100% {
+        box-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #7e22ce, 0 0 40px #7e22ce;
+    }
+}

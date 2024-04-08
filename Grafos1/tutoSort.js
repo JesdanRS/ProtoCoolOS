@@ -5,62 +5,35 @@ document.addEventListener('DOMContentLoaded', function() {
             mensaje: 'Aquí puedes navegar a diferentes secciones de nuestro sitio.',
         },
         {
-            elemento: document.getElementById('arbol-container'),
-            mensaje: 'Este es el área central de interacción donde puedes ver y editar los grafos.',
+            elemento: document.getElementById('graficoBarrasContainer'),
+            mensaje: 'Este es el área central de interacción donde puedes ver la interaccion de las barras.',
             posicionMedio: true,
         },
         {
-            elemento: document.getElementById('opciones-container'),
-            mensaje: 'Aquí puedes seleccionar la opcion que desees realizar con los arboles.',
-            posicionMedio: true,
-
-        },
-        {
-            elemento: document.getElementById('agregarNumBtn'),
-            mensaje: 'Con este boton puedes agregar un nodo con su valor, uno por uno.',
+            elemento: document.getElementById('agregarListaBtn'),
+            mensaje: 'Usa este botón para agregar la lista de valores.',
         },
         {
             elemento: document.getElementById('listaRandomBtn'),
-            mensaje: 'Con este boton puedes generar numeros random en cantidad y de forma rápida.',
+            mensaje: 'Con este boton puedes generar valores random en la lista .',
         },
         {
-            elemento: document.getElementById('ordenarPreBtn'),
-            mensaje: 'Con este boton se aplicara el PRE ORDER en el arbol.',
+            elemento: document.getElementById('ordenarBtn'),
+            mensaje: 'Ordena los valores de menor a mayor valor.',
         },
         {
-            elemento: document.getElementById('ordenarInBtn'),
-            mensaje: 'Con este boton se aplicara el IN ORDER en el arbol.',
-        },
-        {
-            elemento: document.getElementById('ordenarPostBtn'),
-            mensaje: 'Con este boton se aplicara el POST ORDER en el arbol.',
-        },
-        {
-            elemento: document.getElementById('exportBtn'),
-            mensaje: 'Guarda el estado actual de tu arbol aquí.',
-        },
-        {
-            elemento: document.getElementById('importBtn'),
-            mensaje: 'Carga un arbol previamente guardado.',
+            elemento: document.getElementById('ordenarDesBtn'),
+            mensaje: 'Ordena los valores de mayor a menor valor.',
         },
         {
             elemento: document.getElementById('limpiarBtn'),
             mensaje: 'Limpia el lienzo y empieza de nuevo.',
         },
         {
-            elemento: document.getElementById('PostInOrderBtn'),
-            mensaje: 'Con este boton puedes combinar el POST e IN en el orden  .',
-        },
-        {
             elemento: document.getElementById('resultado-container'),
             mensaje: 'En este contenedor aparecera el resultado del arbol con el orden seleccionado',
-        },
-        {
-            elemento: document.getElementById('contenedor-general'),
-            mensaje: '¡OJO! Recuerda que para seleccionar otro tipo de orden o acción, debes esperar a que la animacion del arbol termine el ordenamiento de los valores.',
-            posicionMedio: true,
-
         }
+
 
     ];
     let pasoActual = 0;
@@ -87,7 +60,8 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             tooltip.innerHTML += `<button onclick="finalizarTutorial()"><span style="margin-left: 5px;">✓</span></button>`;
         }
-        
+        if (pasoActual === 1) { // Recordando que los índices comienzan en 0
+        }
         tooltip.innerHTML += `</div>`;
         document.body.appendChild(tooltip);
 
