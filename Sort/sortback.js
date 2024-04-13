@@ -1,5 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     //DECLARACIONES
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.style.display = 'none';
+    document.body.appendChild(fileInput);
     const agregarListaBtn = document.getElementById('agregarListaBtn');
     const listaRandomBtn = document.getElementById('listaRandomBtn');
     const limpiarBtn = document.getElementById('limpiarBtn');
@@ -480,9 +484,51 @@ document.addEventListener('DOMContentLoaded', function() {
         listaNumeros = [];
         document.getElementById('sortText').textContent = "--";
         document.getElementById('tiempoOrdenamiento').textContent = "--";
-        document.getElementById('listaOriginal').textContent = "--"; // Limpia la lista original
+        document.getElementById('listaOriginal').textContent = "--";
         document.getElementById('listaOrdenada').textContent = "--";
         dibujarGraficoBarras(listaNumeros);
+    });
+
+    guardarBtn.addEventListener('click', function() {
+        if (listaNumeros.length > 0) {
+            const nombreArchivo = prompt("Ingrese el nombre del archivo para guardar:", "miListaNumeros");
+            if (nombreArchivo) {
+                const blob = new Blob([JSON.stringify(listaNumeros)], {type: "application/json"});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${nombreArchivo}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+        } else {
+            alert('No hay números para guardar.');
+        }
+    });
+
+    cargarBtn.addEventListener('click', function() {
+        document.getElementById('sortText').textContent = "--";
+        document.getElementById('tiempoOrdenamiento').textContent = "--";
+        document.getElementById('listaOriginal').textContent = "--";
+        document.getElementById('listaOrdenada').textContent = "--";
+        fileInput.click();
+        fileInput.onchange = function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        listaNumeros = JSON.parse(event.target.result);
+                        document.getElementById('listaOriginal').textContent = listaNumeros.join(", ");
+                        dibujarGraficoBarras(listaNumeros);
+                        alert('Lista cargada correctamente.');
+                    } catch (e) {
+                        alert('El archivo no es válido.');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        };
     });
 
     dibujarGraficoBarras(listaNumeros);
