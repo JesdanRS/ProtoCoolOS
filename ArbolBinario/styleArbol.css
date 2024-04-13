@@ -619,7 +619,7 @@ Estilo de botón HELP
 }
 
 #agregarNumBtn, #listaRandomBtn, #ordenarPreBtn, #ordenarInBtn, #ordenarPostBtn,
-#listaCompBtn, #importBtn, #exportBtn{
+#listaCompBtn, #importBtn, #exportBtn, #ingresarPreBtn, #ingresarInBtn, #ingresarPostBtn{
     cursor: pointer;
     margin-left: 10px;
     padding: 8px 38px;

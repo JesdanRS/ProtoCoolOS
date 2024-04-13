@@ -100,10 +100,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
       
-    // Initialize your tree
+    //INICIALIZAR ÁRBOL
     const bt = new BinaryTree();
 
-    // Agrega esta función para actualizar el árbol
+    //ACTUALIZAR DIBUJO DEL ÁRBOL
     function updateTree() {
         const nodesData = d3.hierarchy(bt.root, function(d) {
             return [d.left, d.right].filter(n => n !== null);
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
         drawTree(nodesData); // Pasar nodesData a drawTree
     }
 
-    // Asigna un manejador de eventos al botón para agregar números al árbol
+    //AGREGAR NODO
     document.getElementById('agregarNumBtn').addEventListener('click', function() {
         const num = prompt('Introduce nuevo nodo:');
         const value = parseInt(num);
@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    // Agregar evento para generar árbol a partir de lista aleatoria
+    //GENERAR ÁRBOL CON LISTA ALEATORIA
     document.getElementById('listaRandomBtn').addEventListener('click', function() {
         const quantity = parseInt(prompt('Ingrese la cantidad de números aleatorios a generar:'));
         if (!isNaN(quantity)) {
@@ -162,11 +162,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Agregar evento para limpiar y refrescar la página
+    //LIMPIAR ÁRBOL
     document.getElementById('limpiarBtn').addEventListener('click', function() {
         location.reload(); // Recargar la página para limpiar y refrescar el árbol
     });
 
+    //ORDENAR ÁRBOL: PRE ORDER
     document.getElementById('ordenarPreBtn').addEventListener('click', function() {
         document.getElementById('tipoOrden').innerText = "Pre-Order";
         const result = [];
@@ -246,6 +247,7 @@ document.addEventListener('DOMContentLoaded', function() {
         animateTraversal();
     });
 
+    //ORDENAR ÁRBOL: IN ORDER
     document.getElementById('ordenarInBtn').addEventListener('click', function() {
         document.getElementById('tipoOrden').innerText = "In-Order";
         const result = [];
@@ -326,6 +328,7 @@ document.addEventListener('DOMContentLoaded', function() {
         animateTraversal();
     });
     
+    //ORDENAR ÁRBOL: POST ORDER
     document.getElementById('ordenarPostBtn').addEventListener('click', function() {
         document.getElementById('tipoOrden').innerText = "Post-Order";
         const result = [];
@@ -406,68 +409,7 @@ document.addEventListener('DOMContentLoaded', function() {
         animateTraversal();
     });
 
-    // Obtén el modal
-    var modal = document.getElementById("modalContainer");
-
-    document.getElementById('listaCompBtn').addEventListener('click', function() {
-        if (!bt.isEmpty()) { // Verifica si el árbol no está vacío
-            modal.style.display = "block";
-            compararInPost(bt);
-        } else {
-            alert('El árbol está vacío.');
-        }
-    });
-    
-    // Añadir método isEmpty a BinaryTree para verificar si el árbol está vacío
-    BinaryTree.prototype.isEmpty = function() {
-        return this.root === null;
-    };      
-
-    // Obtén el elemento <span> que cierra el modal
-    var span = document.getElementsByClassName("close")[0];
-
-    // Cuando el usuario haga clic en <span> (x), cierra el modal
-    span.onclick = function() {
-        modal.style.display = "none";
-    }
-
-    // Cuando el usuario haga clic en cualquier lugar fuera del modal, ciérralo
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-
-    function compararInPost(bt) {
-        const inOrder = [];
-        const postOrder = [];
-        
-        // Llenar las listas inOrder y postOrder
-        bt.inOrderTraverse(bt.root, value => inOrder.push(value));
-        bt.postOrderTraverse(bt.root, value => postOrder.push(value));
-        
-        function buildTree(inOrder, postOrder) {
-            if(inOrder.length === 0 || postOrder.length === 0) return null;
-            
-            const rootVal = postOrder[postOrder.length - 1];
-            const root = new TreeNode(rootVal);
-            
-            const index = inOrder.indexOf(rootVal);
-            
-            root.left = buildTree(inOrder.slice(0, index), postOrder.slice(0, index));
-            root.right = buildTree(inOrder.slice(index + 1), postOrder.slice(index, -1));
-            
-            return root;
-        }
-
-        document.getElementById('Inorden').innerText = inOrder.join(', ');
-        document.getElementById('Postorden').innerText = postOrder.join(', ');
-        
-        bt.root = buildTree(inOrder, postOrder);
-        // Suponiendo que existe una función updateTree para actualizar la visualización del árbol
-        updateTree();
-    }
-
+    //DIBUJAR ÁRBOL
     function drawTree(){
         // Configura el lienzo SVG
         const margin = {top: 50, right: 20, bottom: 20, left: 20},
@@ -519,11 +461,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Variable i para la identificación del nodo
         let i = 0;
 
-        // Sección de enlaces
+        // Enlaces
         const link = svg.selectAll('path.link')
             .data(links, (d) => { return d.target.id; });
 
-        // Agregando los enlaces al SVG
         const linkEnter = link.enter().append('path')
             .attr("class", "link")
             .style("stroke", "white") // Color visible de los enlaces
@@ -534,11 +475,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     + "L" + d.target.y + "," + d.target.x;
         });
 
-        // Nodes section
+        // Nodos
         const node = svg.selectAll('g.node')
             .data(nodes, (d) => { return d.id || (d.id = ++i); });
-
-        // Para los nodos
         const nodeEnter = node.enter().append('g')
         .attr('class', 'node')
         .attr("transform", (d) => { 
@@ -570,7 +509,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }      
 
-
+    //EXPORTAR E IMPORTAR ÁRBOL
     function exportarArbol(nombreArchivo) {
         const datosExportar = {
             root: bt.root
