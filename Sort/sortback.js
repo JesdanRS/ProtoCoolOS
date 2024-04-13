@@ -52,6 +52,59 @@ document.addEventListener('DOMContentLoaded', function() {
     //SELECTION SORT
 
     //INSERTION SORT
+    async function visualizarInsertionSort(listaNumeros) {
+        let arr = [].concat(listaNumeros);
+        let startTime = performance.now(); // Captura el tiempo de inicio
+    
+        for (let i = 1; i < arr.length; i++) {
+            let key = arr[i];
+            let j = i - 1;
+    
+            /* Mueve los elementos de arr[0..i-1], que son mayores que key,
+               a una posición adelante de su posición actual */
+            while (j >= 0 && arr[j] > key) {
+                arr[j + 1] = arr[j];
+                j = j - 1;
+                dibujarGraficoBarras(arr, [j + 1, i]); // Visualizar el cambio
+                await sleep(100); // Pausa para visualización
+            }
+            arr[j + 1] = key;
+            dibujarGraficoBarras(arr); // Visualizar el cambio
+            await sleep(100); // Pausa para visualización
+        }
+    
+        let endTime = performance.now(); // Captura el tiempo de finalización
+        let tiempoOrdenamiento = (endTime - startTime) / 1000; // Calcula la diferencia y convierte a segundos
+        document.getElementById('tiempoOrdenamiento').textContent = tiempoOrdenamiento.toFixed(2); // Muestra el tiempo en el elemento del DOM
+        document.getElementById('listaOrdenada').textContent = arr.join(", ");
+    }
+
+    async function visualizarInsertionSortDesc(listaNumeros) {
+        let arr = [].concat(listaNumeros);
+        let startTime = performance.now(); // Captura el tiempo de inicio
+        
+        for (let i = 1; i < arr.length; i++) {
+            let key = arr[i];
+            let j = i - 1;
+    
+            // Mueve los elementos de arr[0..i-1] que son menores que
+            // key a una posición adelante de su posición actual
+            while (j >= 0 && arr[j] < key) {
+                arr[j + 1] = arr[j];
+                dibujarGraficoBarras(arr, [j + 1, j]); // Visualización de la posición que está siendo comparada
+                await sleep(100); // Pausa para visualización
+                j = j - 1;
+            }
+            arr[j + 1] = key;
+            dibujarGraficoBarras(arr, [j + 1]); // Visualización de la inserción
+            await sleep(100); // Pausa para visualización
+        }
+        
+        let endTime = performance.now(); // Captura el tiempo de finalización
+        let tiempoOrdenamiento = (endTime - startTime) / 1000; // Calcula la diferencia y convierte a segundos
+        document.getElementById('tiempoOrdenamiento').textContent = tiempoOrdenamiento.toFixed(2); // Muestra el tiempo en el elemento del DOM
+        document.getElementById('listaOrdenada').textContent = arr.join(", ");
+    }
 
     //SHELL SORT
     async function visualizarShellSort(listaNumeros) {
@@ -294,6 +347,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         document.getElementById('tiempoOrdenamiento').textContent = "--";
         document.getElementById('listaOrdenada').textContent = "--";
+    });
+
+    //LISTENERS SELECTION SORT
+
+
+    //LISTENERS INSERTION SORT
+    IordenarBtn.addEventListener('click', async function() {
+        document.getElementById('tiempoOrdenamiento').textContent = "--";
+        document.getElementById('listaOrdenada').textContent = "--";
+        await visualizarInsertionSort(listaNumeros);
+        actualizarResultado();
+    });
+
+    IordenarDesBtn.addEventListener('click', async function() {
+        document.getElementById('tiempoOrdenamiento').textContent = "--";
+        document.getElementById('listaOrdenada').textContent = "--";
+        await visualizarInsertionSortDesc(listaNumeros);
+        actualizarResultado();
     });
 
     //LISTENERS SHELL SORT
