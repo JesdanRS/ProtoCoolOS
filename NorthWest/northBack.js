@@ -388,33 +388,33 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.getElementById('minimizarBtn').addEventListener('click', function(){
-         // Obtener la última fila y la última columna de la matriz
-    const ultimaFila = [];
-    const ultimaColumna = [];
-    const matriz = obtenerMatrizActual(); // Función para obtener la matriz actual, deberás implementarla
-
-    // Llenar la última fila y la última columna
-    for (let i = 0; i < matriz.length; i++) {
-        ultimaFila.push(matriz[i][matriz[i].length - 1]);
-    }
-    for (let j = 0; j < matriz[0].length; j++) {
-        ultimaColumna.push(matriz[matriz.length - 1][j]);
-    }
-
-    // Sumar los elementos de la última fila y la última columna
-    const sumaUltimaFila = ultimaFila.reduce((acc, val) => acc + val, 0);
-    const sumaUltimaColumna = ultimaColumna.reduce((acc, val) => acc + val, 0);
-
-    // Verificar si las sumas son iguales
-    if (sumaUltimaFila === sumaUltimaColumna) {
-        // Realizar el algoritmo del método de esquina Noroeste
-        const resultado = metodoEsquinaNoroeste(matriz);
-        mostrarResultado(resultado);
-    } else {
-        // Mostrar un mensaje indicando que los costos son diferentes
-        alert('No se puede resolver con el método de esquina Noroeste porque las sumas de la última fila y columna son diferentes.');
-    }
-    });
+        // Obtener la última fila y la última columna de la matriz
+       const ultimaFila = [];
+       const ultimaColumna = [];
+       const matriz = obtenerMatrizActual(); // Función para obtener la matriz actual, deberás implementarla
+   
+       // Llenar la última fila y la última columna
+       for (let i = 0; i < matriz.length; i++) {
+           ultimaFila.push(matriz[i][matriz[i].length - 1]);
+       }
+       for (let j = 0; j < matriz[0].length; j++) {
+           ultimaColumna.push(matriz[matriz.length - 1][j]);
+       }
+   
+       // Sumar los elementos de la última fila y la última columna
+       const sumaUltimaFila = ultimaFila.reduce((acc, val) => acc + val, 0);
+       const sumaUltimaColumna = ultimaColumna.reduce((acc, val) => acc + val, 0);
+   
+       // Verificar si las sumas son iguales
+       if (sumaUltimaFila === sumaUltimaColumna) {
+           // Realizar el algoritmo del método de esquina Noroeste
+           const resultado = metodoEsquinaNoroeste(matriz);
+           mostrarResultado(resultado);
+       } else {
+           // Mostrar un mensaje indicando que los costos son diferentes
+           alert('No se puede resolver con el método de esquina Noroeste porque las sumas de la última fila y columna son diferentes.');
+       }
+   });
 
 
     function obtenerMatrizActual() {
@@ -491,41 +491,57 @@ document.addEventListener('DOMContentLoaded', function() {
    
 
     function mostrarResultado(asignaciones) {
-        // Obtener el contenedor donde se mostrará el resultado
-        const resultadoContainer = document.getElementById('resultado-container');
-    
-        // Obtener los nombres de las filas y las columnas
+        // Obtener los nombres de filas y columnas
         const nombresFilas = obtenerNombresFilas();
         const nombresColumnas = obtenerNombresColumnas();
     
-        // Crear una cadena para almacenar la salida formateada
-        let salida = '';
+        // Obtener el contenedor donde se mostrará el resultado
+        const resultadoContainer = document.getElementById('resultado-container');
+    
+        // Crear una cadena para almacenar la salida formateada como una tabla HTML
+        let tablaHTML = '<table class="matrix-table">';
+    
+        // Agregar encabezados de columnas
+        tablaHTML += '<tr><th></th>';
+        nombresColumnas.forEach(nombre => {
+            tablaHTML += `<th>${nombre}</th>`;
+        });
     
         // Iterar sobre las filas de la matriz de asignaciones
-        for (let i = 0; i < asignaciones.length; i++) {
-            // Obtener el nombre de la fila actual
-            const nombreFila = nombresFilas[i];
-    
+        asignaciones.forEach((fila, i) => {
+            tablaHTML += '<tr>';
+            tablaHTML += `<th>${nombresFilas[i]}</th>`; // Agregar el nombre de la fila
             // Iterar sobre las columnas de la matriz de asignaciones
-            for (let j = 0; j < asignaciones[i].length; j++) {
-                // Obtener el nombre de la columna actual
-                const nombreColumna = nombresColumnas[j];
+            fila.forEach(asignacion => {
+                // Agregar una clase CSS especial si el espacio tiene resultado
+                const claseResultado = asignacion !== 0 ? 'resultado' : '';
+                tablaHTML += `<td class="${claseResultado}">${asignacion}</td>`;
+            });
+            const totalFila = fila.reduce((acc, asignacion) => acc + asignacion, 0);
+            tablaHTML += `<td>${totalFila}</td>`;
+            tablaHTML += '</tr>';
+        });
     
-                // Obtener el valor de la asignación en la posición (i, j)
-                const asignacion = asignaciones[i][j];
+        // Agregar la última fila (total por columna)
+        tablaHTML += '<tr><th>Oferta</th>';
+        asignaciones[0].forEach((_, j) => {
+            const totalColumna = asignaciones.reduce((acc, fila) => acc + fila[j], 0);
+            tablaHTML += `<td>${totalColumna}</td>`;
+        });
+        const totalGeneral = asignaciones.flat().reduce((acc, asignacion) => acc + asignacion, 0);
+        tablaHTML += `<td>${totalGeneral}</td>`;
+        tablaHTML += '</tr>';
     
-                // Agregar la asignación formateada a la salida si hay una asignación en esta posición
-                if (asignacion > 0) {
-                    salida += `${nombreFila}->${nombreColumna}(${asignacion})\t`;
-                }
-            }
-        }
+        tablaHTML += '</table>';
     
-        // Mostrar la salida en el contenedor
-        resultadoContainer.textContent = salida;
+        // Mostrar la tabla en el contenedor
+        resultadoContainer.innerHTML = tablaHTML;
         resultadoContainer.style.display = 'block'; // Mostrar el contenedor si estaba oculto
     }
-
+    
+    
+    
+    
     function obtenerNombresFilas() {
         const filas = document.querySelectorAll('#matriz-body tr');
         const nombresFilas = Array.from(filas).map(fila => fila.firstChild.textContent.trim());

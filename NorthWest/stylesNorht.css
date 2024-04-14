@@ -815,3 +815,21 @@ Estilo de botón HELP
         box-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #7e22ce, 0 0 40px #7e22ce;
     }
 }
+
+
+
+.matrix-table {
+    border-collapse: collapse;
+}
+
+.matrix-table th,
+.matrix-table td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: center;
+}
+
+.resultado {
+    background-color: lightgreen; /* Define el color de fondo para los espacios con resultado */
+}
+
