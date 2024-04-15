@@ -653,7 +653,7 @@ Estilo de botón HELP
     background: linear-gradient(95deg, #7e22ce 3.2%, #3b82f6 99.5%);
     font-family: 'Poppins', sans-serif;
 }
-#minimizarBtn{
+#minimizarBtn, #maximizarBtn{
     margin-top: 15px;
     margin-left: 10px;
     cursor: pointer;

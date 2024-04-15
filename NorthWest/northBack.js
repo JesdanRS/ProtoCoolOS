@@ -192,7 +192,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function actualizarMatriz() {
-
         if (nodos.length === 0 || aristas.length === 0) {
             matrizHeader.innerHTML = '';
             matrizBody.innerHTML = '';
@@ -234,6 +233,19 @@ document.addEventListener('DOMContentLoaded', function() {
         // Generar el HTML de la matriz
         generarHTMLMatriz(matriz, nodosInicioArray, nodosDestinoArray);
     }
+
+    function maximizar(matriz) {
+        // Copia profunda de la matriz para no modificar la original
+        let matrizMaximizada = JSON.parse(JSON.stringify(matriz));
+        
+        for (let i = 0; i < matrizMaximizada.length - 1; i++) { // Ignorar la última fila
+            for (let j = 0; j < matrizMaximizada[i].length - 1; j++) { // Ignorar la última columna
+                matrizMaximizada[i][j] = -matrizMaximizada[i][j];
+            }
+        }
+        
+        return matrizMaximizada; // Devuelve la matriz con los valores negados
+    }        
 
     function generarHTMLMatriz(matriz, nodosInicioIds, nodosDestinoIds) {
         // Filtrar IDs para asegurarse de que los nodos existen
@@ -416,6 +428,34 @@ document.addEventListener('DOMContentLoaded', function() {
        }
    });
 
+    document.getElementById('maximizarBtn').addEventListener('click', function() {
+        console.log("Botón maximizar presionado");  // Verificar si el botón responde
+        const matriz = obtenerMatrizActual();
+        if (!matriz) {
+            console.log("Error al obtener la matriz actual");
+            return; // Salir si no se puede obtener una matriz válida
+        }
+        console.log("Matriz obtenida:", matriz);  // Verificar la matriz obtenida
+        
+        const mat = maximizar(matriz);
+        console.log("Matriz maximizada:", mat);  // Verificar los cambios en la matriz
+
+        const ultimaFila = matriz.map(fila => fila[fila.length - 1]);
+        const ultimaColumna = matriz.map((_, i) => matriz[i][matriz[i].length - 1]);
+        console.log("Última fila:", ultimaFila, "Última columna:", ultimaColumna);  // Datos para comprobar
+
+        const sumaUltimaFila = ultimaFila.reduce((acc, val) => acc + val, 0);
+        const sumaUltimaColumna = ultimaColumna.reduce((acc, val) => acc + val, 0);
+
+        if (sumaUltimaFila === sumaUltimaColumna) {
+            console.log("Sumas iguales, aplicando método de esquina Noroeste");
+            const resultado = metodoEsquinaNoroesteM(matriz);
+            mostrarResultado(resultado);
+        } else {
+            console.log("Las sumas de la última fila y columna son diferentes.");
+            alert('No se puede resolver con el método de esquina Noroeste porque las sumas de la última fila y columna son diferentes.');
+        }
+    });
 
     function obtenerMatrizActual() {
         if (nodos.length === 0 || aristas.length === 0) {
@@ -455,6 +495,56 @@ document.addEventListener('DOMContentLoaded', function() {
         return matriz;
     }
 
+    function metodoEsquinaNoroesteM(matriz) {
+        const demandas = []; // Demanda de cada fila
+        const ofertas = []; // Oferta de cada columna
+        const asignaciones = []; // Asignaciones
+    
+        // Inicializar las demandas y las ofertas
+        for (let i = 0; i < matriz.length - 1; i++) { // Excluyendo la última fila de ofertas
+            demandas.push(matriz[i][matriz[i].length - 1]); // Último elemento de cada fila (excepto la última)
+        }
+        for (let j = 0; j < matriz[matriz.length - 1].length - 1; j++) { // Excluyendo el último elemento de demandas
+            ofertas.push(matriz[matriz.length - 1][j]); // Elementos de la última fila (excepto el último)
+        }
+    
+        // Inicializar la matriz de asignaciones con ceros
+        // Método de esquina noroeste modificado para maximizar
+        for (let i = 0; i < matriz.length - 1; i++) {
+            asignaciones.push(new Array(matriz[i].length - 1).fill(0));
+        }
+
+        let i = 0, j = 0;
+        while (i < demandas.length && j < ofertas.length) {
+            // Encuentra el índice del valor más grande (más cercano a cero si son negativos)
+            let maxCostoIndex = -1;
+            let maxCosto = Number.NEGATIVE_INFINITY;
+            for (let k = 0; k < matriz[i].length - 1; k++) {
+                if (matriz[i][k] > maxCosto && ofertas[k] > 0) {
+                    maxCostoIndex = k;
+                    maxCosto = matriz[i][k];
+                }
+            }
+
+            // Si no encontramos un costo válido, pasamos a la siguiente demanda.
+            if (maxCostoIndex === -1) {
+                i++;
+                continue;
+            }
+
+            // Realiza la asignación con el mayor costo disponible.
+            const asignacion = Math.min(demandas[i], ofertas[maxCostoIndex]);
+            asignaciones[i][maxCostoIndex] = asignacion;
+            demandas[i] -= asignacion;
+            ofertas[maxCostoIndex] -= asignacion;
+
+            if (demandas[i] === 0) i++;
+            if (ofertas[maxCostoIndex] === 0) j++;
+        }
+
+        return asignaciones;
+    }    
+
     function metodoEsquinaNoroeste(matriz) {
         const demandas = []; // Demanda de cada fila
         const ofertas = []; // Oferta de cada columna
@@ -488,8 +578,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return asignaciones;
     }
 
-   
-
     function mostrarResultado(asignaciones) {
         // Obtener los nombres de filas y columnas
         const nombresFilas = obtenerNombresFilas();
@@ -497,7 +585,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
         // Obtener el contenedor donde se mostrará el resultado
         const resultadoContainer = document.getElementById('resultado-container');
-    
+        
         // Crear una cadena para almacenar la salida formateada como una tabla HTML
         let tablaHTML = '<table class="matrix-table">';
     
