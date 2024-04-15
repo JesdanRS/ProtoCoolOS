@@ -409,14 +409,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Obtén el modal
     var modal = document.getElementById("modalContainer");
 
-    document.getElementById('listaCompBtn').addEventListener('click', function() {
-        if (!bt.isEmpty()) { // Verifica si el árbol no está vacío
-            modal.style.display = "block";
-            compararInPost(bt);
-        } else {
-            alert('El árbol está vacío.');
-        }
-    });
     
     // Añadir método isEmpty a BinaryTree para verificar si el árbol está vacío
     BinaryTree.prototype.isEmpty = function() {
