@@ -624,7 +624,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     
         // Agregar la última fila (total por columna)
-        tablaHTML += '<tr><th>Oferta</th>';
+        tablaHTML += '<tr><th>Demanda</th>';
         asignaciones[0].forEach((_, j) => {
             const totalColumna = asignaciones.reduce((acc, fila) => acc + fila[j], 0);
             tablaHTML += `<td>${totalColumna}</td>`;
