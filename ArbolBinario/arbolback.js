@@ -680,24 +680,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     function validateLists(preOrder, inOrder, postOrder) {
-        if (preOrder.length !== inOrder.length || inOrder.length !== postOrder.length) {
-            alert('Las listas deben tener la misma longitud.');
+        // Verifica si las listas tienen elementos y coinciden en longitud donde es necesario
+        let lists = [preOrder, inOrder, postOrder].filter(list => list.length > 0);
+        if (lists.length < 2) {
+            alert('Se requieren al menos dos listas para reconstruir el árbol.');
             return false;
         }
     
-        let sortedPre = [...preOrder].sort((a, b) => a - b);
-        let sortedIn = [...inOrder].sort((a, b) => a - b);
-        let sortedPost = [...postOrder].sort((a, b) => a - b);
-    
-        for (let i = 0; i < sortedPre.length; i++) {
-            if (sortedPre[i] !== sortedIn[i] || sortedIn[i] !== sortedPost[i]) {
-                alert('Las listas deben contener los mismos elementos.');
-                return false;
+        // Compara los elementos de las listas disponibles para asegurarse de que son iguales y están completas
+        let sortedLists = lists.map(list => [...list].sort((a, b) => a - b));
+        for (let i = 0; i < sortedLists[0].length; i++) {
+            for (let j = 1; j < sortedLists.length; j++) {
+                if (sortedLists[j][i] !== sortedLists[0][i]) {
+                    alert('Las listas deben contener los mismos elementos.');
+                    return false;
+                }
             }
         }
     
         return true;
-    }    
+    }
+     
 
     function clearAndRebuildTree(buildFunction, list1, list2) {
         bt.root = null; // Limpia el árbol actual completamente.
