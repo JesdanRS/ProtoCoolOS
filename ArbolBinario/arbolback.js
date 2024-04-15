@@ -616,5 +616,148 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     document.getElementById('importInput').addEventListener('change', importarArbol);
-});
+
+    let inOrderList = [];
+    let preOrderList = [];
+    let postOrderList = [];
+
+    document.getElementById('submitPreOrder').addEventListener('click', function() {
+        preOrderList = document.getElementById('inputPreOrder').value.split(',').map(Number);
+        if (preOrderList.some(isNaN)) {
+            alert('Por favor, ingresa una lista válida de números para Pre-Order.');
+        } else {
+            console.log('Pre-Order guardado:', preOrderList);
+        }
+    });
+
+    document.getElementById('submitInOrder').addEventListener('click', function() {
+        inOrderList = document.getElementById('inputInOrder').value.split(',').map(Number);
+        if (inOrderList.some(isNaN)) {
+            alert('Por favor, ingresa una lista válida de números para In-Order.');
+        } else {
+            console.log('In-Order guardado:', inOrderList);
+        }
+    });
+
+    document.getElementById('submitPostOrder').addEventListener('click', function() {
+        postOrderList = document.getElementById('inputPostOrder').value.split(',').map(Number);
+        if (postOrderList.some(isNaN)) {
+            alert('Por favor, ingresa una lista válida de números para Post-Order.');
+        } else {
+            console.log('Post-Order guardado:', postOrderList);
+        }
+    });
+
+    document.getElementById('reconstructPreIn').addEventListener('click', function() {
+        if (preOrderList.length > 0 && inOrderList.length > 0 && validateLists(preOrderList, inOrderList, postOrderList)) {
+            let clonedPreOrder = [...preOrderList];
+            let clonedInOrder = [...inOrderList];
+            clearAndRebuildTree(buildTreeFromPreIn, clonedPreOrder, clonedInOrder);
+        } else {
+            alert('Asegúrate de que las listas Pre-Order e In-Order estén correctamente guardadas y sean consistentes.');
+        }
+    });
+
+    document.getElementById('reconstructInPost').addEventListener('click', function() {
+        if (inOrderList.length > 0 && postOrderList.length > 0 && validateLists(preOrderList, inOrderList, postOrderList)) {
+            let clonedInOrder = [...inOrderList];
+            let clonedPostOrder = [...postOrderList];
+            clearAndRebuildTree(buildTreeFromInPost, clonedInOrder, clonedPostOrder);
+        } else {
+            alert('Asegúrate de que las listas In-Order y Post-Order estén correctamente guardadas y sean consistentes.');
+        }
+    });
+
+    document.getElementById('reconstructPrePost').addEventListener('click', function() {
+        if (preOrderList.length > 0 && postOrderList.length > 0 && validateLists(preOrderList, inOrderList, postOrderList)) {
+            let clonedPreOrder = [...preOrderList];
+            let clonedPostOrder = [...postOrderList];
+            clearAndRebuildTree(buildTreeFromPrePost, clonedPreOrder, clonedPostOrder);
+        } else {
+            alert('Asegúrate de que las listas Pre-Order y Post-Order estén correctamente guardadas y sean consistentes.');
+        }
+    });
+
+
+    function validateLists(preOrder, inOrder, postOrder) {
+        if (preOrder.length !== inOrder.length || inOrder.length !== postOrder.length) {
+            alert('Las listas deben tener la misma longitud.');
+            return false;
+        }
     
+        let sortedPre = [...preOrder].sort((a, b) => a - b);
+        let sortedIn = [...inOrder].sort((a, b) => a - b);
+        let sortedPost = [...postOrder].sort((a, b) => a - b);
+    
+        for (let i = 0; i < sortedPre.length; i++) {
+            if (sortedPre[i] !== sortedIn[i] || sortedIn[i] !== sortedPost[i]) {
+                alert('Las listas deben contener los mismos elementos.');
+                return false;
+            }
+        }
+    
+        return true;
+    }    
+
+    function clearAndRebuildTree(buildFunction, list1, list2) {
+        bt.root = null; // Limpia el árbol actual completamente.
+        bt.root = buildFunction(list1, list2); // Reconstruye el árbol con las listas clonadas.
+        updateTree(); // Actualiza la visualización del árbol.
+    }
+    
+
+    function buildTreeFromPreIn(preOrder, inOrder) {
+        if (preOrder.length === 0 || inOrder.length === 0) return null;
+        let rootValue = preOrder[0];
+        let root = new TreeNode(rootValue);
+        let index = inOrder.indexOf(rootValue);
+    
+        root.left = buildTreeFromPreIn(preOrder.slice(1, index + 1), inOrder.slice(0, index));
+        root.right = buildTreeFromPreIn(preOrder.slice(index + 1), inOrder.slice(index + 1));
+        return root;
+    }
+    
+    function buildTreeFromInPost(inOrder, postOrder) {
+        if (inOrder.length === 0 || postOrder.length === 0) return null;
+    
+        // Extraer la raíz del final de postOrder
+        let rootValue = postOrder.pop();
+        let root = new TreeNode(rootValue);
+    
+        // Encontrar el índice de la raíz en inOrder
+        let index = inOrder.indexOf(rootValue);
+    
+        // Construir subárboles izquierdo y derecho
+        // Asegúrate de ajustar correctamente las divisiones de postOrder
+        root.left = buildTreeFromInPost(inOrder.slice(0, index), postOrder.slice(0, index));
+        root.right = buildTreeFromInPost(inOrder.slice(index + 1), postOrder.slice(index));
+    
+        return root;
+    }
+    
+    function buildTreeFromPrePost(preOrder, postOrder) {
+        if (!preOrder.length || !postOrder.length) return null;
+        if (preOrder.length === 1) return new TreeNode(preOrder[0]);
+    
+        let rootValue = preOrder[0];
+        let root = new TreeNode(rootValue);
+    
+        if (preOrder.length === 1) return root;
+    
+        // Encuentra el segundo elemento de Pre-Order en Post-Order para dividir el árbol
+        let leftRoot = preOrder[1];
+        let idx = postOrder.indexOf(leftRoot);
+    
+        // Asegúrate de copiar las listas al hacer slice para evitar mutación
+        let leftPre = preOrder.slice(1, idx + 2);
+        let rightPre = preOrder.slice(idx + 2);
+        let leftPost = postOrder.slice(0, idx + 1);
+        let rightPost = postOrder.slice(idx + 1, postOrder.length - 1);
+    
+        root.left = buildTreeFromPrePost(leftPre, leftPost);
+        root.right = buildTreeFromPrePost(rightPre, rightPost);
+    
+        return root;
+    }
+    
+});
