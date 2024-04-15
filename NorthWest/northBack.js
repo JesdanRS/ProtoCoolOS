@@ -400,61 +400,66 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.getElementById('minimizarBtn').addEventListener('click', function(){
-        // Obtener la última fila y la última columna de la matriz
-       const ultimaFila = [];
-       const ultimaColumna = [];
-       const matriz = obtenerMatrizActual(); // Función para obtener la matriz actual, deberás implementarla
-   
-       // Llenar la última fila y la última columna
-       for (let i = 0; i < matriz.length; i++) {
-           ultimaFila.push(matriz[i][matriz[i].length - 1]);
-       }
-       for (let j = 0; j < matriz[0].length; j++) {
-           ultimaColumna.push(matriz[matriz.length - 1][j]);
-       }
-   
-       // Sumar los elementos de la última fila y la última columna
-       const sumaUltimaFila = ultimaFila.reduce((acc, val) => acc + val, 0);
-       const sumaUltimaColumna = ultimaColumna.reduce((acc, val) => acc + val, 0);
-   
-       // Verificar si las sumas son iguales
-       if (sumaUltimaFila === sumaUltimaColumna) {
-           // Realizar el algoritmo del método de esquina Noroeste
-           const resultado = metodoEsquinaNoroeste(matriz);
-           mostrarResultado(resultado);
-       } else {
-           // Mostrar un mensaje indicando que los costos son diferentes
-           alert('No se puede resolver con el método de esquina Noroeste porque las sumas de la última fila y columna son diferentes.');
-       }
-   });
-
-    document.getElementById('maximizarBtn').addEventListener('click', function() {
-        console.log("Botón maximizar presionado");  // Verificar si el botón responde
+        // Obtener la matriz actual
         const matriz = obtenerMatrizActual();
-        if (!matriz) {
-            console.log("Error al obtener la matriz actual");
-            return; // Salir si no se puede obtener una matriz válida
-        }
-        console.log("Matriz obtenida:", matriz);  // Verificar la matriz obtenida
         
-        const mat = maximizar(matriz);
-        console.log("Matriz maximizada:", mat);  // Verificar los cambios en la matriz
-
-        const ultimaFila = matriz.map(fila => fila[fila.length - 1]);
-        const ultimaColumna = matriz.map((_, i) => matriz[i][matriz[i].length - 1]);
-        console.log("Última fila:", ultimaFila, "Última columna:", ultimaColumna);  // Datos para comprobar
-
+        // Verificar si se pudo obtener la matriz
+        if (matriz === null) {
+            alert('No se puede generar la matriz.');
+            return;
+        }
+    
+        // Obtener la última fila y la última columna de la matriz
+        const ultimaFila = matriz[matriz.length - 1];
+        const ultimaColumna = matriz.map(fila => fila[matriz[0].length - 1]);
+        
+        // Sumar los elementos de la última fila y la última columna
         const sumaUltimaFila = ultimaFila.reduce((acc, val) => acc + val, 0);
         const sumaUltimaColumna = ultimaColumna.reduce((acc, val) => acc + val, 0);
-
+        
+        // Verificar si las sumas son iguales
         if (sumaUltimaFila === sumaUltimaColumna) {
-            console.log("Sumas iguales, aplicando método de esquina Noroeste");
-            const resultado = metodoEsquinaNoroesteM(matriz);
-            mostrarResultado(resultado);
+            // Realizar el algoritmo del método de esquina Noroeste
+            const asignaciones = metodoEsquinaNoroeste(matriz);
+            
+            // Mostrar los resultados en la interfaz de usuario
+            mostrarResultado(asignaciones, matriz);
         } else {
-            console.log("Las sumas de la última fila y columna son diferentes.");
+            // Mostrar un mensaje indicando que los costos son diferentes
             alert('No se puede resolver con el método de esquina Noroeste porque las sumas de la última fila y columna son diferentes.');
         }
+    });
+
+
+    document.getElementById('maximizarBtn').addEventListener('click', function() {
+         // Obtener la matriz actual
+         const matriz = obtenerMatrizActual();
+        
+         // Verificar si se pudo obtener la matriz
+         if (matriz === null) {
+             alert('No se puede generar la matriz.');
+             return;
+         }
+     
+         // Obtener la última fila y la última columna de la matriz
+         const ultimaFila = matriz[matriz.length - 1];
+         const ultimaColumna = matriz.map(fila => fila[matriz[0].length - 1]);
+         
+         // Sumar los elementos de la última fila y la última columna
+         const sumaUltimaFila = ultimaFila.reduce((acc, val) => acc + val, 0);
+         const sumaUltimaColumna = ultimaColumna.reduce((acc, val) => acc + val, 0);
+         
+         // Verificar si las sumas son iguales
+         if (sumaUltimaFila === sumaUltimaColumna) {
+             // Realizar el algoritmo del método de esquina Noroeste
+             const asignaciones = metodoEsquinaNoroesteM(matriz);
+             
+             // Mostrar los resultados en la interfaz de usuario
+             mostrarResultado(asignaciones, matriz);
+         } else {
+             // Mostrar un mensaje indicando que los costos son diferentes
+             alert('No se puede resolver con el método de esquina Noroeste porque las sumas de la última fila y columna son diferentes.');
+         }
     });
 
     function obtenerMatrizActual() {
@@ -578,14 +583,14 @@ document.addEventListener('DOMContentLoaded', function() {
         return asignaciones;
     }
 
-    function mostrarResultado(asignaciones) {
+    function mostrarResultado(asignaciones, matrizOriginal) {
         // Obtener los nombres de filas y columnas
         const nombresFilas = obtenerNombresFilas();
         const nombresColumnas = obtenerNombresColumnas();
     
         // Obtener el contenedor donde se mostrará el resultado
         const resultadoContainer = document.getElementById('resultado-container');
-        
+    
         // Crear una cadena para almacenar la salida formateada como una tabla HTML
         let tablaHTML = '<table class="matrix-table">';
     
@@ -594,16 +599,24 @@ document.addEventListener('DOMContentLoaded', function() {
         nombresColumnas.forEach(nombre => {
             tablaHTML += `<th>${nombre}</th>`;
         });
+        tablaHTML += '</tr>';
+    
+        // Inicializar el costo total
+        let costoTotal = 0;
     
         // Iterar sobre las filas de la matriz de asignaciones
         asignaciones.forEach((fila, i) => {
             tablaHTML += '<tr>';
             tablaHTML += `<th>${nombresFilas[i]}</th>`; // Agregar el nombre de la fila
             // Iterar sobre las columnas de la matriz de asignaciones
-            fila.forEach(asignacion => {
+            fila.forEach((asignacion, j) => {
+                // Multiplicar la asignación por el valor correspondiente en la matriz original
+                const producto = asignacion * matrizOriginal[i][j];
                 // Agregar una clase CSS especial si el espacio tiene resultado
                 const claseResultado = asignacion !== 0 ? 'resultado' : '';
                 tablaHTML += `<td class="${claseResultado}">${asignacion}</td>`;
+                // Sumar el producto al costo total
+                costoTotal += producto;
             });
             const totalFila = fila.reduce((acc, asignacion) => acc + asignacion, 0);
             tablaHTML += `<td>${totalFila}</td>`;
@@ -620,6 +633,9 @@ document.addEventListener('DOMContentLoaded', function() {
         tablaHTML += `<td>${totalGeneral}</td>`;
         tablaHTML += '</tr>';
     
+        // Agregar el costo total al resultado
+        tablaHTML += `<tr><th>Costo Total</th><td colspan="${nombresColumnas.length + 1}">${costoTotal}</td></tr>`;
+    
         tablaHTML += '</table>';
     
         // Mostrar la tabla en el contenedor
@@ -627,6 +643,7 @@ document.addEventListener('DOMContentLoaded', function() {
         resultadoContainer.style.display = 'block'; // Mostrar el contenedor si estaba oculto
     }
     
+
     
     
     
