@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="estilosKruskal.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
+    <script src="kruskalback.js"></script>
+    <!--LLAMAR TUTO <script src="tutoJohn.js"></script> -->
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.2/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <title>Kruskal</title>
+</head>
+    
+<body>
+
+    <div class="main">
+        <!-- Navbar -->
+        <div class="navbar">
+            <a href="#" class="logo">ProtoCool OS</a>
+            <!--
+            <div class="nav-links">
+                <span class="item selected">Home</span>
+            </div>
+            -->
+            <div class="nav-buttons" id="navMenu">
+                <a href="../index.html">
+                    <button class="nav-btn">HOME</button>
+                </a>
+                <a href="../Grafos1/indexGrafos.html">
+                    <button class="nav-btn">GRAFOS</button>
+                </a>
+                <a href="../Johnson/indexJohnson.html">
+                    <button class="nav-btn">JOHNSON</button>
+                </a>
+                <a href="../Asigancion/indexAsignacion.html">
+                    <button class="nav-btn">ASIGNACIÓN</button>
+                </a>
+                <a href="../NorthWest/indexNorth.html">
+                    <button class="nav-btn">NORTH WEST</button>
+                </a>
+                <a href="../Sort/indexSort.html">
+                    <button class="nav-btn">SORT</button>
+                </a>
+                <a href="../ArbolBinario/indexArbol.html">
+                    <button class="nav-btn">ARBOL BINARIO</button>
+                </a>
+                <a href="../ArbolBinario/indexKruskal.html">
+                    <button class="nav-btn selected">KRUSKAL</button>
+                </a>
+                <a href="../Contacto/indexContacto.html">
+                    <button class="nav-btn">CONTACTO</button>
+                </a>
+            </div>
+    
+            <button class="toggler">
+                <i class='bx bx-menu'></i>
+            </button>
+        </div>
+        <!-- End of Navbar -->
+
+        <!-- Top Container -->
+        <div id="logo"></div>
+        <div class="flex-container">
+            <div class="buttons-container">
+                <p id="text"> OPCIONES NODOS</p>
+                <label for="cambiarColorBtn" style="color: white; margin-right: 5px;">Color de Nodo:</label>
+                <input type="color" id="cambiarColorBtn" value="#016875">
+                <label for="cambiarColorTextoBtn" style="color: white; margin-right: 5px;">Color de Texto:</label>
+                <input type="color" id="cambiarColorTextoBtn" value="#ffffff">  
+                <p id="text"> OPCIONES GRAFO</p>
+                <button id="eliminarBtn">Eliminar</button>
+                <button id="limpiarBtn">Limpiar</button>
+                <button id="guardarBtn">Guardar</button>
+                <button id="cargarBtn">Importar</button>
+                <p id="text"> SOLUCIONES</p>
+                <button id="solMinBtn" class="solBtn">Minimizar</button>
+                <div id="minOptions" style="display:none; position: absolute; background-color: #252954; padding: 10px; border-radius: 5px; margin-top: 5px;">
+                    <input type="color" id="colorSolución" value="#FF0000"> <!-- Rojo por defecto -->
+                    <button id="aplicarColorSolucion">Aplicar</button>
+                </div>
+                <button id="solMaxBtn" class="solBtn">Maximizar</button>
+                <div id="maxOptions" style="display:none; position: absolute; background-color: #252954; padding: 10px; border-radius: 5px; margin-top: 5px;">
+                    <input type="color" id="colorSolución" value="#FF0000"> <!-- Rojo por defecto -->
+                    <button id="aplicarColorSolucion">Aplicar</button>
+                </div>
+            </div>
+    
+            <div class="graph-and-info-container">
+                <!-- Contenedor de resultados visible desde el inicio -->
+                <div id="resultado-container">
+                    <p>SOLUCIÓN <span id="tipoSol">--</span></p>
+                </div>
+                <!-- Contenedor del Gráfico de Barras -->
+                <div id="graficoContainer">
+                    <canvas id="graficoBarras"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- End of Top Container -->
+
+        <!-- Botón help -->
+
+        <button id="helpBtn">?</button>
+        <div id="helpPopup" class="hidden">
+            <p>AYUDA</p>
+            <br>
+            <p>Dentro del contenedor de la izquierda:</p>
+            <p>- Para añadir un nodo: hacer click en la pantalla</p>
+            <p>- Para unir nodos: mantener click y llevar a otro nodo</p>
+            <p>- Para eliminar nodo: hacer click derecho en un nodo</p>
+            <p>- Para mover nodo: mantener presionado Ctrl y hacer click en el nodo</p>
+            <br>
+            <p>Fuera del contenedor:</p>
+            <p>- Presionar guardar para guardar</p>
+            <p>- Presionar limpiar para limpiar</p>
+        </div>
+
+        <!-- End of Botón help -->
+
+    </div>
+
+</body>
+
+</html>
