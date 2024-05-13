@@ -96,10 +96,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return cell;
     }
 
-    paper.on('element:mouseover', function(elementView){
-        paper.el.style.cursor = 'default';
-    });
-
     paper.on('blank:pointerdown', function(evt, x, y) {
         // Verifica si el modo de edición está activado
         if (modoEdicion) {
@@ -172,6 +168,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('volverColorOrig').addEventListener('click', function() {
         // Llamar a la función para restaurar los colores originales de las aristas
         restaurarColoresOriginales();
+        // Limpiar el contenido del contenedor 'resultado-container'
+        document.getElementById('resultado-container').innerText = '';
     });
 
     // Función para restaurar los colores originales de las aristas
@@ -203,9 +201,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function calcularKruskal() {
         var edges = Object.values(graph.getLinks());
         edges.sort((a, b) => a.labels()[0].attrs.text.text - b.labels()[0].attrs.text.text);
-    
+        
         var mstEdges = [];
         var unionFind = {};
+        var sum = 0; // Variable para almacenar la suma de los valores de las aristas
     
         function find(x) {
             if (unionFind[x] === undefined) {
@@ -224,27 +223,31 @@ document.addEventListener('DOMContentLoaded', function() {
             if (find(sourceId) !== find(targetId)) {
                 union(sourceId, targetId);
                 mstEdges.push(edge);
-    
-                // Marcar la arista en el gráfico como parte de la solución
-                edge.attr('line/stroke', '#FF0000'); // Cambiar el color de la arista
-                edge.attr('line/strokeWidth', 4); // Opcional: ajustar el ancho de la arista si lo deseas
-            } else {
-                // Desmarcar aristas que no forman parte de la solución
-                edge.attr('line/stroke', document.getElementById('cambiarColorAristaBtn').value); // Restaurar el color original de la arista
-                edge.attr('line/strokeWidth', 4); // Opcional: restaurar el ancho original de la arista si lo deseas
+                sum += parseFloat(edge.labels()[0].attrs.text.text); // Sumar el valor de la arista
             }
+        });
+    
+        // Mostrar la suma en el contenedor resultado-container
+        var resultadoContainer = document.getElementById('resultado-container');
+        resultadoContainer.textContent = mstEdges.map(edge => edge.labels()[0].attrs.text.text).join('+') + '=' + sum;
+    
+        // Marcar las aristas en el gráfico como parte de la solución después de mostrar la suma
+        mstEdges.forEach(edge => {
+            edge.attr('line/stroke', '#FF0000'); // Cambiar el color de la arista
+            edge.attr('line/strokeWidth', 4); // Opcional: ajustar el ancho de la arista si lo deseas
         });
     
         // Guardar la lista de aristas seleccionadas para futuras referencias
         paper.selectedEdges = mstEdges;
-    }    
+    }
 
     function maximizarKruskal() {
         var edges = Object.values(graph.getLinks());
         edges.sort((a, b) => b.labels()[0].attrs.text.text - a.labels()[0].attrs.text.text); // Ordenar de mayor a menor
-    
+        
         var maxEdges = [];
         var unionFind = {};
+        var sum = 0; // Variable para almacenar la suma de los valores de las aristas
     
         function find(x) {
             if (unionFind[x] === undefined) {
@@ -263,15 +266,18 @@ document.addEventListener('DOMContentLoaded', function() {
             if (find(sourceId) !== find(targetId)) {
                 union(sourceId, targetId);
                 maxEdges.push(edge);
-    
-                // Marcar la arista en el gráfico como parte de la solución
-                edge.attr('line/stroke', '#FF0000'); // Cambiar el color de la arista maximizada (por ejemplo, verde)
-                edge.attr('line/strokeWidth', 4); // Opcional: ajustar el ancho de la arista si lo deseas
-            } else {
-                // Desmarcar aristas que no forman parte de la solución
-                edge.attr('line/stroke', document.getElementById('cambiarColorAristaBtn').value); // Restaurar el color original de la arista
-                edge.attr('line/strokeWidth', 4); // Opcional: restaurar el ancho original de la arista si lo deseas
+                sum += parseFloat(edge.labels()[0].attrs.text.text); // Sumar el valor de la arista
             }
+        });
+    
+        // Mostrar la suma en el contenedor resultado-container
+        var resultadoContainer = document.getElementById('resultado-container');
+        resultadoContainer.textContent = maxEdges.map(edge => edge.labels()[0].attrs.text.text).join('+') + '=' + sum;
+    
+        // Marcar las aristas en el gráfico como parte de la solución después de mostrar la suma
+        maxEdges.forEach(edge => {
+            edge.attr('line/stroke', '#FF0000'); // Cambiar el color de la arista maximizada (por ejemplo, verde)
+            edge.attr('line/strokeWidth', 4); // Opcional: ajustar el ancho de la arista si lo deseas
         });
     
         // Guardar la lista de aristas seleccionadas para futuras referencias
@@ -316,64 +322,44 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    modoEliminar = false;
+
     document.getElementById('eliminarBtn').addEventListener('click', function() {
-        // Verifica si está en el modo de eliminar nodos
-        if (modoEliminar) {
-            cambiarModoEdicion(); // Cambia al modo de edición para crear nodos
-        } else {
-            cambiarModoEliminar(); // Cambia al modo de eliminar nodos
+        // Cambia entre modo de eliminar y modo de edición cada vez que se presiona el botón.
+        modoEliminar = !modoEliminar; // Alternar el estado de modoEliminar
+        paper.el.style.cursor = 'crosshair';
+        if (modoEliminar && !modoEdicion) {
+            alert('Debes activar el modo de edición para eliminar.');
+            modoEliminar = false; // Desactiva el modo eliminar si el modo edición no está activo.
+            paper.el.style.cursor = 'default';
+        } else if (!modoEliminar){
+            paper.el.style.cursor = 'default';
         }
     });
     
-
-    var modoEliminar = false; // Variable para rastrear el estado del modo de eliminar nodos y aristas
-
     function cambiarModoEliminar() {
-        if (!modoEdicion) {
+        modoEliminar = !modoEliminar; // Alternar el estado de modoEliminar
+        if (modoEliminar && !modoEdicion) {
             alert('Debes activar el modo de edición para entrar al modo de eliminar.');
-            return;
+            modoEliminar = false; // Desactiva el modo eliminar si el modo edición no está activo.
         }
-    
-        modoEliminar = true; // Activa el modo de eliminar nodos y aristas
-        modoEdicion = false; // Desactiva el modo de edición
-    
-        // Actualiza las interacciones del papel para eliminar nodos y aristas al hacer clic sobre ellos
-        paper.setInteractivity(function(cellView) {
-            return { elementMove: false, elementRemove: true, linkRemove: true };
-        });
-    }
-
-
-    function cambiarModoEdicion() {
-        modoEliminar = false; // Desactiva el modo de eliminar nodos
-        modoEdicion = true; // Activa el modo de edición para crear nodos
-    
-        // Actualiza las interacciones del papel para crear nodos
-        paper.setInteractivity(function(cellView) {
-            return { vertexAdd: false, labelMove: true };
-        });
     }
     
-    
-    paper.on('link:pointerclick', function(linkView) {
-        // Verifica si está en el modo de eliminar aristas
-        if (modoEliminar) {
-            // Elimina la arista seleccionada
-            graph.removeCells([linkView.model]);
-        }
-    });
-    
-
-
     paper.on('element:pointerclick', function(elementView) {
         // Verifica si está en el modo de eliminar nodos
-        if (!modoEdicion) {
+        if (modoEliminar && modoEdicion) {
             // Elimina el nodo y sus aristas de conexión
             graph.removeCells([elementView.model]);
         }
     });
-        
-
+    
+    paper.on('link:pointerclick', function(linkView) {
+        // Verifica si está en el modo de eliminar aristas
+        if (modoEliminar && modoEdicion) {
+            // Elimina la arista seleccionada
+            graph.removeCells([linkView.model]);
+        }
+    });      
 
         // Evento de clic para el botón "cargarBtn"
     document.getElementById('cargarBtn').addEventListener('click', function() {

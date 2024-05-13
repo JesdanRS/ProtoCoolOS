@@ -16,6 +16,20 @@ html, body {
     font-family: 'Poppins', sans-serif;
 }
 
+#resultado-container {
+    position: 100px;
+    bottom: 80px;
+    right: 280px;
+    width: 500px;
+    background: linear-gradient(95deg, #6bcff4 3.2%, #3b82f6 99.5%);
+    color: white;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    padding: 20px;
+    border-radius: 10px;
+    /* Quitar 'display: none;' para que sea visible desde el inicio */
+    z-index: 1;
+}
+
 .flex-container {
     display: flex;
     justify-content: space-between;
