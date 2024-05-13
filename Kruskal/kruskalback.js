@@ -239,19 +239,123 @@ document.addEventListener('DOMContentLoaded', function() {
         paper.selectedEdges = mstEdges;
     }    
 
+    function maximizarKruskal() {
+        var edges = Object.values(graph.getLinks());
+        edges.sort((a, b) => b.labels()[0].attrs.text.text - a.labels()[0].attrs.text.text); // Ordenar de mayor a menor
+    
+        var maxEdges = [];
+        var unionFind = {};
+    
+        function find(x) {
+            if (unionFind[x] === undefined) {
+                return x;
+            }
+            return find(unionFind[x]);
+        }
+    
+        function union(x, y) {
+            unionFind[find(x)] = find(y);
+        }
+    
+        edges.forEach(edge => {
+            var sourceId = edge.source().id;
+            var targetId = edge.target().id;
+            if (find(sourceId) !== find(targetId)) {
+                union(sourceId, targetId);
+                maxEdges.push(edge);
+    
+                // Marcar la arista en el gráfico como parte de la solución
+                edge.attr('line/stroke', '#FF0000'); // Cambiar el color de la arista maximizada (por ejemplo, verde)
+                edge.attr('line/strokeWidth', 4); // Opcional: ajustar el ancho de la arista si lo deseas
+            } else {
+                // Desmarcar aristas que no forman parte de la solución
+                edge.attr('line/stroke', document.getElementById('cambiarColorAristaBtn').value); // Restaurar el color original de la arista
+                edge.attr('line/strokeWidth', 4); // Opcional: restaurar el ancho original de la arista si lo deseas
+            }
+        });
+    
+        // Guardar la lista de aristas seleccionadas para futuras referencias
+        paper.selectedEdges = maxEdges;
+    }
+
+    document.getElementById('solMaxBtn').addEventListener('click', function() {
+        // Ejecutar la función para maximizar el grafo
+        maximizarKruskal();
+    });
+    
+
     // Evento de clic para el botón "guardarBtn"
     document.getElementById('guardarBtn').addEventListener('click', function() {
-        var jsonData = JSON.stringify(graph.toJSON());
-        var blob = new Blob([jsonData], { type: 'application/json' });
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = url;
-        a.download = 'grafo.json';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        var nombreArchivo = prompt("Ingrese el nombre del archivo:");
+        if (nombreArchivo) {
+            var jsonData = JSON.stringify(graph.toJSON());
+            var blob = new Blob([jsonData], { type: 'application/json' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = nombreArchivo + '.json'; // Agregar la extensión al nombre del archivo
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } else {
+            alert("Por favor, ingrese un nombre válido para el archivo.");
+        }
     });
+    
+    document.getElementById('eliminarBtn').addEventListener('click', function() {
+        // Verifica si está en el modo de eliminar nodos
+        if (modoEliminar) {
+            cambiarModoEdicion(); // Cambia al modo de edición para crear nodos
+        } else {
+            cambiarModoEliminar(); // Cambia al modo de eliminar nodos
+        }
+    });
+    
+
+    var modoEliminar = false; // Variable para rastrear el estado del modo de eliminar nodos y aristas
+
+    function cambiarModoEliminar() {
+        modoEliminar = true; // Activa el modo de eliminar nodos y aristas
+        modoEdicion = false; // Desactiva el modo de edición
+
+        // Actualiza las interacciones del papel para eliminar nodos y aristas al hacer clic sobre ellos
+        paper.setInteractivity(function(cellView) {
+            return { elementMove: false, elementRemove: true, linkRemove: true };
+        });
+    }
+
+
+    function cambiarModoEdicion() {
+        modoEliminar = false; // Desactiva el modo de eliminar nodos
+        modoEdicion = true; // Activa el modo de edición para crear nodos
+    
+        // Actualiza las interacciones del papel para crear nodos
+        paper.setInteractivity(function(cellView) {
+            return { vertexAdd: false, labelMove: true };
+        });
+    }
+    
+    
+    paper.on('link:pointerclick', function(linkView) {
+        // Verifica si está en el modo de eliminar aristas
+        if (modoEliminar) {
+            // Elimina la arista seleccionada
+            graph.removeCells([linkView.model]);
+        }
+    });
+    
+
+
+    paper.on('element:pointerclick', function(elementView) {
+        // Verifica si está en el modo de eliminar nodos
+        if (!modoEdicion) {
+            // Elimina el nodo y sus aristas de conexión
+            graph.removeCells([elementView.model]);
+        }
+    });
+        
+
 
         // Evento de clic para el botón "cargarBtn"
     document.getElementById('cargarBtn').addEventListener('click', function() {
