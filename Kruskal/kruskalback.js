@@ -279,9 +279,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     document.getElementById('solMaxBtn').addEventListener('click', function() {
+        // Verificar que todos los nodos tengan al menos 2 aristas
+        var nodes = Object.values(graph.getElements());
+        var isValidGraph = nodes.every(node => {
+            var connectedLinks = graph.getConnectedLinks(node);
+            return connectedLinks.length >= 2;
+        });
+    
+        if (!isValidGraph) {
+            alert("Todos los nodos deben tener al menos 2 aristas para maximizar el grafo.");
+            return;
+        }
+    
         // Ejecutar la función para maximizar el grafo
         maximizarKruskal();
     });
+    
     
 
     // Evento de clic para el botón "guardarBtn"
@@ -316,9 +329,14 @@ document.addEventListener('DOMContentLoaded', function() {
     var modoEliminar = false; // Variable para rastrear el estado del modo de eliminar nodos y aristas
 
     function cambiarModoEliminar() {
+        if (!modoEdicion) {
+            alert('Debes activar el modo de edición para entrar al modo de eliminar.');
+            return;
+        }
+    
         modoEliminar = true; // Activa el modo de eliminar nodos y aristas
         modoEdicion = false; // Desactiva el modo de edición
-
+    
         // Actualiza las interacciones del papel para eliminar nodos y aristas al hacer clic sobre ellos
         paper.setInteractivity(function(cellView) {
             return { elementMove: false, elementRemove: true, linkRemove: true };
