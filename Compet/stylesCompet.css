@@ -868,12 +868,3 @@ Estilo de botón HELP
     font-size: 10px;
 }
 
-.info-container {
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 20px;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    font-family: Arial, sans-serif;
-}
