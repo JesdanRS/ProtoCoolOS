@@ -119,13 +119,15 @@ window.addEventListener('resize', updateDimensions);
     function importarGrafo(event) {
         const archivo = event.target.files[0];
         const lector = new FileReader();
-    
         lector.onload = function(e) {
             // Parsear el archivo JSON
             const data = JSON.parse(e.target.result);
     
             // Limpiar el lienzo
             svg.selectAll("*").remove();
+    
+            // Objeto para almacenar las conexiones entre nodos
+            conexiones = {};
     
             // Recrear los nodos
             data.nodos.forEach(nodo => {
@@ -147,9 +149,20 @@ window.addEventListener('resize', updateDimensions);
                         event.preventDefault();
                         // Eliminar el nodo y sus conexiones
                         const id = d3.select(this).attr("id");
-                        delete conexiones[id];
-                        svg.selectAll(`line[id^=${id}], text[id^=${id}-text]`).remove();
+                        const lineas = svg.selectAll("line");
+                        lineas.each(function() {
+                            if (
+                                this.getAttribute("x1") === d3.select(`#${id}`).attr("cx") ||
+                                this.getAttribute("x2") === d3.select(`#${id}`).attr("cx") ||
+                                this.getAttribute("y1") === d3.select(`#${id}`).attr("cy") ||
+                                this.getAttribute("y2") === d3.select(`#${id}`).attr("cy")
+                            ) {
+                                this.remove();
+                            }
+                        });
+                        svg.select(`#${id}-text`).remove();
                         this.remove();
+                        delete conexiones[id];
                     });
     
                 svg.selectAll("circle").raise(); // Asegurar que los nodos estén dibujados sobre las líneas
@@ -161,6 +174,9 @@ window.addEventListener('resize', updateDimensions);
                     .attr("y", nodo.y - 15)
                     .attr("fill", "white")
                     .text(`${nodo.id} (${nodo.x}, ${nodo.y})`);
+    
+                // Inicializar las conexiones del nodo
+                conexiones[nodo.id] = [];
             });
     
             // Recrear las conexiones entre nodos
@@ -173,10 +189,15 @@ window.addEventListener('resize', updateDimensions);
                     }
                 });
             });
+    
+            // Actualizar las dimensiones del plano de coordenadas después de importar
+            updateDimensions();
         };
     
         lector.readAsText(archivo);
     }
+    
+    
     
     // Asignar la función importarGrafo al evento change del input de importación
     importarArchivo.addEventListener('change', importarGrafo);
