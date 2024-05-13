@@ -168,6 +168,77 @@ document.addEventListener('DOMContentLoaded', function() {
     // Maneja el cambio de modo de edición cuando se hace clic en el interruptor
     document.querySelector('input[type="checkbox"]').addEventListener('change', cambiarModoEdicion);
 
+    // Evento de clic para el botón "Borrar Solución"
+    document.getElementById('volverColorOrig').addEventListener('click', function() {
+        // Llamar a la función para restaurar los colores originales de las aristas
+        restaurarColoresOriginales();
+    });
+
+    // Función para restaurar los colores originales de las aristas
+    function restaurarColoresOriginales() {
+        var edges = Object.values(graph.getLinks());
+        edges.forEach(edge => {
+            edge.attr('line/stroke', document.getElementById('cambiarColorAristaBtn').value); // Restaurar el color original de la arista
+            edge.attr('line/strokeWidth', 4); // Opcional: restaurar el ancho original de la arista si lo deseas
+        });
+    }
+    
+    document.getElementById('solMinBtn').addEventListener('click', function() {
+        // Verificar que todos los nodos tengan al menos 2 aristas
+        var nodes = Object.values(graph.getElements());
+        var isValidGraph = nodes.every(node => {
+            var connectedLinks = graph.getConnectedLinks(node);
+            return connectedLinks.length >= 2;
+        });
+    
+        if (!isValidGraph) {
+            alert("Todos los nodos deben tener al menos 2 aristas.");
+            return;
+        }
+    
+        // Ejecutar el algoritmo de Kruskal
+        calcularKruskal();
+    });
+    
+    function calcularKruskal() {
+        var edges = Object.values(graph.getLinks());
+        edges.sort((a, b) => a.labels()[0].attrs.text.text - b.labels()[0].attrs.text.text);
+    
+        var mstEdges = [];
+        var unionFind = {};
+    
+        function find(x) {
+            if (unionFind[x] === undefined) {
+                return x;
+            }
+            return find(unionFind[x]);
+        }
+    
+        function union(x, y) {
+            unionFind[find(x)] = find(y);
+        }
+    
+        edges.forEach(edge => {
+            var sourceId = edge.source().id;
+            var targetId = edge.target().id;
+            if (find(sourceId) !== find(targetId)) {
+                union(sourceId, targetId);
+                mstEdges.push(edge);
+    
+                // Marcar la arista en el gráfico como parte de la solución
+                edge.attr('line/stroke', '#FF0000'); // Cambiar el color de la arista
+                edge.attr('line/strokeWidth', 4); // Opcional: ajustar el ancho de la arista si lo deseas
+            } else {
+                // Desmarcar aristas que no forman parte de la solución
+                edge.attr('line/stroke', document.getElementById('cambiarColorAristaBtn').value); // Restaurar el color original de la arista
+                edge.attr('line/strokeWidth', 4); // Opcional: restaurar el ancho original de la arista si lo deseas
+            }
+        });
+    
+        // Guardar la lista de aristas seleccionadas para futuras referencias
+        paper.selectedEdges = mstEdges;
+    }    
+
     // Evento de clic para el botón "guardarBtn"
     document.getElementById('guardarBtn').addEventListener('click', function() {
         var jsonData = JSON.stringify(graph.toJSON());
