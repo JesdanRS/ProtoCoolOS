@@ -3,14 +3,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const matrizContainer = document.getElementById('matriz-container');
     const matrizHeader = document.getElementById('matriz-header');
     const matrizBody = document.getElementById('matriz-body');
-    const exportarBtn = document.getElementById('exportarBtn');
-    const importarBtn = document.getElementById('importarBtn');
     const importarArchivo = document.getElementById('importarArchivo');
     const colorPicker = document.getElementById('cambiarColorBtn');
+    const cambiarColorTextoBtn = document.getElementById('cambiarColorTextoBtn');
+    let estado = {
+        seleccionando: false,
+        nodoOrigen: null,
+        colorActual: '#d2e5ff',
+        colorTextoActual: '#ffffff', // Color de texto predeterminado
+        modoEliminar: false
+    };
     let nodos = new vis.DataSet();
     let aristas = new vis.DataSet();
     let network = null;
-    let estado = { seleccionando: false, nodoOrigen: null, colorActual: '#d2e5ff', modoEliminar: false };
     let ultimoIdNodo = 0; // Mantener el control del último ID de nodo utilizado
 
     const opciones = { //Opciones de grafo
@@ -18,20 +23,33 @@ document.addEventListener('DOMContentLoaded', function() {
             shape: 'circle',
             font: {
                 size: 14,
-                color: '#ffffff',
-                multi: true
+                color: estado.colorTextoActual,
+                multi: true,
+                vadjust: -15,
+                align: 'center'
             },
             borderWidth: 2,
             scaling: {
                 min: 16,
                 max: 32,
                 label: {
+                    heightConstraint: { valign: 'top' },
                     enabled: true,
                     min: 14,
                     max: 30,
                     drawThreshold: 8,
-                    maxVisible: 20
+                    maxVisible: 20,
+                    align: 'center'
                 }
+            },
+            shapeProperties: {
+                useBorderWithImage: true
+            },
+            margin: {
+                top: 20,
+                left: 20,
+                right: 20,
+                bottom: 20
             }
         },
         edges: {
@@ -41,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 angle: Math.PI / 4
             },
             font: {
-                align: 'middle'
+                align: 'top'
             }
         },
         physics: {
@@ -82,35 +100,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (estado.seleccionando) { // Verificación de nodo seleccionado
                     const nodoOrigen = estado.nodoOrigen;
                     const nodoDestino = nodeId;
-                    if (nodoOrigen !== nodoDestino && !aristaDuplicada(nodoOrigen, nodoDestino)) { // Acción para creación arista ida o vuelta
+                    // Solo permitir la creación si no es un loop y no existe arista duplicada
+                    if (nodoOrigen !== nodoDestino && !aristaDuplicada(nodoOrigen, nodoDestino)) {
                         let atributoArista;
                         do {
                             atributoArista = prompt("Ingrese el atributo de la arista (ej. peso):", "");
-                            if (atributoArista === null) break; // El usuario canceló el prompt
-                        } while (isNaN(atributoArista) || atributoArista.trim() === ""); // Repetir mientras la entrada no sea un número o esté vacía
-                    
-                        if (atributoArista !== null) { // Verificar nuevamente por si el usuario canceló el prompt
+                            if (atributoArista === null) break;
+                        } while (isNaN(atributoArista) || atributoArista.trim() === "");
+                        
+                        if (atributoArista !== null) {
                             aristas.add({
                                 from: nodoOrigen,
                                 to: nodoDestino,
                                 label: atributoArista
                             });
                         }
-                    } else if(nodoOrigen === nodoDestino && !loopExistente(nodoOrigen)) { // Acción para creación arista loop
-                        let atributoArista;
-                        do {
-                            atributoArista = prompt("Ingrese el atributo de la arista (loop):", "");
-                            if (atributoArista === null) break; // El usuario canceló el prompt
-                        } while (isNaN(atributoArista) || atributoArista.trim() === ""); // Repetir mientras la entrada no sea un número o esté vacía
-                    
-                        if (atributoArista !== null) { // Verificar nuevamente por si el usuario canceló el prompt
-                            aristas.add({
-                                from: nodoOrigen,
-                                to: nodoDestino,
-                                label: atributoArista
-                            });
-                        }
-                    }                    
+                    }
                     estado.seleccionando = false;
                     estado.nodoOrigen = null;
                 } else {
@@ -144,17 +149,271 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
+        network.on("afterDrawing", function (ctx) {
+            nodos.forEach((nodo) => {
+                const nodeId = nodo.id;
+                const nodePosition = network.getPositions([nodeId])[nodeId];
+                const x = nodePosition.x;
+                const y = nodePosition.y;
+
+                // Calcula el valor acumulado y de resta del nodo
+                let valorAcumuladoNodo = calcularValorAcumuladoNodo(nodeId);
+                let valorRestadoNodo = calcularValoresResta(nodeId);
+        
+                // Utiliza el contexto del canvas (ctx) para medir el texto
+                ctx.font = `${opciones.nodes.font.size}px Arial`;
+                const textWidth = ctx.measureText(nodo.label).width;
+        
+                // Calcula el tamaño del nodo basándose en el texto y el margen
+                const nodeWidth = textWidth + opciones.nodes.margin.left + opciones.nodes.margin.right;
+
+                // Ajusta aquí para cambiar la posición del contador
+                const textOffsetY = nodeWidth /4; // Posición Y debajo del nodo
+                const textOffsetXLeft = -nodeWidth/3; // Posición X para el contador de la izquierda
+                const textOffsetXRight = nodeWidth/6;
+
+                // Dibuja el contador de la parte baja izquierda
+                ctx.fillStyle = nodo.font.color;
+                ctx.font = "14px Arial";
+                ctx.align = 'left';
+                ctx.fillText(valorAcumuladoNodo.toString(), x + textOffsetXLeft, y + textOffsetY);
+                ctx.align = 'right';
+                ctx.fillText(valorRestadoNodo.toString(), x + textOffsetXRight, y + textOffsetY);
+        
+                // Dibuja una línea horizontal en el medio del nodo
+                ctx.beginPath();
+                ctx.moveTo(x - nodeWidth / 2, y);
+                ctx.lineTo(x + nodeWidth / 2, y);
+                ctx.strokeStyle = nodo.font.color; // Usa el color del texto almacenado en la propiedad del nodo
+                ctx.stroke();
+        
+                // Ejemplo adicional: Dibuja una línea vertical en el medio del nodo
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x, y + nodeWidth / 2);
+                ctx.strokeStyle = nodo.font.color; // Usa el mismo color para la línea vertical
+                ctx.stroke();
+            });
+
+            aristas.forEach((arista) => {
+                const fromId = arista.from;
+                const toId = arista.to;
+                const fromNodePosition = network.getPositions([fromId])[fromId];
+                const toNodePosition = network.getPositions([toId])[toId];
+        
+                // Calcula la holgura
+                const valorArista = parseFloat(arista.label) || 0;
+                const sumaFromNode = calcularValorAcumuladoNodo(fromId);
+                const restaToNode = calcularValoresResta(toId);
+                const holgura = restaToNode - sumaFromNode - valorArista;
+
+                // Calcula ángulo de inclinación para el texto
+                let angle = Math.atan2(toNodePosition.y - fromNodePosition.y, toNodePosition.x - fromNodePosition.x);
+                if (angle > Math.PI / 2 || angle < -Math.PI / 2) {
+                    angle += Math.PI; // Ajusta el ángulo si es necesario
+                }
+        
+                // Configura la posición para dibujar la holgura debajo de la arista
+                const medioX = (fromNodePosition.x + toNodePosition.x) / 2;
+                const medioY = (fromNodePosition.y + toNodePosition.y) / 2 + 15; // Ajusta según sea necesario
+        
+                // Define el estilo de la fuente para la holgura desde cero
+                const holguraFont = "bold 14px Arial";
+                const holguraStrokeWidth = 2;
+                const holguraStrokeColor = "#ffffff";
+        
+                // Dibuja la holgura
+                ctx.font = holguraFont;
+                ctx.fillStyle = '#343434';
+                ctx.textAlign = "center";
+                ctx.textBaseline = 'middle'; // Alinea el texto verticalmente en el centro
+
+                // Guarda el estado actual del contexto antes de la transformación
+                ctx.save();
+
+                // Translada y rota el contexto para dibujar el texto perpendicular a la arista
+                ctx.translate(medioX, medioY);
+                ctx.rotate(angle);
+
+                // Dibuja el contorno del texto si es necesario
+                if (holguraStrokeWidth > 0) {
+                    ctx.strokeStyle = holguraStrokeColor;
+                    ctx.lineWidth = holguraStrokeWidth;
+                    ctx.strokeText(`h=${holgura}`, 0, 0);
+                }
+
+                // Dibuja el texto de la holgura
+                ctx.fillText(`h=${holgura}`, 0, 0);
+
+                ctx.restore();
+            });
+        });
+               
+
         nodos.on("*", function() { // Verificar acciones sobre nodo
             actualizarMatriz();
             comprobarVisibilidadMatriz();
+            network.redraw();
         });
         aristas.on("*", function() { // Verificar acciones sobre aristas
             actualizarMatriz();
             comprobarVisibilidadMatriz();
+            network.redraw();
         });
     }
 
-    function crearNodo(x, y, color, nombre) { //Crear nodo
+    function destacarRutaCritica(colorRuta) {
+        // Obtener el nodo inicial y final
+        const nodoInicial = nodos.getIds().filter(id => aristas.get({ filter: arista => arista.to === id }).length === 0)[0];
+        const nodoFinal = nodos.getIds().filter(id => aristas.get({ filter: arista => arista.from === id }).length === 0)[0];
+        
+        // Obtener la holgura para todas las aristas
+        const holguras = {};
+        aristas.forEach(arista => {
+            const valorArista = parseFloat(arista.label) || 0;
+            const sumaFromNode = calcularValorAcumuladoNodo(arista.from);
+            const restaToNode = calcularValoresResta(arista.to);
+            holguras[arista.id] = restaToNode - sumaFromNode - valorArista;
+        });
+        
+        // Obtener las aristas que tienen holgura 0
+        const aristasRutaCritica = Object.keys(holguras).filter(aristaId => holguras[aristaId] === 0);
+        
+        // Obtener los nodos conectados por estas aristas
+        const nodosRutaCritica = new Set();
+        aristasRutaCritica.forEach(aristaId => {
+            const arista = aristas.get(aristaId);
+            nodosRutaCritica.add(arista.from);
+            nodosRutaCritica.add(arista.to);
+        });
+        
+        // Marcar los nodos de la ruta crítica con el mismo color que las aristas de la ruta crítica
+        const colorRutaCritica = colorRuta; // Color de la ruta crítica
+        nodosRutaCritica.forEach(nodoId => {
+            nodos.update({ id: nodoId, color: { background: colorRutaCritica } }); // Cambiar el color de fondo del nodo
+        });
+        
+        // Restablecer el color de fondo de los nodos que no están en la ruta crítica
+        nodos.forEach(nodo => {
+            if (!nodosRutaCritica.has(nodo.id)) {
+                nodos.update({ id: nodo.id, color: { background: undefined } }); // Restablecer el color de fondo del nodo
+            }
+        });
+        
+        // Marcar las aristas de la ruta crítica con el color de la ruta crítica
+        aristasRutaCritica.forEach(aristaId => {
+            aristas.update({ id: aristaId, color: colorRutaCritica }); // Cambiar el color de la arista
+        });
+        
+        // Restablecer el color de las demás aristas que no están en la ruta crítica
+        aristas.forEach(arista => {
+            if (!aristasRutaCritica.includes(arista.id)) {
+                aristas.update({ id: arista.id, color: undefined }); // Restablecer el color de la arista
+            }
+        });
+
+        const nombreNodoInicio = nodos.get(nodoInicial).label;
+        const nombreNodoFinal = nodos.get(nodoFinal).label;
+    
+        alert(`Nodo de inicio(Color Verde): ${nombreNodoInicio}\nNodo final(Color  Rojo): ${nombreNodoFinal}`);
+    }
+    
+    function hexToRGBA(hex, alpha) {
+        // Expresión regular para validar el formato hexadecimal
+        const hexRegex = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i;
+        const result = hexRegex.exec(hex);
+        
+        // Convertir el valor hexadecimal a decimal y luego a una cadena RGBA
+        return result
+            ? `rgba(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}, ${alpha})`
+            : null;
+    }
+
+    // Función para calcular el valor acumulado para cada nodo
+    function calcularValorAcumuladoNodo(nodoId) {
+        const nodosIds = nodos.getIds();
+        const nodosVisitados = new Set(); // Conjunto para evitar ciclos infinitos
+        let valorAcumulado = 0;
+    
+        function dfs(currentNodeId) {
+            if (nodosVisitados.has(currentNodeId)) return; // Evitar ciclos infinitos
+            nodosVisitados.add(currentNodeId);
+    
+            const aristasEntrantes = aristas.get({
+                filter: arista => arista.to === currentNodeId
+            });
+    
+            let maxValorEntrante = 0;
+            aristasEntrantes.forEach(arista => {
+                const valorArista = parseFloat(arista.label) || 0;
+                const valorOrigen = calcularValorAcumuladoNodo(arista.from); // Utilizar la recursión para obtener el valor acumulado del nodo origen
+                const suma = valorOrigen + valorArista;
+                if (suma > maxValorEntrante) {
+                    maxValorEntrante = suma;
+                }
+            });
+    
+            valorAcumulado = maxValorEntrante;
+        }
+    
+        dfs(nodoId);
+    
+        return valorAcumulado;
+    }
+
+    function calcularValoresResta(nodeId) {
+        const nodosIds = nodos.getIds();
+        const nodosVisitados = new Set(); // Conjunto para evitar ciclos infinitos
+        const valoresResta = {};
+    
+        // Inicializar valores de resta basándose en valores acumulativos
+        nodosIds.forEach(id => {
+            valoresResta[id] = calcularValorAcumuladoNodo(id); // Inicializa con el valor acumulado
+        });
+    
+        function dfs(currentNodeId) {
+            if (nodosVisitados.has(currentNodeId)) return; // Evitar ciclos infinitos
+            nodosVisitados.add(currentNodeId);
+    
+            const aristasSalientes = aristas.get({
+                filter: arista => arista.from === currentNodeId
+            });
+    
+            if (aristasSalientes.length > 0) {
+                let minResta = Number.MAX_SAFE_INTEGER;
+    
+                aristasSalientes.forEach(arista => {
+                    const valorArista = parseFloat(arista.label) || 0;
+                    const valorRestaDestino = valoresResta[arista.to];
+                    const resta = valorRestaDestino - valorArista;
+    
+                    if (resta < minResta) {
+                        minResta = resta;
+                    }
+                });
+    
+                valoresResta[currentNodeId] = minResta;
+    
+                // Recursivamente llamar para nodos de destino
+                aristasSalientes.forEach(arista => {
+                    dfs(arista.to);
+                });
+            }
+        }
+    
+        dfs(nodeId);
+    
+        return valoresResta[nodeId];
+    }
+
+    cambiarColorTextoBtn.addEventListener('input', function(event) {
+        estado.colorTextoActual = event.target.value;
+        // Se elimina el recorrido y actualización de nodos existentes
+        // Ahora solo se actualiza el estado para que los nuevos nodos usen este color
+    });
+
+    // Asegúrate de actualizar la sección donde creas nodos para usar el estado.colorTextoActual
+    function crearNodo(x, y, color, nombre) {
         ultimoIdNodo++; // Incrementar el ID del último nodo para asegurar que sea único
         nodos.add({
             id: ultimoIdNodo,
@@ -162,98 +421,101 @@ document.addEventListener('DOMContentLoaded', function() {
             x: x,
             y: y,
             color: color,
+            font: { color: estado.colorTextoActual }, // Se establece el color del texto para el nuevo nodo
             physics: false
         });
     }
 
-    function aristaDuplicada(origen, destino) { // Verificar si no existe ya una arista en la misma dirección al mismo nodo
+    function aristaDuplicada(origen, destino) {
         const aristasExistentes = aristas.get({
             filter: function(item) {
-                return (item.from === origen && item.to === destino);
+                return (item.from === origen && item.to === destino) || (item.from === destino && item.to === origen);
             }
         });
         return aristasExistentes.length > 0;
-    }
-
-    function loopExistente(nodo) { // Verificar si no hay arista loop en el mismo nodo
-        const loops = aristas.get({
-            filter: function(item) {
-                return item.from === nodo && item.to === nodo;
-            }
-        });
-        return loops.length > 0;
     }
 
     function comprobarVisibilidadMatriz() { // Comprobar si la matriz está vacía o no
         matrizContainer.style.display = nodos.length === 0 && aristas.length === 0 ? 'none' : 'block';
     }
 
-    function actualizarMatriz() {
+    function actualizarMatriz() { // Actualización de datos en la matriz
+        const nodosArray = nodos.get().map(nodo => nodo.id);
+        let matriz = {};
 
-        if (nodos.length === 0 || aristas.length === 0) {
-            matrizHeader.innerHTML = '';
-            matrizBody.innerHTML = '';
-            return; // Salir de la función si no hay nodos o aristas
-        }
-
-        // Asegurándose de que solo se usan nodos existentes
-        let nodosInicio = new Set(aristas.get().map(arista => arista.from).filter(id => nodos.get(id)));
-        let nodosDestino = new Set(aristas.get().map(arista => arista.to).filter(id => nodos.get(id)));
-    
-        // Llenar los conjuntos basados en las aristas actuales
-        aristas.get().forEach(arista => {
-            nodosInicio.add(arista.from);
-            nodosDestino.add(arista.to);
+        nodosArray.forEach(nodoId => {
+            matriz[nodoId] = nodosArray.reduce((acc, id) => ({ ...acc, [id]: 0 }), {});
         });
-    
-        // Convertir a arrays para poder iterar y crear la matriz
-        const nodosInicioArray = [...nodosInicio];
-        const nodosDestinoArray = [...nodosDestino];
-    
-        // Crear una matriz vacía basada en los nodos de inicio y destino
-        let matriz = nodosInicioArray.reduce((acc, inicio) => ({
-            ...acc,
-            [inicio]: nodosDestinoArray.reduce((destAcc, destino) => ({
-                ...destAcc,
-                [destino]: 0
-            }), {})
-        }), {});
-    
-        // Llenar la matriz con las aristas existentes
+
         aristas.get().forEach(arista => {
             const valor = arista.label ? parseInt(arista.label, 10) : 0;
-            if (matriz[arista.from] && matriz[arista.from][arista.to] !== undefined) {
+            if (matriz[arista.from] && matriz[arista.from][arista.to] !== undefined) { // Asegura que ambos nodos existan
                 matriz[arista.from][arista.to] = isNaN(valor) ? 0 : valor;
             }
         });
-    
-        // Generar el HTML de la matriz
-        generarHTMLMatriz(matriz, nodosInicioArray, nodosDestinoArray);
+
+        generarHTMLMatriz(matriz, nodosArray);
     }
 
-    function generarHTMLMatriz(matriz, nodosInicioIds, nodosDestinoIds) {
-        nodosInicioIds = nodosInicioIds.filter(id => nodos.get(id) != null);
-        nodosDestinoIds = nodosDestinoIds.filter(id => nodos.get(id) != null);
-
-        if (nodosInicioIds.length === 0 || nodosDestinoIds.length === 0) {
-            matrizHeader.innerHTML = '';
-            matrizBody.innerHTML = '';
-            return;
-        }
-        const nodosInicioLabels = nodosInicioIds.map(id => nodos.get(id).label);
-        const nodosDestinoLabels = nodosDestinoIds.map(id => nodos.get(id).label);
+    function generarHTMLMatriz(matriz, nodosIds) {
+        // Identificar el nodo inicial y final basándose en las aristas
+        let nodoInicial = null;
+        let nodoFinal = null;
         
-        // Ajustar encabezado de la matriz para nodos destino
-        matrizHeader.innerHTML = '<th></th>' + nodosDestinoLabels.map(label => `<th>${label}</th>`).join('');
+        nodosIds.forEach(id => {
+            if (aristas.get({ filter: (arista) => arista.from === id }).length === 0) {
+                nodoFinal = id;
+            }
+            if (aristas.get({ filter: (arista) => arista.to === id }).length === 0) {
+                nodoInicial = id;
+            }
+        });
+    
+        // Aquí podrías establecer los colores que deseas utilizar
+        const colorInicio = '#00B32C'; // Verde para el nodo inicial
+        const colorFinal = '#DC3D2A'; // Rojo para el nodo final
+    
+        let encabezadoHTML = '<th></th>';
+        let sumaTotalColumnas = Array(nodosIds.length).fill(0); // Inicializa un array con ceros para las sumas de las columnas
         
-        // Ajustar cuerpo de la matriz para nodos inicio
-        matrizBody.innerHTML = nodosInicioIds.map(id => {
-            const fila = nodosDestinoIds.map(idDestino => matriz[id][idDestino]).join('</td><td>');
-            return `<tr><th>${nodos.get(id).label}</th><td>${fila}</td></tr>`;
-        }).join('');
+        nodosIds.forEach((id, index) => {
+            const label = nodos.get(id).label;
+            const esNodoInicial = id === nodoInicial;
+            const color = esNodoInicial ? colorInicio : '';
+            encabezadoHTML += `<th style="background-color:${color}">${label}</th>`;
+        });
+        encabezadoHTML += '<th>Suma</th>';
+        matrizHeader.innerHTML = encabezadoHTML;
+    
+        let cuerpoHTML = '';
+        nodosIds.forEach(id => {
+            const esNodoFinal = id === nodoFinal;
+            const color = esNodoFinal ? colorFinal : '';
+            cuerpoHTML += `<tr><th style="background-color:${color}">${nodos.get(id).label}</th>`;
+            let sumaFila = 0;
+            nodosIds.forEach((idInterno, index) => {
+                const valor = matriz[id][idInterno];
+                cuerpoHTML += `<td>${valor}</td>`;
+                sumaTotalColumnas[index] += valor; // Suma el valor actual al total de la columna
+                sumaFila += valor;
+            });
+            const colorSuma = esNodoFinal && sumaFila === 0 ? colorFinal : '';
+            cuerpoHTML += `<td style="background-color:${colorSuma}">${sumaFila}</td></tr>`;            
+        });
+    
+        // Agregar la última fila para las sumas de las columnas
+        cuerpoHTML += '<tr><th>Suma</th>';
+        sumaTotalColumnas.forEach((sumaColumna, index) => {
+            const esNodoInicial = nodosIds[index] === nodoInicial;
+            const color = esNodoInicial ? colorInicio : '';
+            cuerpoHTML += `<td style="background-color:${color}">${sumaColumna}</td>`;
+        });
+        const sumaTotal = sumaTotalColumnas.reduce((acc, current) => acc + current, 0); // Calcular la suma total de las columnas
+        cuerpoHTML += `<td>${sumaTotal}</td></tr>`; // La suma total al final
+        matrizBody.innerHTML = cuerpoHTML;
     }
     
-
+    
     function exportarComoPNG(nombreArchivo) { // Exportar imagen del grafo
         html2canvas(grafoContainer).then(canvas => {
             let enlace = document.createElement('a');
@@ -318,8 +580,14 @@ document.addEventListener('DOMContentLoaded', function() {
         reader.readAsText(archivo);
     }
 
-    guardarBtn.addEventListener('click', function() { // Se apreta el botón de exportar
-        exportOptions.style.display = 'block';
+    document.getElementById('guardarBtn').addEventListener('click', function() {
+        // Alternar la visualización del contenedor de opciones de exportación
+        const exportOptions = document.getElementById('exportOptions');
+        exportOptions.style.display = exportOptions.style.display === 'none' ? 'block' : 'none';
+        // Posicionamiento debajo del botón Exportar, si es necesario
+        const rect = this.getBoundingClientRect();
+        exportOptions.style.left = rect.left + 'px';
+        exportOptions.style.top = (rect.top + rect.height) + 'px';
     });
 
     exportPNG.addEventListener('click', function() { // Se apreta el botón de exportar como PNG
@@ -343,6 +611,35 @@ document.addEventListener('DOMContentLoaded', function() {
     cargarBtn.addEventListener('click', () => importarArchivo.click()); // Se apreta el botón de importar
     importarArchivo.addEventListener('change', importarGrafo);
 
+    document.getElementById('rutaCriticaBtn').addEventListener('click', function() {
+        const rutaOptions = document.getElementById('rutaOptions');
+        rutaOptions.style.display = rutaOptions.style.display === 'none' ? 'block' : 'none';
+    
+        // Aseguramos que el contenedor esté posicionado correctamente debajo del botón "Ruta Crítica"
+        const rect = this.getBoundingClientRect();
+        rutaOptions.style.left = rect.left + 'px';
+        rutaOptions.style.top = (rect.top + rect.height) + 'px';
+    });
+    // Manejador para el botón de aplicar color de ruta crítica
+    document.getElementById('aplicarColorRutaCritica').addEventListener('click', function() {
+        const colorRuta = document.getElementById('colorRutaCritica');
+        const nodosIniciales = nodos.getIds().filter(id => aristas.get({
+            filter: arista => arista.to === id
+        }).length === 0);
+
+        const nodosFinales = nodos.getIds().filter(id => aristas.get({
+            filter: arista => arista.from === id
+        }).length === 0);
+
+        // Verificar que solo haya un nodo inicial y un nodo final
+        if (nodosIniciales.length !== 1 || nodosFinales.length !== 1) {
+            alert('Debe haber un único nodo de inicio y un único nodo final para calcular la ruta crítica.');
+            return;
+        }
+        destacarRutaCritica(colorRuta.value);
+        document.getElementById('rutaOptions').style.display = 'none';
+    });
+
     document.getElementById('eliminarBtn').addEventListener('click', function() { // Cambia el cursor en modo eliminar
         estado.modoEliminar = !estado.modoEliminar;
         grafoContainer.style.cursor = estado.modoEliminar ? 'crosshair' : '';
@@ -353,299 +650,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.getElementById('limpiarBtn').addEventListener('click', function() { // Limpiar grafo completo y actualizar matriz
-        nodos.clear();
-        aristas.clear();
-        estado = { seleccionando: false, nodoOrigen: null, colorActual: estado.colorActual, modoEliminar: false };
-        ultimoIdNodo = 0; // Restablecer el contador de ID de nodos al limpiar
-        actualizarMatriz(); // La matriz se actualiza al limpiar
-        comprobarVisibilidadMatriz();
-
-        // limpiar el contenedor de la respuesta
-        const resultadoContainer = document.getElementById('resultado-container');
-        resultadoContainer.innerHTML = ''; // Vaciar el contenido del contenedor de resultados
-        resultadoContainer.style.display = 'none'; // Opcional: Ocultar el contenedor hasta nuevos resultados
+        location.reload(); // Refrescar la página
     });
 
-
-    function hungarianAlgorithm(costMatrix) {
-        const numRows = costMatrix.length;
-        const numCols = costMatrix[0].length;
-    
-        // Paso 1: Restar el mínimo de cada fila
-        const minRowValues = costMatrix.map(row => Math.min(...row));
-        for (let i = 0; i < numRows; i++) {
-            for (let j = 0; j < numCols; j++) {
-                costMatrix[i][j] = minRowValues[i] - costMatrix[i][j];
-            }
-        }
-    
-        // Paso 2: Restar el mínimo de cada columna
-        const minColValues = Array.from({ length: numCols }, (_, colIndex) => {
-            let min = Infinity;
-            for (let i = 0; i < numRows; i++) {
-                min = Math.min(min, costMatrix[i][colIndex]);
-            }
-            return min;
-        });
-        for (let j = 0; j < numCols; j++) {
-            for (let i = 0; i < numRows; i++) {
-                costMatrix[i][j] = minColValues[j] - costMatrix[i][j];
-            }
-        }
-    
-        // Paso 3: Realizar asignaciones óptimas
-        const assignedRows = new Set();
-        const assignedCols = new Set();
-        const assignments = [];
-        while (assignedRows.size < numRows && assignedCols.size < numCols) {
-            let minUncoveredValue = Infinity;
-            let minUncoveredPosition = { row: -1, col: -1 };
-            for (let i = 0; i < numRows; i++) {
-                for (let j = 0; j < numCols; j++) {
-                    if (!assignedRows.has(i) && !assignedCols.has(j) && costMatrix[i][j] < minUncoveredValue) {
-                        minUncoveredValue = costMatrix[i][j];
-                        minUncoveredPosition = { row: i, col: j };
-                    }
-                }
-            }
-    
-            if (minUncoveredValue !== Infinity) {
-                const { row, col } = minUncoveredPosition;
-                assignedRows.add(row);
-                assignedCols.add(col);
-                assignments.push({ row, col });
-            } else {
-            return null;
-            }
-        }
-
-        return assignments;
-    }
-
-    function hungarianAlgorithmaxim(costMatrix) {
-        const numRows = costMatrix.length;
-        const numCols = costMatrix[0].length;
-    
-        // Paso 1: Encontrar el máximo de cada fila y restarlo de cada elemento
-        const maxRowValues = costMatrix.map(row => Math.max(...row));
-        for (let i = 0; i < numRows; i++) {
-            for (let j = 0; j < numCols; j++) {
-                costMatrix[i][j] = maxRowValues[i] - costMatrix[i][j];
-            }
-        }
-    
-        // Paso 2: Encontrar el máximo de cada columna y restarlo de cada elemento
-        const maxColValues = Array.from({ length: numCols }, (_, colIndex) => {
-            let max = -Infinity;
-            for (let i = 0; i < numRows; i++) {
-                max = Math.max(max, costMatrix[i][colIndex]);
-            }
-            return max;
-        });
-        for (let j = 0; j < numCols; j++) {
-            for (let i = 0; i < numRows; i++) {
-                costMatrix[i][j] = maxColValues[j] - costMatrix[i][j];
-            }
-        }
-    
-        // Paso 3: Realizar asignaciones óptimas
-        const assignedRows = new Set();
-        const assignedCols = new Set();
-        const assignments = [];
-        while (assignedRows.size < numRows && assignedCols.size < numCols) {
-            let maxUncoveredValue = -Infinity;
-            let maxUncoveredPosition = { row: -1, col: -1 };
-            for (let i = 0; i < numRows; i++) {
-                for (let j = 0; j < numCols; j++) {
-                    if (!assignedRows.has(i) && !assignedCols.has(j) && costMatrix[i][j] > maxUncoveredValue) {
-                        maxUncoveredValue = costMatrix[i][j];
-                        maxUncoveredPosition = { row: i, col: j };
-                    }
-                }
-            }
-    
-            if (maxUncoveredValue !== -Infinity) {
-                const { row, col } = maxUncoveredPosition;
-                assignedRows.add(row);
-                assignedCols.add(col);
-                assignments.push({ row, col });
-            } else {
-                // No se encontró ninguna asignación, el algoritmo ha fallado
-                console.error('No se pudo encontrar ninguna asignación válida.');
-                return null;
-            }
-        }
-    
-        return assignments;
-    }
-
-    function obtenerMatrizActual() {
-        if (nodos.length === 0 || aristas.length === 0) {
-            console.error('No hay nodos o aristas para generar la matriz.');
-            return null; // Retornar null en lugar de una matriz vacía
-        }
-    
-        // Crear una matriz vacía
-        const matriz = [];
-    
-        // Obtener los nodos únicos (trabajadores)
-        const trabajadores = new Set(aristas.get().map(arista => arista.from));
-        const tareas = new Set(aristas.get().map(arista => arista.to));
-
-        // Convertir los conjuntos a arrays para poder iterar
-        const trabajadoresArray = [...trabajadores];
-        const tareasArray = [...tareas];
-    
-        // Llenar la matriz con los valores de las aristas
-        trabajadoresArray.forEach((trabajador, i) => {
-            const fila = [];
-            tareasArray.forEach((tarea, j) => {
-                // Buscar la arista que conecta este trabajador con esta tarea
-                const arista = aristas.get({
-                    filter: function (item) {
-                        return item.from === trabajador && item.to === tarea;
-                    }
-                })[0]; // Suponiendo que solo hay una arista que conecta un trabajador con una tarea
-    
-                // Obtener el valor de la arista (costo)
-                const costo = arista ? parseInt(arista.label) : 0;
-                fila.push(costo);
-            });
-            matriz.push(fila);
-        });
-    
-        return matriz;
-    }
-    
-    document.getElementById('minimizarBtn').addEventListener('click', function() {
-        // Obtener la matriz actual y minimizarla
-        const matriz = obtenerMatrizActual();
-        if (!matriz) {
-            console.error('No se pudo generar la matriz.');
-            return;
-        }
-    
-        const resultado = hungarianAlgorithm(matriz); // Aplicar el algoritmo húngaro
-        if (!resultado || resultado.length === 0 || resultado[0].length === 0) {
-            console.error('No se pudo calcular el resultado.');
-            return;
-        }
-        
-        // Mostrar el resultado en pantalla
-        mostrarResultado(resultado);
-        mostrarResultado(resultado);
-// Resaltar las asignaciones en la matriz
-        limpiarResaltadosMatriz(); // Limpiar campos resaltados de la matriz
-        resaltarAsignaciones(resultado);
-    });
-
-    document.getElementById('maximizarBtn').addEventListener('click', function() {
-        // Obtener la matriz actual y minimizarla
-        const matriz = obtenerMatrizActual();
-        if (!matriz) {
-            console.error('No se pudo generar la matriz.');
-            return;
-        }
-    
-        const resultado = hungarianAlgorithmaxim(matriz); // Aplicar el algoritmo húngaro
-        if (!resultado || resultado.length === 0 || resultado[0].length === 0) {
-            console.error('No se pudo calcular el resultado.');
-            return;
-        }
-        
-        // Mostrar el resultado en pantalla
-        mostrarResultado(resultado);
-        mostrarResultado(resultado);
-// Resaltar las asignaciones en la matriz
-        limpiarResaltadosMatriz(); // Limpiar campos resaltados de la matriz
-        resaltarAsignaciones(resultado);
-    });
-    
-    // Función para mostrar el resultado en pantalla
-    // Función para mostrar el resultado en pantalla
-// Función para mostrar el resultado en pantalla
-function mostrarResultado(resultado) {
-    const resultadoContainer = document.getElementById('resultado-container');
-    resultadoContainer.innerHTML = '<h3>Resultado:</h3>';
-
-    const matrizAdyacencia = obtenerMatrizActual(); // Obtener la matriz de adyacencia
-    
-    // Obtener los nombres de las filas y columnas
-    const nombresFilas = obtenerNombresFilas();
-    const nombresColumnas = obtenerNombresColumnas();
-
-    let sumaTotal = 0; // Inicializar la suma total de los costos de las asignaciones
-    
-    // Recorrer cada asignación en el resultado y mostrarla en el contenedor
-    resultado.forEach(asignacion => {
-        const filaNombre = nombresFilas[asignacion.row]; // Obtener el nombre de la fila
-        const columnaNombre = nombresColumnas[asignacion.col]; // Obtener el nombre de la columna
-        const costo = matrizAdyacencia[asignacion.row][asignacion.col]; // Obtener el costo de la asignación desde la matriz de adyacencia
-        resultadoContainer.innerHTML += `<p>${filaNombre} se asigna a ${columnaNombre} con un valor de ${costo}</p>`;
-
-        sumaTotal += costo; // Sumar el costo de esta asignación a la suma tota
-    });
-
-    // Mostrar la suma total de los costos de las asignaciones
-    resultadoContainer.innerHTML += `<h4>Suma total de los costos de las asignaciones: ${sumaTotal}</h4>`;
-    resultadoContainer.style.display = 'block'; // Mostrar el contenedor
-}
-
-// Función para obtener los nombres de las filas
-function obtenerNombresFilas() {
-    const filas = document.querySelectorAll('#matriz-body tr');
-    const nombresFilas = Array.from(filas).map(fila => fila.firstChild.textContent.trim());
-    return nombresFilas;
-}
-
-// Función para obtener los nombres de las columnas
-function obtenerNombresColumnas() {
-    const encabezados = document.querySelectorAll('#matriz-header th');
-    const nombresColumnas = Array.from(encabezados).slice(1).map(encabezado => encabezado.textContent.trim());
-    return nombresColumnas;
-}
-function resaltarAsignaciones(resultado) {
-    const matrizBody = document.getElementById('matriz-body');
-    
-    // Obtener las filas y columnas de la matriz
-    const filas = matrizBody.querySelectorAll('tr');
-    
-    // Obtener los nombres de las filas y columnas
-    const nombresFilas = obtenerNombresFilas();
-    const nombresColumnas = obtenerNombresColumnas();
-    
-    // Iterar sobre cada asignación en el resultado
-    resultado.forEach(asignacion => {
-        const filaNombre = nombresFilas[asignacion.row];
-        const columnaNombre = nombresColumnas[asignacion.col];
-        
-        // Encontrar la celda correspondiente en la matriz y resaltarla cambiando el color de fondo
-        for (let i = 0; i < filas.length; i++) {
-            const fila = filas[i];
-            const nombreFila = fila.querySelector('th').textContent.trim();
-            if (nombreFila === filaNombre) {
-                const celdas = fila.querySelectorAll('td');
-                for (let j = 0; j < celdas.length; j++) {
-                    const celda = celdas[j];
-                    const nombreColumna = nombresColumnas[j];
-                    if (nombreColumna === columnaNombre) {
-                        celda.style.backgroundColor = '#7E22CE'; // Cambiar el color de fondo de la celda
-                        break;
-                    }
-                }
-                break;
-            }
-        }
-    });
-}
-
-function limpiarResaltadosMatriz() {
-    const celdas = document.querySelectorAll('#matriz-body td');
-    celdas.forEach(celda => {
-        celda.style.backgroundColor = ''; // Restablece el color de fondo original
-    });
-}
-    
-    
     inicializarRed();
 });
