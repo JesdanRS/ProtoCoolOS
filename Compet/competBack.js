@@ -279,7 +279,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr("id", nodoId) // Asignar un id único al nodo
             .attr("cx", xAxis(xCoord))
             .attr("cy", yAxis(yCoord))
-            .attr("r", 10)
+            .attr("r", 8)
             .attr("fill", "blue")
             .on("click", function() {
                 if (nodoOrigen === null) {
@@ -316,6 +316,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr("x", xAxis(xCoord) + 15)
             .attr("y", yAxis(yCoord) - 15)
             .attr("fill", "white")
+            .style("font-size", "13px") // Ajustar el tamaño de la fuente aquí
             .text(`${nombreVariable} (${xCoord}, ${yCoord})`);
     });
 
@@ -357,6 +358,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr("x", centerX + 5)
             .attr("y", centerY - 5)
             .attr("fill", "white")
+            .style("font-size", "13px") // Ajustar el tamaño de la fuente aquí
             .text(`${centroidX.toFixed(2)}, ${centroidY.toFixed(2)}`);
     
         // Actualizar el contenido del contenedor de información
