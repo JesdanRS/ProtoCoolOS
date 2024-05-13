@@ -101,9 +101,15 @@ document.addEventListener('DOMContentLoaded', function() {
         svg.selectAll("circle").each(function() {
             const nodo = d3.select(this);
             const id = nodo.attr("id");
-            const x = parseFloat(nodo.attr("cx"));
-            const y = parseFloat(nodo.attr("cy"));
-            data.nodos.push({ id, x, y });
+            const x = parseFloat(nodo.attr("cx")); // Coordenada escalada para SVG
+            const y = parseFloat(nodo.attr("cy")); // Coordenada escalada para SVG
+            const originalX = parseFloat(nodo.attr("data-x")); // Coordenada original
+            const originalY = parseFloat(nodo.attr("data-y")); // Coordenada original
+    
+            // Verificar si las coordenadas son números válidos
+            if (!isNaN(x) && !isNaN(y)) {
+                data.nodos.push({ id, x, y, originalX, originalY });
+            }
         });
     
         // Convertir el objeto de datos a JSON
@@ -114,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
         enlace.download = nombreArchivo || 'grafo.json';
         enlace.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(jsonData);
         enlace.click();
-    }
+    }      
     
     function importarGrafo(event) {
         const archivo = event.target.files[0];
@@ -173,8 +179,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     .attr("x", nodo.x + 15)
                     .attr("y", nodo.y - 15)
                     .attr("fill", "white")
-                    .text(`${nodo.id} (${nodo.x}, ${nodo.y})`);
-    
+                    .text(`${nodo.id} (${nodo.originalX}, ${nodo.originalY})`); // Usar coordenadas originales aquí
+        
                 // Inicializar las conexiones del nodo
                 conexiones[nodo.id] = [];
             });
@@ -279,6 +285,8 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr("id", nodoId) // Asignar un id único al nodo
             .attr("cx", xAxis(xCoord))
             .attr("cy", yAxis(yCoord))
+            .attr("data-x", xCoord) // Guardar coordenada original
+            .attr("data-y", yCoord) // Guardar coordenada original
             .attr("r", 8)
             .attr("fill", "blue")
             .on("click", function() {
