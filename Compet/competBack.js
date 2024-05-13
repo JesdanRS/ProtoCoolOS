@@ -7,68 +7,68 @@ document.addEventListener('DOMContentLoaded', function() {
     const importarBtn = document.getElementById('importarBtn');
     const importarArchivo = document.getElementById('importarArchivo');
     const svg = d3.select(grafoContainer)
-    .append("svg")
-    .attr("width", "100%")
-    .attr("height", "100%");
+        .append("svg")
+        .attr("width", "100%")
+        .attr("height", "100%");
 
-let width, height;
-let xAxis, yAxis;
-let xAxisGroup, yAxisGroup;
+    let width, height;
+    let xAxis, yAxis;
+    let xAxisGroup, yAxisGroup;
 
-function updateDimensions() {
-    width = grafoContainer.offsetWidth;
-    height = grafoContainer.offsetHeight;
+    function updateDimensions() {
+        width = grafoContainer.offsetWidth;
+        height = grafoContainer.offsetHeight;
 
-    xAxis = d3.scaleLinear()
-        .domain([-50, 50]) // Rango de -50 a 50 para centrar en 0
-        .range([0, width]);
+        xAxis = d3.scaleLinear()
+            .domain([-50, 50]) // Rango de -50 a 50 para centrar en 0
+            .range([0, width]);
 
-    yAxis = d3.scaleLinear()
-        .domain([-50, 50]) // Rango de -50 a 50 para centrar en 0
-        .range([height, 0]);
+        yAxis = d3.scaleLinear()
+            .domain([-50, 50]) // Rango de -50 a 50 para centrar en 0
+            .range([height, 0]);
 
-    xAxisGroup = svg.append("g")
-        .attr("transform", `translate(0,${height / 2})`) // Centrar en la mitad de la altura
-        .call(d3.axisBottom(xAxis));
+        xAxisGroup = svg.append("g")
+            .attr("transform", `translate(0,${height / 2})`) // Centrar en la mitad de la altura
+            .call(d3.axisBottom(xAxis));
 
-    yAxisGroup = svg.append("g")
-        .attr("transform", `translate(${width / 2},0)`) // Centrar en la mitad del ancho
-        .call(d3.axisLeft(yAxis));
+        yAxisGroup = svg.append("g")
+            .attr("transform", `translate(${width / 2},0)`) // Centrar en la mitad del ancho
+            .call(d3.axisLeft(yAxis));
 
-    xAxisGroup.selectAll(".tick line")
-        .attr("stroke", "white")
-        .attr("stroke-width", 2);
+        xAxisGroup.selectAll(".tick line")
+            .attr("stroke", "white")
+            .attr("stroke-width", 2);
 
-    yAxisGroup.selectAll(".tick line")
-        .attr("stroke", "white")
-        .attr("stroke-width", 2);
+        yAxisGroup.selectAll(".tick line")
+            .attr("stroke", "white")
+            .attr("stroke-width", 2);
 
-    xAxisGroup.selectAll(".tick text")
-        .attr("fill", "white");
+        xAxisGroup.selectAll(".tick text")
+            .attr("fill", "white");
 
-    yAxisGroup.selectAll(".tick text")
-        .attr("fill", "white");
+        yAxisGroup.selectAll(".tick text")
+            .attr("fill", "white");
 
-    svg.append("line")
-        .attr("x1", width / 2)
-        .attr("y1", 0)
-        .attr("x2", width / 2)
-        .attr("y2", height)
-        .attr("stroke", "white")
-        .attr("stroke-width", 1);
+        svg.append("line")
+            .attr("x1", width / 2)
+            .attr("y1", 0)
+            .attr("x2", width / 2)
+            .attr("y2", height)
+            .attr("stroke", "white")
+            .attr("stroke-width", 1);
 
-    svg.append("line")
-        .attr("x1", 0)
-        .attr("y1", height / 2)
-        .attr("x2", width)
-        .attr("y2", height / 2)
-        .attr("stroke", "white")
-        .attr("stroke-width", 1);
-}
+        svg.append("line")
+            .attr("x1", 0)
+            .attr("y1", height / 2)
+            .attr("x2", width)
+            .attr("y2", height / 2)
+            .attr("stroke", "white")
+            .attr("stroke-width", 1);
+    }
 
-updateDimensions();
+    updateDimensions();
 
-window.addEventListener('resize', updateDimensions);
+    window.addEventListener('resize', updateDimensions);
 
     function exportarComoPNG(nombreArchivo) { // Exportar imagen del grafo
         html2canvas(grafoContainer).then(canvas => {
@@ -196,7 +196,6 @@ window.addEventListener('resize', updateDimensions);
     
         lector.readAsText(archivo);
     }
-    
     
     
     // Asignar la función importarGrafo al evento change del input de importación
@@ -400,31 +399,5 @@ window.addEventListener('resize', updateDimensions);
         });
     });
 
-    function mostrarResultado(resultado) {
-        const resultadoContainer = document.getElementById('resultado-container');
-        resultadoContainer.innerHTML = '<h3>Resultado:</h3>';
-    
-        const matrizAdyacencia = obtenerMatrizActual(); // Obtener la matriz de adyacencia
-        
-        // Obtener los nombres de las filas y columnas
-        const nombresFilas = obtenerNombresFilas();
-        const nombresColumnas = obtenerNombresColumnas();
-    
-        let sumaTotal = 0; // Inicializar la suma total de los costos de las asignaciones
-        
-        // Recorrer cada asignación en el resultado y mostrarla en el contenedor
-        resultado.forEach(asignacion => {
-            const filaNombre = nombresFilas[asignacion.row]; // Obtener el nombre de la fila
-            const columnaNombre = nombresColumnas[asignacion.col]; // Obtener el nombre de la columna
-            const costo = matrizAdyacencia[asignacion.row][asignacion.col]; // Obtener el costo de la asignación desde la matriz de adyacencia
-            resultadoContainer.innerHTML += `<p>${filaNombre} se asigna a ${columnaNombre} con un valor de ${costo}</p>`;
-    
-            sumaTotal += costo; // Sumar el costo de esta asignación a la suma tota
-        });
-    
-        // Mostrar la suma total de los costos de las asignaciones
-        resultadoContainer.innerHTML += `<h4>Suma total de los costos de las asignaciones: ${sumaTotal}</h4>`;
-        resultadoContainer.style.display = 'block'; // Mostrar el contenedor
-    }
     
 });

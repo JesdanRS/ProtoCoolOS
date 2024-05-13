@@ -18,11 +18,11 @@ html, body {
 
 #grafo-container {
     position: relative;
-    width: 1000px;
+    width: 1100px;
     height: 600px;
     border: 1px solid #ccc;
-
 }
+
 #contenedor-general {
     display: flex;
     align-items: flex-start; /* Para alinear los elementos en la parte superior */
