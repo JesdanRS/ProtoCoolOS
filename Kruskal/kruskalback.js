@@ -96,10 +96,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return cell;
     }
 
-    paper.on('element:mouseover', function(elementView){
-        paper.el.style.cursor = 'default';
-    });
-
     paper.on('blank:pointerdown', function(evt, x, y) {
         // Verifica si el modo de edición está activado
         if (modoEdicion) {
@@ -316,64 +312,44 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    modoEliminar = false;
+
     document.getElementById('eliminarBtn').addEventListener('click', function() {
-        // Verifica si está en el modo de eliminar nodos
-        if (modoEliminar) {
-            cambiarModoEdicion(); // Cambia al modo de edición para crear nodos
-        } else {
-            cambiarModoEliminar(); // Cambia al modo de eliminar nodos
+        // Cambia entre modo de eliminar y modo de edición cada vez que se presiona el botón.
+        modoEliminar = !modoEliminar; // Alternar el estado de modoEliminar
+        paper.el.style.cursor = 'crosshair';
+        if (modoEliminar && !modoEdicion) {
+            alert('Debes activar el modo de edición para eliminar.');
+            modoEliminar = false; // Desactiva el modo eliminar si el modo edición no está activo.
+            paper.el.style.cursor = 'default';
+        } else if (!modoEliminar){
+            paper.el.style.cursor = 'default';
         }
     });
     
-
-    var modoEliminar = false; // Variable para rastrear el estado del modo de eliminar nodos y aristas
-
     function cambiarModoEliminar() {
-        if (!modoEdicion) {
+        modoEliminar = !modoEliminar; // Alternar el estado de modoEliminar
+        if (modoEliminar && !modoEdicion) {
             alert('Debes activar el modo de edición para entrar al modo de eliminar.');
-            return;
+            modoEliminar = false; // Desactiva el modo eliminar si el modo edición no está activo.
         }
-    
-        modoEliminar = true; // Activa el modo de eliminar nodos y aristas
-        modoEdicion = false; // Desactiva el modo de edición
-    
-        // Actualiza las interacciones del papel para eliminar nodos y aristas al hacer clic sobre ellos
-        paper.setInteractivity(function(cellView) {
-            return { elementMove: false, elementRemove: true, linkRemove: true };
-        });
-    }
-
-
-    function cambiarModoEdicion() {
-        modoEliminar = false; // Desactiva el modo de eliminar nodos
-        modoEdicion = true; // Activa el modo de edición para crear nodos
-    
-        // Actualiza las interacciones del papel para crear nodos
-        paper.setInteractivity(function(cellView) {
-            return { vertexAdd: false, labelMove: true };
-        });
     }
     
-    
-    paper.on('link:pointerclick', function(linkView) {
-        // Verifica si está en el modo de eliminar aristas
-        if (modoEliminar) {
-            // Elimina la arista seleccionada
-            graph.removeCells([linkView.model]);
-        }
-    });
-    
-
-
     paper.on('element:pointerclick', function(elementView) {
         // Verifica si está en el modo de eliminar nodos
-        if (!modoEdicion) {
+        if (modoEliminar && modoEdicion) {
             // Elimina el nodo y sus aristas de conexión
             graph.removeCells([elementView.model]);
         }
     });
-        
-
+    
+    paper.on('link:pointerclick', function(linkView) {
+        // Verifica si está en el modo de eliminar aristas
+        if (modoEliminar && modoEdicion) {
+            // Elimina la arista seleccionada
+            graph.removeCells([linkView.model]);
+        }
+    });      
 
         // Evento de clic para el botón "cargarBtn"
     document.getElementById('cargarBtn').addEventListener('click', function() {
