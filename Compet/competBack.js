@@ -168,6 +168,7 @@ window.addEventListener('resize', updateDimensions);
 
     let contadorNodos = 0; // Contador para llevar el orden de los nodos agregados
     let nodoOrigen = null;
+    let conexiones = {}; // Objeto para almacenar las conexiones entre nodos
 
     function conectarNodos(nodoOrigen, nodoDestino) {
         const x1 = parseFloat(nodoOrigen.getAttribute("cx"));
@@ -183,6 +184,14 @@ window.addEventListener('resize', updateDimensions);
             .attr("y2", y2)
             .attr("stroke", "white")
             .attr("stroke-width", 2);
+    
+        // Almacenar la conexión entre nodos
+        const idNodoOrigen = nodoOrigen.getAttribute("id");
+        const idNodoDestino = nodoDestino.getAttribute("id");
+        conexiones[idNodoOrigen] = conexiones[idNodoOrigen] || [];
+        conexiones[idNodoDestino] = conexiones[idNodoDestino] || [];
+        conexiones[idNodoOrigen].push(idNodoDestino);
+        conexiones[idNodoDestino].push(idNodoOrigen);
     
         // Asegurar que los nodos estén dibujados sobre las líneas
         svg.selectAll("circle").raise();
@@ -231,23 +240,17 @@ window.addEventListener('resize', updateDimensions);
     });
 
     document.getElementById('resolverBtn').addEventListener('click', function() {
-        // Obtener todos los nodos
-        const nodos = svg.selectAll("circle");
-        const numNodos = nodos.size();
-    
-        // Verificar si hay nodos para resolver
-        if (numNodos === 0) {
-            alert("No hay nodos para resolver.");
-            return;
-        }
-    
         // Calcular el centro del grupo cerrado
         let sumX = 0;
         let sumY = 0;
+        const nodos = svg.selectAll("circle");
+    
         nodos.each(function() {
             sumX += parseFloat(d3.select(this).attr("cx"));
             sumY += parseFloat(d3.select(this).attr("cy"));
         });
+    
+        const numNodos = nodos.size();
         const centerX = sumX / numNodos;
         const centerY = sumY / numNodos;
     
@@ -258,26 +261,27 @@ window.addEventListener('resize', updateDimensions);
             .attr("r", 5)
             .attr("fill", "red");
     
-        // Calcular el punto medio entre cada par de nodos
-        nodos.each(function() {
-            const nodo1 = d3.select(this);
-            nodos.each(function() {
-                const nodo2 = d3.select(this);
-                if (nodo1.node() !== nodo2.node()) {
-                    const medioX = (parseFloat(nodo1.attr("cx")) + parseFloat(nodo2.attr("cx"))) / 2;
-                    const medioY = (parseFloat(nodo1.attr("cy")) + parseFloat(nodo2.attr("cy"))) / 2;
+        // Obtener todas las líneas que representan las conexiones entre nodos
+        const lineas = svg.selectAll("line");
     
-                    // Agregar un punto rojo en el punto medio
-                    svg.append("circle")
-                        .attr("cx", medioX)
-                        .attr("cy", medioY)
-                        .attr("r", 3)
-                        .attr("fill", "red");
-                }
-            });
+        // Iterar sobre cada línea para encontrar nodos asociados y calcular el punto medio
+        lineas.each(function() {
+            const nodo1 = svg.select(`circle[cx="${this.getAttribute("x1")}"][cy="${this.getAttribute("y1")}"]`);
+            const nodo2 = svg.select(`circle[cx="${this.getAttribute("x2")}"][cy="${this.getAttribute("y2")}"]`);
+    
+            if (nodo1.size() !== 0 && nodo2.size() !== 0) { // Verificar si ambos nodos están presentes
+                const xMedio = (parseFloat(nodo1.attr("cx")) + parseFloat(nodo2.attr("cx"))) / 2;
+                const yMedio = (parseFloat(nodo1.attr("cy")) + parseFloat(nodo2.attr("cy"))) / 2;
+    
+                // Dibujar un punto rojo en el punto medio
+                svg.append("circle")
+                    .attr("cx", xMedio)
+                    .attr("cy", yMedio)
+                    .attr("r", 3)
+                    .attr("fill", "red");
+            }
         });
     });
-
 
     function mostrarResultado(resultado) {
         const resultadoContainer = document.getElementById('resultado-container');
