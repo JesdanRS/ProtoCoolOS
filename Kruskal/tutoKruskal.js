@@ -48,10 +48,6 @@ document.addEventListener('DOMContentLoaded', function() {
         {
             elemento: document.getElementById('volverColorOrig'),
             mensaje: 'Borra la solucion y plantea una nueva.',
-        },
-        {
-            elemento: document.getElementById('resultado-container'),
-            mensaje: 'Borra la solucion y plantea una nueva.',
         }
 
     ];
@@ -101,9 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (botonExistente) {
             botonExistente.remove(); // Eliminar el botón existente antes de crear uno nuevo
         }
-        if (pasoActual === 1) {
-            agregarBotonVideo(tooltip); // Agregar el botón de video al tooltip
-        }
+        
         paso.elemento.classList.add('resaltar');
         aplicarDesenfoque();
     }
