@@ -168,6 +168,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('volverColorOrig').addEventListener('click', function() {
         // Llamar a la función para restaurar los colores originales de las aristas
         restaurarColoresOriginales();
+        // Limpiar el contenido del contenedor 'resultado-container'
+        document.getElementById('resultado-container').innerText = '';
     });
 
     // Función para restaurar los colores originales de las aristas
@@ -199,9 +201,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function calcularKruskal() {
         var edges = Object.values(graph.getLinks());
         edges.sort((a, b) => a.labels()[0].attrs.text.text - b.labels()[0].attrs.text.text);
-    
+        
         var mstEdges = [];
         var unionFind = {};
+        var sum = 0; // Variable para almacenar la suma de los valores de las aristas
     
         function find(x) {
             if (unionFind[x] === undefined) {
@@ -220,27 +223,31 @@ document.addEventListener('DOMContentLoaded', function() {
             if (find(sourceId) !== find(targetId)) {
                 union(sourceId, targetId);
                 mstEdges.push(edge);
-    
-                // Marcar la arista en el gráfico como parte de la solución
-                edge.attr('line/stroke', '#FF0000'); // Cambiar el color de la arista
-                edge.attr('line/strokeWidth', 4); // Opcional: ajustar el ancho de la arista si lo deseas
-            } else {
-                // Desmarcar aristas que no forman parte de la solución
-                edge.attr('line/stroke', document.getElementById('cambiarColorAristaBtn').value); // Restaurar el color original de la arista
-                edge.attr('line/strokeWidth', 4); // Opcional: restaurar el ancho original de la arista si lo deseas
+                sum += parseFloat(edge.labels()[0].attrs.text.text); // Sumar el valor de la arista
             }
+        });
+    
+        // Mostrar la suma en el contenedor resultado-container
+        var resultadoContainer = document.getElementById('resultado-container');
+        resultadoContainer.textContent = mstEdges.map(edge => edge.labels()[0].attrs.text.text).join('+') + '=' + sum;
+    
+        // Marcar las aristas en el gráfico como parte de la solución después de mostrar la suma
+        mstEdges.forEach(edge => {
+            edge.attr('line/stroke', '#FF0000'); // Cambiar el color de la arista
+            edge.attr('line/strokeWidth', 4); // Opcional: ajustar el ancho de la arista si lo deseas
         });
     
         // Guardar la lista de aristas seleccionadas para futuras referencias
         paper.selectedEdges = mstEdges;
-    }    
+    }
 
     function maximizarKruskal() {
         var edges = Object.values(graph.getLinks());
         edges.sort((a, b) => b.labels()[0].attrs.text.text - a.labels()[0].attrs.text.text); // Ordenar de mayor a menor
-    
+        
         var maxEdges = [];
         var unionFind = {};
+        var sum = 0; // Variable para almacenar la suma de los valores de las aristas
     
         function find(x) {
             if (unionFind[x] === undefined) {
@@ -259,15 +266,18 @@ document.addEventListener('DOMContentLoaded', function() {
             if (find(sourceId) !== find(targetId)) {
                 union(sourceId, targetId);
                 maxEdges.push(edge);
-    
-                // Marcar la arista en el gráfico como parte de la solución
-                edge.attr('line/stroke', '#FF0000'); // Cambiar el color de la arista maximizada (por ejemplo, verde)
-                edge.attr('line/strokeWidth', 4); // Opcional: ajustar el ancho de la arista si lo deseas
-            } else {
-                // Desmarcar aristas que no forman parte de la solución
-                edge.attr('line/stroke', document.getElementById('cambiarColorAristaBtn').value); // Restaurar el color original de la arista
-                edge.attr('line/strokeWidth', 4); // Opcional: restaurar el ancho original de la arista si lo deseas
+                sum += parseFloat(edge.labels()[0].attrs.text.text); // Sumar el valor de la arista
             }
+        });
+    
+        // Mostrar la suma en el contenedor resultado-container
+        var resultadoContainer = document.getElementById('resultado-container');
+        resultadoContainer.textContent = maxEdges.map(edge => edge.labels()[0].attrs.text.text).join('+') + '=' + sum;
+    
+        // Marcar las aristas en el gráfico como parte de la solución después de mostrar la suma
+        maxEdges.forEach(edge => {
+            edge.attr('line/stroke', '#FF0000'); // Cambiar el color de la arista maximizada (por ejemplo, verde)
+            edge.attr('line/strokeWidth', 4); // Opcional: ajustar el ancho de la arista si lo deseas
         });
     
         // Guardar la lista de aristas seleccionadas para futuras referencias
