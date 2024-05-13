@@ -787,7 +787,7 @@ Estilo de botón HELP
     font-family: 'Poppins', sans-serif;
 }
 
-#solMinBtn, #solMaxBtn, #aplicarColorSolucion{
+#solMinBtn, #solMaxBtn, #aplicarColorSolucion, #volverColorOrig{
     cursor: pointer;
     margin-top: 5px;
     margin-left: 10px;

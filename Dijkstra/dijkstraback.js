@@ -69,11 +69,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function createNode(x, y, label) {
+        var nodeId = label.replace(/\s+/g, '-').toLowerCase();  // Crear un ID simple basado en el label
         var colorNodo = document.getElementById('cambiarColorBtn').value;
         var colorTexto = document.getElementById('cambiarColorTextoBtn').value;
         var nodeSize = Math.max(30, label.length * 10);
-
+    
         var cell = new joint.shapes.standard.Circle({
+            id: nodeId, // Asegúrate de que este ID sea único
             position: { x: x - nodeSize / 2, y: y - nodeSize / 2 },
             size: { width: nodeSize, height: nodeSize },
             attrs: {
@@ -93,8 +95,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         graph.addCell(cell);
+        console.log("Nodo creado con ID:", nodeId);  // Imprimir el ID para verificar
         return cell;
     }
+    console.log("Nodos actuales en el grafo:", graph.getElements().map(el => el.id));
+
+    
 
     paper.on('element:mouseover', function(elementView){
         paper.el.style.cursor = 'default';
@@ -167,6 +173,117 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Maneja el cambio de modo de edición cuando se hace clic en el interruptor
     document.querySelector('input[type="checkbox"]').addEventListener('change', cambiarModoEdicion);
+
+    // Evento de clic para el botón "Borrar Solución"
+    document.getElementById('volverColorOrig').addEventListener('click', function() {
+        var edges = Object.values(graph.getLinks());
+        edges.forEach(edge => {
+            edge.attr('line/stroke', document.getElementById('cambiarColorAristaBtn').value); // Usar el valor del botón cambiarColorAristaBtn
+            edge.attr('line/strokeWidth', 4); // Opcional: restaurar el ancho original de la arista si lo deseas
+        });
+    });
+
+    // Función para restaurar los colores originales de las aristas
+    function restaurarColoresOriginales() {
+        var edges = Object.values(graph.getLinks());
+        edges.forEach(edge => {
+            edge.attr('line/stroke', document.getElementById('cambiarColorAristaBtn').value); // Restaurar el color original de la arista
+            edge.attr('line/strokeWidth', 4); // Opcional: restaurar el ancho original de la arista si lo deseas
+        });
+    }
+
+    document.getElementById('volverColorOrig').addEventListener('click', function() {
+        graph.getLinks().forEach(link => {
+            link.attr('line/stroke', '#000000'); // Color predeterminado
+            link.attr('line/strokeWidth', 1); // Ancho de línea predeterminado
+        });
+    });
+    
+    
+    document.getElementById('solMinBtn').addEventListener('click', function() {
+        const nodeId = prompt("Ingrese el ID del nodo inicial:");
+        const startNode = graph.getCell(nodeId);
+    
+        if (!startNode) {
+            console.error("Nodo no encontrado con ID:", nodeId);
+            alert("Nodo inicial inválido. Asegúrese de que el ID es correcto y está bien escrito.");
+            return;
+        }
+    
+        const results = dijkstraAlgorithm(graph, startNode);
+        highlightPaths(results.distances, results.previous);
+    });
+    
+    function reconstructPath(previous, targetId) {
+        const path = [];
+        let currentId = targetId;
+        
+        while (currentId !== null) {
+            path.unshift(currentId);
+            currentId = previous[currentId];
+        }
+    
+        // Convertir los ID de los nodos en objetos de modelo de nodo
+        const nodePath = path.map(nodeId => graph.getCell(nodeId));
+        
+        return nodePath;
+    }
+    
+    
+    function highlightPaths(distances, previous) {
+        const allLinks = graph.getLinks();
+        const highlightedLinks = [];
+    
+        allLinks.forEach(link => {
+            const sourceId = link.get('source').id;
+            const targetId = link.get('target').id;
+            const path = reconstructPath(previous, targetId);
+            const distance = distances[targetId];
+    
+            // Verificar si tanto el origen como el destino de la arista están en el camino
+            if (path.map(node => node.id).includes(sourceId) && path.map(node => node.id).includes(targetId) && distance !== Infinity) {
+                highlightedLinks.push(link);
+            }
+        });
+    
+        // Resaltar las aristas entre los nodos reconstruidos
+        highlightedLinks.forEach(link => {
+            link.attr('line/stroke', 'red');
+            link.attr('line/strokeWidth', 3);
+        });
+    }
+    
+    
+    
+    function dijkstraAlgorithm(graph, source) {
+        const distances = {};
+        const previous = {};
+        const queue = new joint.util.PriorityQueue((a, b) => distances[a.id] < distances[b.id]);
+    
+        graph.getElements().forEach(function(element) {
+            distances[element.id] = Infinity;
+            previous[element.id] = null;
+            queue.push(element);
+        });
+    
+        distances[source.id] = 0;
+    
+        while (!queue.isEmpty()) {
+            const u = queue.pop();
+            graph.getConnectedLinks(u, { outbound: true }).forEach(function(link) {
+                const v = graph.getCell(link.getTargetElement().id);
+                const alt = distances[u.id] + parseFloat(link.labels()[0].attrs.text.text);
+                if (alt < distances[v.id]) {
+                    distances[v.id] = alt;
+                    previous[v.id] = u.id;
+                    queue.rescoreElement(v);
+                }
+            });
+        }
+    
+        return { distances, previous };
+    }
+    
 
     // Evento de clic para el botón "guardarBtn"
     document.getElementById('guardarBtn').addEventListener('click', function() {

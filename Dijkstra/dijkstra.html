@@ -49,11 +49,11 @@
                 <a href="../ArbolBinario/indexArbol.html">
                     <button class="nav-btn">ARBOL BINARIO</button>
                 </a>
-                <a href="../Dijkstra/dijkstra.html">
-                    <button class="nav-btn selected">DIJKSTRA</button>
-                </a>
                 <a href="../Kruskal/indexkruskal.html">
                     <button class="nav-btn">KRUSKAL</button>
+                </a>
+                <a href="../Dijkstra/dijkstra.html">
+                    <button class="nav-btn selected">DIJKSTRA</button>
                 </a>
                 <a href="../Contacto/indexContacto.html">
                     <button class="nav-btn">CONTACTO</button>
@@ -93,15 +93,8 @@
                 <!-- Contenedor de resultados visible desde el inicio -->
                 <div id="solucion-container">
                     <button id="solMinBtn" class="solBtn">Minimizar</button>
-                    <div id="minOptions" style="display:none; position: absolute; background-color: #252954; padding: 10px; border-radius: 5px; margin-top: 5px;">
-                        <input type="color" id="colorSolución" value="#FF0000"> <!-- Rojo por defecto -->
-                        <button id="aplicarColorSolucion">Aplicar</button>
-                    </div>
                     <button id="solMaxBtn" class="solBtn">Maximizar</button>
-                    <div id="maxOptions" style="display:none; position: absolute; background-color: #252954; padding: 10px; border-radius: 5px; margin-top: 5px;">
-                        <input type="color" id="colorSolución" value="#FF0000"> <!-- Rojo por defecto -->
-                        <button id="aplicarColorSolucion">Aplicar</button>
-                    </div>
+                    <button id="volverColorOrig" class="solBtn">Borrar Solución</button>
                 </div>
                 <!-- Contenedor del Gráfico de Barras -->
                 <div id="graficoContainer">
