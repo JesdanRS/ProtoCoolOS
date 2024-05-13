@@ -198,21 +198,8 @@ document.addEventListener('DOMContentLoaded', function() {
             link.attr('line/strokeWidth', 1); // Ancho de línea predeterminado
         });
     });
+ 
     
-    
-    document.getElementById('solMinBtn').addEventListener('click', function() {
-        const nodeId = prompt("Ingrese el ID del nodo inicial:");
-        const startNode = graph.getCell(nodeId);
-    
-        if (!startNode) {
-            console.error("Nodo no encontrado con ID:", nodeId);
-            alert("Nodo inicial inválido. Asegúrese de que el ID es correcto y está bien escrito.");
-            return;
-        }
-    
-        const results = dijkstraAlgorithm(graph, startNode);
-        highlightPaths(results.distances, results.previous);
-    });
     
     function reconstructPath(previous, targetId) {
         const path = [];
@@ -229,60 +216,108 @@ document.addEventListener('DOMContentLoaded', function() {
         return nodePath;
     }
     
-    
-    function highlightPaths(distances, previous) {
-        const allLinks = graph.getLinks();
-        const highlightedLinks = [];
-    
-        allLinks.forEach(link => {
-            const sourceId = link.get('source').id;
-            const targetId = link.get('target').id;
-            const path = reconstructPath(previous, targetId);
-            const distance = distances[targetId];
-    
-            // Verificar si tanto el origen como el destino de la arista están en el camino
-            if (path.map(node => node.id).includes(sourceId) && path.map(node => node.id).includes(targetId) && distance !== Infinity) {
-                highlightedLinks.push(link);
-            }
-        });
-    
-        // Resaltar las aristas entre los nodos reconstruidos
-        highlightedLinks.forEach(link => {
-            link.attr('line/stroke', 'red');
-            link.attr('line/strokeWidth', 3);
-        });
-    }
-    
-    
-    
     function dijkstraAlgorithm(graph, source) {
         const distances = {};
         const previous = {};
-        const queue = new joint.util.PriorityQueue((a, b) => distances[a.id] < distances[b.id]);
+        const queue = [];
     
-        graph.getElements().forEach(function(element) {
-            distances[element.id] = Infinity;
-            previous[element.id] = null;
-            queue.push(element);
+        graph.getElements().forEach(node => {
+            distances[node.id] = Infinity;
+            previous[node.id] = null;
+            queue.push(node);
         });
     
         distances[source.id] = 0;
     
-        while (!queue.isEmpty()) {
-            const u = queue.pop();
-            graph.getConnectedLinks(u, { outbound: true }).forEach(function(link) {
-                const v = graph.getCell(link.getTargetElement().id);
-                const alt = distances[u.id] + parseFloat(link.labels()[0].attrs.text.text);
-                if (alt < distances[v.id]) {
-                    distances[v.id] = alt;
-                    previous[v.id] = u.id;
-                    queue.rescoreElement(v);
+        while (queue.length > 0) {
+            queue.sort((a, b) => distances[a.id] - distances[b.id]);
+            const current = queue.shift();
+    
+            graph.getConnectedLinks(current, { outbound: true }).forEach(link => {
+                const target = graph.getCell(link.getTargetElement().id);
+                const weight = parseFloat(link.attributes.labels[0].attrs.text.text);
+                const alt = distances[current.id] + weight;
+                if (alt < distances[target.id]) {
+                    distances[target.id] = alt;
+                    previous[target.id] = current.id;
                 }
             });
         }
     
         return { distances, previous };
     }
+    
+    
+    
+    
+    function highlightPaths(distances, previous) {
+        // Limpiar resaltados anteriores
+        graph.getLinks().forEach(link => {
+            link.attr('line/stroke', document.getElementById('cambiarColorAristaBtn').value);
+            link.attr('line/strokeWidth', 2);
+        });
+    
+        graph.getElements().forEach(node => {
+            node.attr('body/fill', document.getElementById('cambiarColorBtn').value);
+        });
+    
+        const highlightedNodes = [];
+    
+        // Encuentra y resalta las aristas y nodos del camino más corto
+        for (let nodeId in previous) {
+            const sourceId = previous[nodeId];
+            if (sourceId && distances[nodeId] === distances[sourceId] + getLinkWeight(graph, sourceId, nodeId)) { // Verifica la coherencia de las distancias
+                const targetId = nodeId;
+                const link = findLinkBetweenNodes(graph, sourceId, targetId);
+                if (link) {
+                    link.attr('line/stroke', 'red');
+                    link.attr('line/strokeWidth', 4);
+                    highlightedNodes.push(sourceId);
+                    highlightedNodes.push(targetId);
+                }
+            }
+        }
+    
+        // Resalta los nodos
+        highlightedNodes.forEach(nodeId => {
+            const node = graph.getCell(nodeId);
+            if (node) {
+                node.attr('body/fill', 'yellow');
+            }
+        });
+    }
+    
+    function getLinkWeight(graph, sourceId, targetId) {
+        const link = findLinkBetweenNodes(graph, sourceId, targetId);
+        return link ? parseFloat(link.labels()[0].attrs.text.text) : Infinity;
+    }
+    
+    function findLinkBetweenNodes(graph, sourceId, targetId) {
+        return graph.getLinks().find(link =>
+            (link.source().id === sourceId && link.target().id === targetId) ||
+            (link.source().id === targetId && link.target().id === sourceId)
+        );
+    }
+    
+    
+    
+    document.getElementById('solMinBtn').addEventListener('click', function() {
+        const nodeId = prompt("Ingrese el ID del nodo inicial:");
+        const startNode = graph.getCell(nodeId);
+    
+        if (!startNode) {
+            alert("Nodo inicial inválido. Asegúrese de que el ID es correcto y está bien escrito.");
+            return;
+        }
+    
+        if (graph.getElements().length < 2) {
+            alert("El grafo debe contener al menos dos nodos para ejecutar Dijkstra.");
+            return;
+        }
+    
+        const results = dijkstraAlgorithm(graph, startNode);
+        highlightPaths(results.distances, results.previous);
+    });
     
 
     // Evento de clic para el botón "guardarBtn"
