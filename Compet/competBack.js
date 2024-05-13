@@ -92,47 +92,11 @@ window.addEventListener('resize', updateDimensions);
 
 
     function exportarGrafo(nombreArchivo) { // Exportar el archivo JSON del grafo y la matriz
-        const datosExportar = {
-            nodos: nodos.get({ returnType: "Object" }),
-            aristas: aristas.get(),
-            estado: estado
-        };
-        const datosStr = JSON.stringify(datosExportar);
-        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(datosStr);
-        
-        let exportarLink = document.createElement('a');
-        exportarLink.setAttribute('href', dataUri);
-        exportarLink.setAttribute('download', nombreArchivo || 'grafo.png');
-        document.body.appendChild(exportarLink);
-        
-        exportarLink.click();
-        document.body.removeChild(exportarLink);
+
     }
 
     function importarGrafo(event) { // Importar un archivo JSON de algún grafo
-        const archivo = event.target.files[0];
-        if (!archivo) {
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = function(fileEvent) {
-            try {
-                const datos = JSON.parse(fileEvent.target.result);
-                nodos.clear();
-                aristas.clear();
-                nodos.add(Object.values(datos.nodos)); // Agrega nodos manteniendo posiciones
-                aristas.add(datos.aristas);
-                estado = datos.estado;
-                colorPicker.value = estado.colorActual;
-                ultimoIdNodo = Math.max(...Object.values(datos.nodos).map(nodo => nodo.id));
-                actualizarMatriz();
-                comprobarVisibilidadMatriz();
-            } catch (error) {
-                console.error('Error al importar el archivo', error);
-            }
-        };
-        reader.readAsText(archivo);
+        
     }
 
     guardarBtn.addEventListener('click', function() { // Se apreta el botón de exportar
@@ -153,12 +117,10 @@ window.addEventListener('resize', updateDimensions);
 
     exportJSON.addEventListener('click', function() { // Se apreta el botón de exportar como JSON (editable)
         let nombreArchivo = prompt("Ingrese el nombre del archivo:", "grafo.json");
-        exportarGrafo(nombreArchivo);
-        exportOptions.style.display = 'none';
+
     });
 
     cargarBtn.addEventListener('click', () => importarArchivo.click()); // Se apreta el botón de importar
-    importarArchivo.addEventListener('change', importarGrafo);
 
 
 
@@ -266,13 +228,27 @@ window.addEventListener('resize', updateDimensions);
     
         // Iterar sobre cada línea para encontrar nodos asociados y calcular el punto medio
         lineas.each(function() {
-            const nodo1 = svg.select(`circle[cx="${this.getAttribute("x1")}"][cy="${this.getAttribute("y1")}"]`);
-            const nodo2 = svg.select(`circle[cx="${this.getAttribute("x2")}"][cy="${this.getAttribute("y2")}"]`);
-    
+            const x1 = parseFloat(this.getAttribute("x1"));
+            const y1 = parseFloat(this.getAttribute("y1"));
+            const x2 = parseFloat(this.getAttribute("x2"));
+            const y2 = parseFloat(this.getAttribute("y2"));
+        
+            const nodo1 = svg.selectAll(`circle`).filter(function() {
+                return Math.round(parseFloat(this.getAttribute("cx"))) === Math.round(x1) &&
+                    Math.round(parseFloat(this.getAttribute("cy"))) === Math.round(y1) &&
+                    !this.classList.contains("centroid");
+            });
+        
+            const nodo2 = svg.selectAll(`circle`).filter(function() {
+                return Math.round(parseFloat(this.getAttribute("cx"))) === Math.round(x2) &&
+                    Math.round(parseFloat(this.getAttribute("cy"))) === Math.round(y2) &&
+                    !this.classList.contains("centroid");
+            });
+        
             if (nodo1.size() !== 0 && nodo2.size() !== 0) { // Verificar si ambos nodos están presentes
-                const xMedio = (parseFloat(nodo1.attr("cx")) + parseFloat(nodo2.attr("cx"))) / 2;
-                const yMedio = (parseFloat(nodo1.attr("cy")) + parseFloat(nodo2.attr("cy"))) / 2;
-    
+                const xMedio = (x1 + x2) / 2;
+                const yMedio = (y1 + y2) / 2;
+        
                 // Dibujar un punto rojo en el punto medio
                 svg.append("circle")
                     .attr("cx", xMedio)
