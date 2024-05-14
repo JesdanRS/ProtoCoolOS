@@ -182,6 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     document.getElementById('solMinBtn').addEventListener('click', function() {
+        restaurarColoresOriginales();
         // Verificar que todos los nodos tengan al menos 2 aristas
         var nodes = Object.values(graph.getElements());
         var isValidGraph = nodes.every(node => {
@@ -285,6 +286,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     document.getElementById('solMaxBtn').addEventListener('click', function() {
+        restaurarColoresOriginales();
         // Verificar que todos los nodos tengan al menos 2 aristas
         var nodes = Object.values(graph.getElements());
         var isValidGraph = nodes.every(node => {
