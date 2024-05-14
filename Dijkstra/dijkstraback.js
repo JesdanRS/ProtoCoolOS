@@ -442,5 +442,93 @@ document.addEventListener('DOMContentLoaded', function() {
         isEmpty() {
             return this.elements.length === 0;
         }
+    }
+
+    document.getElementById('solMaxBtn').addEventListener('click', function() {
+        restaurarColoresOriginales();
+        if (!modoEdicion) {
+            var nombreOrigen = prompt("Ingrese el nombre del nodo de origen:");
+            var nombreDestino = prompt("Ingrese el nombre del nodo de destino:");
+    
+            var nodoOrigen = findNodeByName(nombreOrigen);
+            var nodoDestino = findNodeByName(nombreDestino);
+    
+            if (!nodoOrigen || !nodoDestino) {
+                alert("Uno o ambos nombres de nodos no existen. Por favor, verifique los nombres e intente de nuevo.");
+                return;
+            }
+    
+            if (nodoOrigen.id === nodoDestino.id) {
+                alert("Los nodos origen y destino deben ser diferentes.");
+                return;
+            }
+    
+            var path = dijkstraMaximize(graph, nodoOrigen.id, nodoDestino.id);
+            if (!path || path.length === 0) {
+                alert("No se encontró un camino válido entre los nodos seleccionados.");
+                if (nodoOrigen && nodoDestino) {
+                    markNodeAsError(nodoOrigen);
+                    markNodeAsError(nodoDestino);
+                }
+            } else {
+                highlightPath(path);
+            }
+        } else {
+            alert("Por favor, desactive el modo de edición para usar esta función.");
+        }
+    });
+    
+    function dijkstraMaximize(graph, sourceId, targetId) {
+        var elements = graph.getElements();
+        var links = graph.getLinks();
+        var nodes = {};
+        var dist = {};
+        var prev = {};
+        var pq = new PriorityQueue(true); // Assuming PriorityQueue supports a 'max' parameter to prioritize highest first
+    
+        elements.forEach(function(element) {
+            var id = element.id;
+            nodes[id] = element;
+            dist[id] = -Infinity; // Initialize distances to negative infinity for maximization
+            prev[id] = null;
+        });
+    
+        if (!nodes[sourceId] || !nodes[targetId]) {
+            console.error("Uno o ambos nodos no existen en el gráfico.");
+            return null;
+        }
+    
+        dist[sourceId] = 0;
+        pq.enqueue(sourceId, dist[sourceId]);
+    
+        while (!pq.isEmpty()) {
+            var u = pq.dequeue();
+    
+            if (u === targetId) break;
+    
+            var uDist = dist[u];
+            var neighbors = graph.getNeighbors(nodes[u], { outbound: true });
+    
+            neighbors.forEach(function(v) {
+                var link = findLinkBetweenNodes(links, u, v.id);
+                if (link) {
+                    var attribute = link.attributes.labels[0].attrs.text.text || "0";
+                    var alt = uDist + parseInt(attribute, 10);
+                    if (alt > dist[v.id]) {
+                        dist[v.id] = alt;
+                        prev[v.id] = u;
+                        pq.enqueue(v.id, alt);
+                    }
+                }
+            });
+        }
+    
+        var path = [];
+        for (var at = targetId; at !== null; at = prev[at]) {
+            path.push(at);
+        }
+        path.reverse();
+    
+        return (dist[targetId] === -Infinity) ? null : path;
     }    
 });

@@ -28,6 +28,8 @@ html, body {
     border-radius: 10px;
     /* Quitar 'display: none;' para que sea visible desde el inicio */
     z-index: 1;
+    margin-top: 15px;
+    margin-bottom: 15px;
 }
 
 .flex-container {
