@@ -342,11 +342,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('resolverBtn').addEventListener('click', function() {
         // Limpiar puntos rojos existentes
+
+        const nodos = svg.selectAll("circle");
+        let nodosConDosConexiones = true;
+        nodos.each(function() {
+            const id = d3.select(this).attr("id");
+            if (!(conexiones[id] && conexiones[id].length >= 2)) {
+                nodosConDosConexiones = false;
+            }
+        });
+    
+        // Si algún nodo no tiene al menos 2 conexiones, mostrar un mensaje y evitar la resolución
+        if (!nodosConDosConexiones) {
+            alert("Para resolver el grafo, todos los nodos deben estar unidos con al menos 2 conexiones.");
+            return;
+        }
+
         svg.selectAll("circle.red-dot").remove();
     
         let sumX = 0;
         let sumY = 0;
-        const nodos = svg.selectAll("circle");
         const nodosCoords = [];
         const puntosMedios = [];
     
