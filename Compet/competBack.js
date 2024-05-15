@@ -92,6 +92,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function exportarGrafo(nombreArchivo) {
         // Construir el objeto de datos para exportar
+        const puntosRojoPresentes = svg.select("circle.red-dot").size() > 0;
+
+        if (puntosRojoPresentes) {
+            alert("No se puede exportar mientras haya una solución presente. Por favor, borra la solución antes de exportar.");
+            return;
+        }
+    
         const data = {
             nodos: [],
             conexiones: conexiones
@@ -339,6 +346,20 @@ document.addEventListener('DOMContentLoaded', function() {
             .text(`${nombreVariable} (${xCoord}, ${yCoord})`);
     });
     
+    document.getElementById('borrarSolucionBtn').addEventListener('click', function() {
+        // Remover puntos rojos (solución) del SVG
+        svg.selectAll("circle.red-dot").remove();
+    
+        // Remover texto del centroide
+        svg.select("#centroid-text").remove();
+    
+        // Limpiar el contenido del contenedor de información
+        const infoContainer = document.getElementById('info-container');
+        infoContainer.innerHTML = "";
+    
+        // Remover puntos medios entre nodos
+        svg.selectAll("circle.midpoint-dot").remove();
+    });
 
     document.getElementById('resolverBtn').addEventListener('click', function() {
         // Limpiar puntos rojos existentes
@@ -391,6 +412,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Agregar texto con las coordenadas del centroide
     svg.append("text")
+        .attr("id", "centroid-text") // Identificación única para el texto del centroide
         .attr("x", centerX + 5)
         .attr("y", centerY - 5)
         .attr("fill", "white")

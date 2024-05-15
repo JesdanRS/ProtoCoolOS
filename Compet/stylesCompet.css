@@ -678,7 +678,7 @@ Estilo de botón HELP
     font-family: 'Poppins', sans-serif;
 }
 
-#resolverBtn{
+#resolverBtn, #borrarSolucionBtn{
     margin-top: 15px;
     margin-left: 10px;
     cursor: pointer;
