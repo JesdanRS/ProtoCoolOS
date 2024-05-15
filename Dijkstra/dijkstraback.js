@@ -276,6 +276,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('limpiarBtn').addEventListener('click', function() {
         graph.resetCells(); // Elimina todos los elementos del gráfico
+        document.getElementById('resultado-container').innerText = '';
     });    
 
     document.getElementById('solMinBtn').addEventListener('click', function() {
@@ -403,11 +404,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     
         var path = [];
+        var pathSum = 0;
         for (var at = targetId; at !== null; at = prev[at]) {
+            if (prev[at] !== null) {
+                var link = findLinkBetweenNodes(links, prev[at], at);
+                if (link) {
+                    pathSum += parseInt(link.attributes.labels[0].attrs.text.text, 10);
+                }
+            }
             path.push(at);
         }
         path.reverse();
     
+        document.getElementById('resultado-container').innerText = 'Suma del camino mínimo: ' + pathSum;
         return (dist[targetId] === Infinity) ? null : path;
     }
     
@@ -499,36 +508,42 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     
         dist[sourceId] = 0;
-        pq.enqueue(sourceId, dist[sourceId]);
-    
-        while (!pq.isEmpty()) {
-            var u = pq.dequeue();
-    
-            if (u === targetId) break;
-    
-            var uDist = dist[u];
-            var neighbors = graph.getNeighbors(nodes[u], { outbound: true });
-    
-            neighbors.forEach(function(v) {
-                var link = findLinkBetweenNodes(links, u, v.id);
-                if (link) {
-                    var attribute = link.attributes.labels[0].attrs.text.text || "0";
-                    var alt = uDist + parseInt(attribute, 10);
-                    if (alt > dist[v.id]) {
-                        dist[v.id] = alt;
-                        prev[v.id] = u;
-                        pq.enqueue(v.id, alt);
-                    }
+    pq.enqueue(sourceId, 0);
+
+    while (!pq.isEmpty()) {
+        var u = pq.dequeue();
+
+        var uDist = dist[u];
+        var neighbors = graph.getNeighbors(nodes[u], { outbound: true });
+
+        neighbors.forEach(function(v) {
+            var link = findLinkBetweenNodes(links, u, v.id);
+            if (link) {
+                var attribute = parseInt(link.attributes.labels[0].attrs.text.text, 10) || 0;
+                var alt = uDist + attribute;
+                if (alt > dist[v.id]) {
+                    dist[v.id] = alt;
+                    prev[v.id] = u;
+                    pq.enqueue(v.id, alt);  // Re-enqueue with updated distance
                 }
-            });
+            }
+        });
+    }
+
+    var path = [];
+    var pathSum = 0;
+    for (var at = targetId; at !== null; at = prev[at]) {
+        if (prev[at] !== null) {
+            var link = findLinkBetweenNodes(links, prev[at], at);
+            if (link) {
+                pathSum += parseInt(link.attributes.labels[0].attrs.text.text, 10);
+            }
         }
-    
-        var path = [];
-        for (var at = targetId; at !== null; at = prev[at]) {
-            path.push(at);
-        }
-        path.reverse();
-    
-        return (dist[targetId] === -Infinity) ? null : path;
+        path.push(at);
+    }
+    path.reverse();
+
+    document.getElementById('resultado-container').innerText = 'Suma del camino máximo: ' + pathSum;
+    return (dist[targetId] === -Infinity) ? null : path;
     }    
 });

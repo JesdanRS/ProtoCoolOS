@@ -384,5 +384,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('limpiarBtn').addEventListener('click', () => {
         graph.resetCells();
+        document.getElementById('resultado-container').innerText = '';
     });
 });
