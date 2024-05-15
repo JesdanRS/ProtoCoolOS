@@ -116,6 +116,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Convertir el objeto de datos a JSON
         const jsonData = JSON.stringify(data);
     
+        if (!nombreArchivo.endsWith(".json")) {
+            nombreArchivo += ".json";
+        }
+        
         // Crear un enlace de descarga para el archivo JSON
         const enlace = document.createElement('a');
         enlace.download = nombreArchivo || 'grafo.json';
