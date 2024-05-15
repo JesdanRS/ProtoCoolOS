@@ -20,11 +20,11 @@ document.addEventListener('DOMContentLoaded', function() {
         height = grafoContainer.offsetHeight;
 
         xAxis = d3.scaleLinear()
-            .domain([-54, 54]) // Rango de -50 a 50 para centrar en 0
+            .domain([-54.995, 54.995]) // Rango de -50 a 50 para centrar en 0
             .range([0, width]);
 
         yAxis = d3.scaleLinear()
-            .domain([-54, 54]) // Rango de -50 a 50 para centrar en 0
+            .domain([-54.995, 54.995]) // Rango de -50 a 50 para centrar en 0
             .range([height, 0]);
 
         xAxisGroup = svg.append("g")
