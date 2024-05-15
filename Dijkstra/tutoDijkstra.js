@@ -123,59 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     
-    function reproducirVideo() {
-        // Obtén el tooltip actual por su clase o ID
-        const tooltip = document.querySelector('.tooltip');
-    
-        // Crea el contenedor para el video si aún no existe
-        let videoContainer = document.getElementById('videoContainer');
-        if (!videoContainer) {
-            videoContainer = document.createElement('div');
-            videoContainer.id = 'videoContainer';
-            videoContainer.style.position = 'fixed'; // O 'absolute' si el tooltip es parte de un contenedor posicionado
-            videoContainer.style.zIndex = '1007'; // Asegúrate de que esté por encima del desenfoque
-            videoContainer.style.left = '50%'; // Ajusta según la posición del tooltip en tu página
-            videoContainer.style.top = '50%'; // Ajusta según la posición del tooltip en tu página
-            videoContainer.style.transform = 'translate(-50%, -50%)'; // Centra el contenedor en la pantalla
-            videoContainer.style.maxWidth = '70vw'; // Usa un máximo del 70% del ancho de la ventana
-            videoContainer.style.maxHeight = '70vh'; // Usa un máximo del 70% del alto de la ventana
-            document.body.appendChild(videoContainer);
-        }
-    
-        // Vacía cualquier contenido anterior
-        videoContainer.innerHTML = '';
-    
-        // Crea el elemento video y sus fuentes
-        const video = document.createElement('video');
-        video.controls = true;
-        video.autoplay = true; // Esto inicia la reproducción automáticamente cuando se crea el elemento
-        video.style.width = '100%'; // Hace que el video llene el contenedor
-        video.style.height = '100%'; // Hace que el video llene el contenedor
-        video.innerHTML = '<source src="VideoTutorialGrafos.mp4" type="video/mp4">Tu navegador no soporta videos HTML5.';
-        
-        // Añade el video al contenedor
-        videoContainer.appendChild(video);
-        // Crea un botón para cerrar el video
-    const closeButton = document.createElement('button');
-    closeButton.innerText = 'X'; // Puedes reemplazar esto con un ícono de cerrar si lo prefieres
-    closeButton.style.position = 'absolute';
-    closeButton.style.top = '5px';
-    closeButton.style.right = '5px';
-    closeButton.style.zIndex = '1008'; // Asegúrate de que esté por encima del video
-    closeButton.style.background = 'none';
-    closeButton.style.border = 'none';
-    closeButton.style.color = 'white';
-    closeButton.style.fontSize = '20px';
-    closeButton.style.cursor = 'pointer';
 
-    // Añade funcionalidad para cerrar el video
-    closeButton.onclick = function() {
-        videoContainer.remove(); // Elimina el contenedor de video
-    };
-
-    // Añade el botón de cierre al contenedor de video
-    videoContainer.appendChild(closeButton);
-    }
     
     
     function ocultarPasos() {
