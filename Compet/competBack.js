@@ -101,6 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
         svg.selectAll("circle").each(function() {
             const nodo = d3.select(this);
             const id = nodo.attr("id");
+            const nombre = nodo.attr("data-nombre"); // Obtener el nombre del nodo
             const x = parseFloat(nodo.attr("cx")); // Coordenada escalada para SVG
             const y = parseFloat(nodo.attr("cy")); // Coordenada escalada para SVG
             const originalX = parseFloat(nodo.attr("data-x")); // Coordenada original
@@ -108,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
             // Verificar si las coordenadas son números válidos
             if (!isNaN(x) && !isNaN(y)) {
-                data.nodos.push({ id, x, y, originalX, originalY });
+                data.nodos.push({ id, nombre, x, y, originalX, originalY }); // Agregar el nombre del nodo
             }
         });
     
@@ -120,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
         enlace.download = nombreArchivo || 'grafo.json';
         enlace.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(jsonData);
         enlace.click();
-    }      
+    }
     
     function importarGrafo(event) {
         const archivo = event.target.files[0];
@@ -138,10 +139,11 @@ document.addEventListener('DOMContentLoaded', function() {
             // Recrear los nodos
             data.nodos.forEach(nodo => {
                 const nuevoNodo = svg.append("circle")
-                    .attr("id", nodo.id)
+                    .attr("id", nodo.id) // Utilizar el ID original
+                    .attr("data-nombre", nodo.nombre) // Utilizar el nombre del nodo
                     .attr("cx", nodo.x)
                     .attr("cy", nodo.y)
-                    .attr("r", 10)
+                    .attr("r", 8)
                     .attr("fill", "blue")
                     .on("click", function() {
                         if (nodoOrigen === null) {
@@ -173,14 +175,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
                 svg.selectAll("circle").raise(); // Asegurar que los nodos estén dibujados sobre las líneas
     
-                // Agregar el texto asociado al nodo
+                // Agregar el texto asociado al nodo con el nombre correspondiente
                 svg.append("text")
                     .attr("id", `${nodo.id}-text`)
                     .attr("x", nodo.x + 15)
                     .attr("y", nodo.y - 15)
                     .attr("fill", "white")
-                    .text(`${nodo.id} (${nodo.originalX}, ${nodo.originalY})`); // Usar coordenadas originales aquí
-        
+                    .style("font-size", "13px") // Tamaño de fuente más pequeño
+                    .text(`${nodo.nombre} (${nodo.originalX}, ${nodo.originalY})`); // Utilizar el nombre y las coordenadas originales aquí
+    
                 // Inicializar las conexiones del nodo
                 conexiones[nodo.id] = [];
             });
@@ -202,6 +205,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
         lector.readAsText(archivo);
     }
+    
+    
     
     
     // Asignar la función importarGrafo al evento change del input de importación
@@ -270,6 +275,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     document.getElementById('agregarBtn').addEventListener('click', function() {
+        const nombreNodo = prompt("Ingrese el nombre del nodo:");
         const xCoord = parseFloat(prompt("Ingrese la coordenada en el eje X (entre -50 y 50):"));
         const yCoord = parseFloat(prompt("Ingrese la coordenada en el eje Y (entre -50 y 50):"));
     
@@ -279,10 +285,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     
         const contador = ++contadorNodos; // Incrementar el contador de nodos
-        const nombreVariable = `x${contador}y${contador}`; // Crear el nombre de la variable
+        const nombreVariable = nombreNodo || `nodo${contador}`; // Utilizar el nombre proporcionado o generar uno
         const nodoId = `nodo${contador}`; // Crear un identificador único para el nodo
         const nodo = svg.append("circle")
             .attr("id", nodoId) // Asignar un id único al nodo
+            .attr("data-nombre", nombreNodo) // Guardar el nombre del nodo
             .attr("cx", xAxis(xCoord))
             .attr("cy", yAxis(yCoord))
             .attr("data-x", xCoord) // Guardar coordenada original
@@ -327,6 +334,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .style("font-size", "13px") // Ajustar el tamaño de la fuente aquí
             .text(`${nombreVariable} (${xCoord}, ${yCoord})`);
     });
+    
 
     document.getElementById('resolverBtn').addEventListener('click', function() {
         // Limpiar puntos rojos existentes
