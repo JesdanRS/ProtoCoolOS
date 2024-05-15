@@ -91,12 +91,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function exportarGrafo(nombreArchivo) {
-        // Construir el objeto de datos para exportar
+        const puntosRojoPresentes = svg.select("circle.red-dot").size() > 0;
+
+        if (puntosRojoPresentes) {
+            alert("No se puede exportar mientras haya una solución presente. Por favor, borra la solución antes de exportar.");
+            return;
+        }
+
         const data = {
             nodos: [],
             conexiones: conexiones
         };
-    
+
         // Obtener la información de cada nodo
         svg.selectAll("circle").each(function() {
             const nodo = d3.select(this);
@@ -106,47 +112,46 @@ document.addEventListener('DOMContentLoaded', function() {
             const y = parseFloat(nodo.attr("cy")); // Coordenada escalada para SVG
             const originalX = parseFloat(nodo.attr("data-x")); // Coordenada original
             const originalY = parseFloat(nodo.attr("data-y")); // Coordenada original
-    
+
             // Verificar si las coordenadas son números válidos
             if (!isNaN(x) && !isNaN(y)) {
                 data.nodos.push({ id, nombre, x, y, originalX, originalY }); // Agregar el nombre del nodo
             }
         });
-    
+
         // Convertir el objeto de datos a JSON
         const jsonData = JSON.stringify(data);
-    
+
         if (!nombreArchivo.endsWith(".json")) {
             nombreArchivo += ".json";
         }
-        
+
         // Crear un enlace de descarga para el archivo JSON
         const enlace = document.createElement('a');
         enlace.download = nombreArchivo || 'grafo.json';
         enlace.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(jsonData);
         enlace.click();
     }
-    
+
     function importarGrafo(event) {
         const archivo = event.target.files[0];
         const lector = new FileReader();
         lector.onload = function(e) {
-            // Parsear el archivo JSON
             const data = JSON.parse(e.target.result);
-    
+
             // Limpiar el lienzo
             svg.selectAll("*").remove();
-    
-            // Objeto para almacenar las conexiones entre nodos
+
             conexiones = {};
-    
-            // Recrear los nodos
+
             data.nodos.forEach(nodo => {
                 const nuevoNodo = svg.append("circle")
-                    .attr("id", nodo.id) // Utilizar el ID original
-                    .attr("data-nombre", nodo.nombre) // Utilizar el nombre del nodo
+                    .attr("id", nodo.id)
+                    .attr("data-nombre", nodo.nombre)
                     .attr("cx", nodo.x)
                     .attr("cy", nodo.y)
+                    .attr("data-x", nodo.originalX)
+                    .attr("data-y", nodo.originalY)
                     .attr("r", 8)
                     .attr("fill", "blue")
                     .on("click", function() {
@@ -159,7 +164,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     })
                     .on("contextmenu", function() {
                         event.preventDefault();
-                        // Eliminar el nodo y sus conexiones
                         const id = d3.select(this).attr("id");
                         const lineas = svg.selectAll("line");
                         lineas.each(function() {
@@ -176,23 +180,20 @@ document.addEventListener('DOMContentLoaded', function() {
                         this.remove();
                         delete conexiones[id];
                     });
-    
-                svg.selectAll("circle").raise(); // Asegurar que los nodos estén dibujados sobre las líneas
-    
-                // Agregar el texto asociado al nodo con el nombre correspondiente
+
+                svg.selectAll("circle").raise();
+
                 svg.append("text")
                     .attr("id", `${nodo.id}-text`)
                     .attr("x", nodo.x + 15)
                     .attr("y", nodo.y - 15)
                     .attr("fill", "white")
-                    .style("font-size", "13px") // Tamaño de fuente más pequeño
-                    .text(`${nodo.nombre} (${nodo.originalX}, ${nodo.originalY})`); // Utilizar el nombre y las coordenadas originales aquí
-    
-                // Inicializar las conexiones del nodo
+                    .style("font-size", "13px")
+                    .text(`${nodo.nombre} (${nodo.originalX}, ${nodo.originalY})`);
+
                 conexiones[nodo.id] = [];
             });
-    
-            // Recrear las conexiones entre nodos
+
             Object.keys(data.conexiones).forEach(idOrigen => {
                 data.conexiones[idOrigen].forEach(idDestino => {
                     const nodoOrigen = document.getElementById(idOrigen);
@@ -202,11 +203,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
             });
-    
-            // Actualizar las dimensiones del plano de coordenadas después de importar
+
             updateDimensions();
         };
-    
+
         lector.readAsText(archivo);
     }
     
@@ -239,8 +239,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
 
-    cargarBtn.addEventListener('click', () => importarArchivo.click()); // Se apreta el botón de importar
-
+    cargarBtn.addEventListener('click', function() {
+        importarArchivo.click();
+    });
 
 
     document.getElementById('limpiarBtn').addEventListener('click', function() { // Limpiar grafo completo y actualizar matriz
@@ -339,50 +340,64 @@ document.addEventListener('DOMContentLoaded', function() {
             .text(`${nombreVariable} (${xCoord}, ${yCoord})`);
     });
     
-
-    document.getElementById('resolverBtn').addEventListener('click', function() {
-        // Limpiar puntos rojos existentes
-
-        const nodos = svg.selectAll("circle");
-        let nodosConDosConexiones = true;
-        nodos.each(function() {
-            const id = d3.select(this).attr("id");
-            if (!(conexiones[id] && conexiones[id].length >= 2)) {
-                nodosConDosConexiones = false;
-            }
-        });
-    
-        // Si algún nodo no tiene al menos 2 conexiones, mostrar un mensaje y evitar la resolución
-        if (!nodosConDosConexiones) {
-            alert("Para resolver el grafo, todos los nodos deben estar unidos con al menos 2 conexiones.");
-            return;
-        }
-
+    document.getElementById('borrarSolucionBtn').addEventListener('click', function() {
+        // Remover puntos rojos (solución) del SVG
         svg.selectAll("circle.red-dot").remove();
     
-        let sumX = 0;
-        let sumY = 0;
-        const nodosCoords = [];
-        const puntosMedios = [];
+        // Remover texto del centroide
+        svg.select("#centroid-text").remove();
     
-        nodos.each(function() {
-            const x = parseFloat(d3.select(this).attr("cx"));
-            const y = parseFloat(d3.select(this).attr("cy"));
-            const nombre = d3.select(this).attr("data-nombre"); // Obtener el nombre del nodo
-            nodosCoords.push({x, y, nombre}); // Agregar el nombre del nodo al objeto de coordenadas
-            sumX += x;
-            sumY += y;
-        });
+        // Limpiar el contenido del contenedor de información
+        const infoContainer = document.getElementById('info-container');
+        infoContainer.innerHTML = "";
     
-        const numNodos = nodos.size();
-        const centerX = sumX / numNodos;
-        const centerY = sumY / numNodos;
-    
-        const centroidX = centerX / (width / 100) - 50;
-        const centroidY = 50 - (centerY / (height / 100));
-    
-        // Agregar un punto rojo en el centro del grupo cerrado
-        svg.append("circle")
+        // Remover puntos medios entre nodos
+        svg.selectAll("circle.midpoint-dot").remove();
+    });
+
+    document.getElementById('resolverBtn').addEventListener('click', function() {
+    // Limpiar puntos rojos existentes
+    svg.selectAll("circle.red-dot").remove();
+    svg.selectAll("circle.midpoint-dot").remove();
+
+    const nodos = svg.selectAll("circle");
+    let nodosConDosConexiones = true;
+    nodos.each(function() {
+        const id = d3.select(this).attr("id");
+        if (!(conexiones[id] && conexiones[id].length >= 2)) {
+            nodosConDosConexiones = false;
+        }
+    });
+
+    // Si algún nodo no tiene al menos 2 conexiones, mostrar un mensaje y evitar la resolución
+    if (!nodosConDosConexiones) {
+        alert("Para resolver el grafo, todos los nodos deben estar unidos con al menos 2 conexiones.");
+        return;
+    }
+
+    let sumX = 0;
+    let sumY = 0;
+    const nodosCoords = [];
+    const puntosMedios = [];
+
+    nodos.each(function() {
+        const x = parseFloat(d3.select(this).attr("cx"));
+        const y = parseFloat(d3.select(this).attr("cy"));
+        const nombre = d3.select(this).attr("data-nombre"); // Obtener el nombre del nodo
+        nodosCoords.push({ x, y, nombre, id: d3.select(this).attr("id") }); // Agregar el nombre del nodo y el ID al objeto de coordenadas
+        sumX += x;
+        sumY += y;
+    });
+
+    const numNodos = nodos.size();
+    const centerX = sumX / numNodos;
+    const centerY = sumY / numNodos;
+
+    const centroidX = centerX / (width / 100) - 50;
+    const centroidY = 50 - (centerY / (height / 100));
+
+    // Agregar un punto rojo en el centro del grupo cerrado
+    svg.append("circle")
         .attr("cx", centerX)
         .attr("cy", centerY)
         .attr("r", 5)
@@ -391,6 +406,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Agregar texto con las coordenadas del centroide
     svg.append("text")
+        .attr("id", "centroid-text") // Identificación única para el texto del centroide
         .attr("x", centerX + 5)
         .attr("y", centerY - 5)
         .attr("fill", "white")
@@ -410,25 +426,31 @@ document.addEventListener('DOMContentLoaded', function() {
         infoContainer.innerHTML += `<p>${coord.nombre}: (${nodoX.toFixed(2)}, ${nodoY.toFixed(2)})</p>`;
     });
 
-    // Calcular y mostrar las coordenadas de los puntos medios entre los nodos
-    for (let i = 0; i < nodosCoords.length - 1; i++) {
+    // Calcular y mostrar las coordenadas de los puntos medios entre los nodos conectados
+    for (let i = 0; i < nodosCoords.length; i++) {
         for (let j = i + 1; j < nodosCoords.length; j++) {
-            const xMedio = (nodosCoords[i].x + nodosCoords[j].x) / 2;
-            const yMedio = (nodosCoords[i].y + nodosCoords[j].y) / 2;
-            const medioX = xMedio / (width / 100) - 50;
-            const medioY = 50 - (yMedio / (height / 100)); // Invertir el eje Y
-            puntosMedios.push({x: medioX, y: medioY});
+            const nodo1 = nodosCoords[i];
+            const nodo2 = nodosCoords[j];
+            
+            // Verificar si los nodos están conectados
+            if (conexiones[nodo1.id].includes(nodo2.id)) {
+                const xMedio = (nodo1.x + nodo2.x) / 2;
+                const yMedio = (nodo1.y + nodo2.y) / 2;
+                const medioX = xMedio / (width / 100) - 50;
+                const medioY = 50 - (yMedio / (height / 100)); // Invertir el eje Y
+                puntosMedios.push({ x: medioX, y: medioY });
 
-            // Agregar coordenadas de punto medio al contenedor de información
-            infoContainer.innerHTML += `<p>Punto Medio entre ${nodosCoords[i].nombre} y ${nodosCoords[j].nombre}: (${medioX.toFixed(2)}, ${medioY.toFixed(2)})</p>`;
+                // Agregar coordenadas de punto medio al contenedor de información
+                infoContainer.innerHTML += `<p>Punto Medio entre ${nodo1.nombre} y ${nodo2.nombre}: (${medioX.toFixed(2)}, ${medioY.toFixed(2)})</p>`;
 
-            // Agregar un punto rojo en las coordenadas del punto medio
-            svg.append("circle")
-                .attr("cx", xMedio)
-                .attr("cy", yMedio)
-                .attr("r", 3)
-                .attr("fill", "red")
-                .classed("red-dot", true); // Marcar como punto rojo
+                // Agregar un punto rojo en las coordenadas del punto medio
+                svg.append("circle")
+                    .attr("cx", xMedio)
+                    .attr("cy", yMedio)
+                    .attr("r", 3)
+                    .attr("fill", "red")
+                    .classed("midpoint-dot", true); // Marcar como punto medio
+            }
         }
     }
 });
