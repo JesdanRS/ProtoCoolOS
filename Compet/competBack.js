@@ -91,19 +91,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function exportarGrafo(nombreArchivo) {
-        // Construir el objeto de datos para exportar
         const puntosRojoPresentes = svg.select("circle.red-dot").size() > 0;
 
         if (puntosRojoPresentes) {
             alert("No se puede exportar mientras haya una solución presente. Por favor, borra la solución antes de exportar.");
             return;
         }
-    
+
         const data = {
             nodos: [],
             conexiones: conexiones
         };
-    
+
         // Obtener la información de cada nodo
         svg.selectAll("circle").each(function() {
             const nodo = d3.select(this);
@@ -113,47 +112,46 @@ document.addEventListener('DOMContentLoaded', function() {
             const y = parseFloat(nodo.attr("cy")); // Coordenada escalada para SVG
             const originalX = parseFloat(nodo.attr("data-x")); // Coordenada original
             const originalY = parseFloat(nodo.attr("data-y")); // Coordenada original
-    
+
             // Verificar si las coordenadas son números válidos
             if (!isNaN(x) && !isNaN(y)) {
                 data.nodos.push({ id, nombre, x, y, originalX, originalY }); // Agregar el nombre del nodo
             }
         });
-    
+
         // Convertir el objeto de datos a JSON
         const jsonData = JSON.stringify(data);
-    
+
         if (!nombreArchivo.endsWith(".json")) {
             nombreArchivo += ".json";
         }
-        
+
         // Crear un enlace de descarga para el archivo JSON
         const enlace = document.createElement('a');
         enlace.download = nombreArchivo || 'grafo.json';
         enlace.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(jsonData);
         enlace.click();
     }
-    
+
     function importarGrafo(event) {
         const archivo = event.target.files[0];
         const lector = new FileReader();
         lector.onload = function(e) {
-            // Parsear el archivo JSON
             const data = JSON.parse(e.target.result);
-    
+
             // Limpiar el lienzo
             svg.selectAll("*").remove();
-    
-            // Objeto para almacenar las conexiones entre nodos
+
             conexiones = {};
-    
-            // Recrear los nodos
+
             data.nodos.forEach(nodo => {
                 const nuevoNodo = svg.append("circle")
-                    .attr("id", nodo.id) // Utilizar el ID original
-                    .attr("data-nombre", nodo.nombre) // Utilizar el nombre del nodo
+                    .attr("id", nodo.id)
+                    .attr("data-nombre", nodo.nombre)
                     .attr("cx", nodo.x)
                     .attr("cy", nodo.y)
+                    .attr("data-x", nodo.originalX)
+                    .attr("data-y", nodo.originalY)
                     .attr("r", 8)
                     .attr("fill", "blue")
                     .on("click", function() {
@@ -166,7 +164,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     })
                     .on("contextmenu", function() {
                         event.preventDefault();
-                        // Eliminar el nodo y sus conexiones
                         const id = d3.select(this).attr("id");
                         const lineas = svg.selectAll("line");
                         lineas.each(function() {
@@ -183,23 +180,20 @@ document.addEventListener('DOMContentLoaded', function() {
                         this.remove();
                         delete conexiones[id];
                     });
-    
-                svg.selectAll("circle").raise(); // Asegurar que los nodos estén dibujados sobre las líneas
-    
-                // Agregar el texto asociado al nodo con el nombre correspondiente
+
+                svg.selectAll("circle").raise();
+
                 svg.append("text")
                     .attr("id", `${nodo.id}-text`)
                     .attr("x", nodo.x + 15)
                     .attr("y", nodo.y - 15)
                     .attr("fill", "white")
-                    .style("font-size", "13px") // Tamaño de fuente más pequeño
-                    .text(`${nodo.nombre} (${nodo.originalX}, ${nodo.originalY})`); // Utilizar el nombre y las coordenadas originales aquí
-    
-                // Inicializar las conexiones del nodo
+                    .style("font-size", "13px")
+                    .text(`${nodo.nombre} (${nodo.originalX}, ${nodo.originalY})`);
+
                 conexiones[nodo.id] = [];
             });
-    
-            // Recrear las conexiones entre nodos
+
             Object.keys(data.conexiones).forEach(idOrigen => {
                 data.conexiones[idOrigen].forEach(idDestino => {
                     const nodoOrigen = document.getElementById(idOrigen);
@@ -209,11 +203,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
             });
-    
-            // Actualizar las dimensiones del plano de coordenadas después de importar
+
             updateDimensions();
         };
-    
+
         lector.readAsText(archivo);
     }
     
@@ -246,8 +239,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
 
-    cargarBtn.addEventListener('click', () => importarArchivo.click()); // Se apreta el botón de importar
-
+    cargarBtn.addEventListener('click', function() {
+        importarArchivo.click();
+    });
 
 
     document.getElementById('limpiarBtn').addEventListener('click', function() { // Limpiar grafo completo y actualizar matriz
