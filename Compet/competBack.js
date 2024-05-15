@@ -101,6 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
         svg.selectAll("circle").each(function() {
             const nodo = d3.select(this);
             const id = nodo.attr("id");
+            const nombre = nodo.attr("data-nombre"); // Obtener el nombre del nodo
             const x = parseFloat(nodo.attr("cx")); // Coordenada escalada para SVG
             const y = parseFloat(nodo.attr("cy")); // Coordenada escalada para SVG
             const originalX = parseFloat(nodo.attr("data-x")); // Coordenada original
@@ -108,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
             // Verificar si las coordenadas son números válidos
             if (!isNaN(x) && !isNaN(y)) {
-                data.nodos.push({ id, x, y, originalX, originalY });
+                data.nodos.push({ id, nombre, x, y, originalX, originalY }); // Agregar el nombre del nodo
             }
         });
     
@@ -120,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
         enlace.download = nombreArchivo || 'grafo.json';
         enlace.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(jsonData);
         enlace.click();
-    }      
+    }
     
     function importarGrafo(event) {
         const archivo = event.target.files[0];
@@ -138,10 +139,11 @@ document.addEventListener('DOMContentLoaded', function() {
             // Recrear los nodos
             data.nodos.forEach(nodo => {
                 const nuevoNodo = svg.append("circle")
-                    .attr("id", nodo.id)
+                    .attr("id", nodo.id) // Utilizar el ID original
+                    .attr("data-nombre", nodo.nombre) // Utilizar el nombre del nodo
                     .attr("cx", nodo.x)
                     .attr("cy", nodo.y)
-                    .attr("r", 10)
+                    .attr("r", 8)
                     .attr("fill", "blue")
                     .on("click", function() {
                         if (nodoOrigen === null) {
@@ -173,14 +175,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
                 svg.selectAll("circle").raise(); // Asegurar que los nodos estén dibujados sobre las líneas
     
-                // Agregar el texto asociado al nodo
+                // Agregar el texto asociado al nodo con el nombre correspondiente
                 svg.append("text")
                     .attr("id", `${nodo.id}-text`)
                     .attr("x", nodo.x + 15)
                     .attr("y", nodo.y - 15)
                     .attr("fill", "white")
-                    .text(`${nodo.id} (${nodo.originalX}, ${nodo.originalY})`); // Usar coordenadas originales aquí
-        
+                    .style("font-size", "13px") // Tamaño de fuente más pequeño
+                    .text(`${nodo.nombre} (${nodo.originalX}, ${nodo.originalY})`); // Utilizar el nombre y las coordenadas originales aquí
+    
                 // Inicializar las conexiones del nodo
                 conexiones[nodo.id] = [];
             });
@@ -202,6 +205,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
         lector.readAsText(archivo);
     }
+    
+    
     
     
     // Asignar la función importarGrafo al evento change del input de importación
@@ -270,6 +275,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     document.getElementById('agregarBtn').addEventListener('click', function() {
+        const nombreNodo = prompt("Ingrese el nombre del nodo:");
         const xCoord = parseFloat(prompt("Ingrese la coordenada en el eje X (entre -50 y 50):"));
         const yCoord = parseFloat(prompt("Ingrese la coordenada en el eje Y (entre -50 y 50):"));
     
@@ -279,10 +285,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     
         const contador = ++contadorNodos; // Incrementar el contador de nodos
-        const nombreVariable = `x${contador}y${contador}`; // Crear el nombre de la variable
+        const nombreVariable = nombreNodo || `nodo${contador}`; // Utilizar el nombre proporcionado o generar uno
         const nodoId = `nodo${contador}`; // Crear un identificador único para el nodo
         const nodo = svg.append("circle")
             .attr("id", nodoId) // Asignar un id único al nodo
+            .attr("data-nombre", nombreNodo) // Guardar el nombre del nodo
             .attr("cx", xAxis(xCoord))
             .attr("cy", yAxis(yCoord))
             .attr("data-x", xCoord) // Guardar coordenada original
@@ -327,6 +334,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .style("font-size", "13px") // Ajustar el tamaño de la fuente aquí
             .text(`${nombreVariable} (${xCoord}, ${yCoord})`);
     });
+    
 
     document.getElementById('resolverBtn').addEventListener('click', function() {
         // Limpiar puntos rojos existentes
@@ -341,7 +349,8 @@ document.addEventListener('DOMContentLoaded', function() {
         nodos.each(function() {
             const x = parseFloat(d3.select(this).attr("cx"));
             const y = parseFloat(d3.select(this).attr("cy"));
-            nodosCoords.push({x, y});
+            const nombre = d3.select(this).attr("data-nombre"); // Obtener el nombre del nodo
+            nodosCoords.push({x, y, nombre}); // Agregar el nombre del nodo al objeto de coordenadas
             sumX += x;
             sumY += y;
         });
@@ -351,59 +360,58 @@ document.addEventListener('DOMContentLoaded', function() {
         const centerY = sumY / numNodos;
     
         const centroidX = centerX / (width / 100) - 50;
-        const centroidY = 50 - (centerY / (height / 100)); // Invertir el eje Y
+        const centroidY = 50 - (centerY / (height / 100));
     
         // Agregar un punto rojo en el centro del grupo cerrado
         svg.append("circle")
-            .attr("cx", centerX)
-            .attr("cy", centerY)
-            .attr("r", 5)
-            .attr("fill", "red")
-            .classed("red-dot", true); // Marcar como punto rojo
-    
-        // Agregar texto con las coordenadas del centroide
-        svg.append("text")
-            .attr("x", centerX + 5)
-            .attr("y", centerY - 5)
-            .attr("fill", "white")
-            .style("font-size", "13px") // Ajustar el tamaño de la fuente aquí
-            .text(`${centroidX.toFixed(2)}, ${centroidY.toFixed(2)}`);
-    
-        // Actualizar el contenido del contenedor de información
-        const infoContainer = document.getElementById('info-container');
-        infoContainer.innerHTML = `<h3>Información de Coordenadas</h3>
-                                   <p>Centroide: (${centroidX.toFixed(2)}, ${centroidY.toFixed(2)})</p>
-                                   <h4>Coordenadas de Nodos:</h4>`;
-    
-        // Agregar coordenadas de nodos al contenedor de información y mostrar los puntos en el gráfico
-        nodosCoords.forEach((coord, index) => {
-            const nodoX = coord.x / (width / 100) - 50;
-            const nodoY = 50 - (coord.y / (height / 100)); // Invertir el eje Y
-            infoContainer.innerHTML += `<p>Nodo ${index + 1}: (${nodoX.toFixed(2)}, ${nodoY.toFixed(2)})</p>`;
-        });
-    
-        // Calcular y mostrar las coordenadas de los puntos medios entre los nodos
-        for (let i = 0; i < nodosCoords.length - 1; i++) {
-            for (let j = i + 1; j < nodosCoords.length; j++) {
-                const xMedio = (nodosCoords[i].x + nodosCoords[j].x) / 2;
-                const yMedio = (nodosCoords[i].y + nodosCoords[j].y) / 2;
-                const medioX = xMedio / (width / 100) - 50;
-                const medioY = 50 - (yMedio / (height / 100)); // Invertir el eje Y
-                puntosMedios.push({x: medioX, y: medioY});
-    
-                // Agregar coordenadas de punto medio al contenedor de información
-                infoContainer.innerHTML += `<p>Punto Medio ${i + 1}-${j + 1}: (${medioX.toFixed(2)}, ${medioY.toFixed(2)})</p>`;
-    
-                // Agregar un punto rojo en las coordenadas del punto medio
-                svg.append("circle")
-                    .attr("cx", xMedio)
-                    .attr("cy", yMedio)
-                    .attr("r", 3)
-                    .attr("fill", "red")
-                    .classed("red-dot", true); // Marcar como punto rojo
-            }
-        }
+        .attr("cx", centerX)
+        .attr("cy", centerY)
+        .attr("r", 5)
+        .attr("fill", "red")
+        .classed("red-dot", true); // Marcar como punto rojo
+
+    // Agregar texto con las coordenadas del centroide
+    svg.append("text")
+        .attr("x", centerX + 5)
+        .attr("y", centerY - 5)
+        .attr("fill", "white")
+        .style("font-size", "13px") // Ajustar el tamaño de la fuente aquí
+        .text(`${centroidX.toFixed(2)}, ${centroidY.toFixed(2)}`);
+
+    // Actualizar el contenido del contenedor de información
+    const infoContainer = document.getElementById('info-container');
+    infoContainer.innerHTML = `<h3>Información de Coordenadas</h3>
+                               <p>Centroide: (${centroidX.toFixed(2)}, ${centroidY.toFixed(2)})</p>
+                               <h4>Coordenadas de Nodos:</h4>`;
+
+    // Agregar coordenadas de nodos al contenedor de información y mostrar los puntos en el gráfico
+    nodosCoords.forEach(coord => {
+        const nodoX = coord.x / (width / 100) - 50;
+        const nodoY = 50 - (coord.y / (height / 100)); // Invertir el eje Y
+        infoContainer.innerHTML += `<p>${coord.nombre}: (${nodoX.toFixed(2)}, ${nodoY.toFixed(2)})</p>`;
     });
 
+    // Calcular y mostrar las coordenadas de los puntos medios entre los nodos
+    for (let i = 0; i < nodosCoords.length - 1; i++) {
+        for (let j = i + 1; j < nodosCoords.length; j++) {
+            const xMedio = (nodosCoords[i].x + nodosCoords[j].x) / 2;
+            const yMedio = (nodosCoords[i].y + nodosCoords[j].y) / 2;
+            const medioX = xMedio / (width / 100) - 50;
+            const medioY = 50 - (yMedio / (height / 100)); // Invertir el eje Y
+            puntosMedios.push({x: medioX, y: medioY});
+
+            // Agregar coordenadas de punto medio al contenedor de información
+            infoContainer.innerHTML += `<p>Punto Medio entre ${nodosCoords[i].nombre} y ${nodosCoords[j].nombre}: (${medioX.toFixed(2)}, ${medioY.toFixed(2)})</p>`;
+
+            // Agregar un punto rojo en las coordenadas del punto medio
+            svg.append("circle")
+                .attr("cx", xMedio)
+                .attr("cy", yMedio)
+                .attr("r", 3)
+                .attr("fill", "red")
+                .classed("red-dot", true); // Marcar como punto rojo
+        }
+    }
+});
     
 });
