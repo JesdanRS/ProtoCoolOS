@@ -17,12 +17,14 @@ html, body {
 }
 
 #grafo-container {
-    position: relative;
-    width: 1100px;
-    height: 600px;
-    border: 1px solid #ccc;
-}
+    margin: 0 auto; /* Margen automático a la izquierda y derecha */
 
+    position: relative;
+    width: 1200px;
+    height: 500px;
+    border: 1px solid #ccc;
+
+}
 #contenedor-general {
     display: flex;
     align-items: flex-start; /* Para alinear los elementos en la parte superior */
@@ -663,35 +665,6 @@ Estilo de botón HELP
     background: linear-gradient(95deg, #7e22ce 3.2%, #3b82f6 99.5%);
     font-family: 'Poppins', sans-serif;
 }
-#minimizarBtn{
-    margin-top: 15px;
-    margin-left: 10px;
-    cursor: pointer;
-    padding: 8px 38px;
-    border-radius: 18px;
-    font-weight: 500;
-    font-size: 13px;
-    letter-spacing: -1px;
-    color: #fff;
-    border: none;
-    background: linear-gradient(95deg, #6bcff4 3.2%, #3b82f6 99.5%);
-    font-family: 'Poppins', sans-serif;
-}
-
-#resolverBtn, #borrarSolucionBtn{
-    margin-top: 15px;
-    margin-left: 10px;
-    cursor: pointer;
-    padding: 8px 38px;
-    border-radius: 18px;
-    font-weight: 500;
-    font-size: 13px;
-    letter-spacing: -1px;
-    color: #fff;
-    border: none;
-    background: linear-gradient(95deg, #6bcff4 3.2%, #3b82f6 99.5%);
-    font-family: 'Poppins', sans-serif;
-}
 
 #guardarBtn{
     cursor: pointer;
@@ -706,7 +679,7 @@ Estilo de botón HELP
     font-family: 'Poppins', sans-serif;
 }
 
-#limpiarBtn, #agregarBtn{
+#limpiarBtn, #resolverBtn{
     cursor: pointer;
     margin-left: 10px;
 
@@ -733,31 +706,7 @@ Estilo de botón HELP
     background: linear-gradient(95deg, #7e22ce 3.2%, #3b82f6 99.5%);
     font-family: 'Poppins', sans-serif;
 }
-#resultado-container {
-    position: fixed;
-    bottom: 80px; /* Distancia desde la parte inferior de la ventana */
-    right: 20px; /* Distancia desde el borde derecho de la ventana */
-    width: 500px;
-    background: linear-gradient(95deg, #6bcff4 3.2%, #3b82f6 99.5%);
-    color: white;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
-    padding: 20px;
-    border-radius: 10px;
-    display: none;
-    z-index: 1; /* Asegura que esté por encima de otros elementos */
-}
-#guardarBtn, #exportPNG, #exportPDF, #exportJSON{
-    cursor: pointer;
-    padding: 8px 38px;
-    border-radius: 18px;
-    font-weight: 500;
-    font-size: 13px;
-    letter-spacing: -1px;
-    color: #fff;
-    border: none;
-    background: linear-gradient(95deg, #7e22ce 3.2%, #3b82f6 99.5%);
-    font-family: 'Poppins', sans-serif;
-}
+
 .atributo-text {
     color: white;
     /* Otros estilos necesarios para posicionar y mostrar correctamente el texto del atributo */
@@ -850,21 +799,3 @@ Estilo de botón HELP
         box-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #7e22ce, 0 0 40px #7e22ce;
     }
 }
-
-
-.grid line {
-    stroke: white; /* Haciendo las líneas completamente blancas */
-    stroke-opacity: 1; /* Asegurando máxima visibilidad */
-}
-
-.axis path,
-.axis line {
-    stroke: white; /* Ejes en blanco */
-    stroke-width: 1px;
-}
-
-.axis text {
-    fill: white; /* Texto del eje en blanco */
-    font-size: 10px;
-}
-

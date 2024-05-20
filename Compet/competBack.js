@@ -1,76 +1,244 @@
 document.addEventListener('DOMContentLoaded', function() {
     const grafoContainer = document.getElementById('grafo-container');
-    const matrizContainer = document.getElementById('matriz-container');
-    const matrizHeader = document.getElementById('matriz-header');
-    const matrizBody = document.getElementById('matriz-body');
     const exportarBtn = document.getElementById('exportarBtn');
     const importarBtn = document.getElementById('importarBtn');
     const importarArchivo = document.getElementById('importarArchivo');
-    const svg = d3.select(grafoContainer)
-        .append("svg")
-        .attr("width", "100%")
-        .attr("height", "100%");
+    const colorPicker = document.getElementById('cambiarColorBtn');
+    let nodos = new vis.DataSet();
+    let aristas = new vis.DataSet();
+    let network = null;
+    let estado = { seleccionando: false, nodoOrigen: null, colorActual: '#d2e5ff', modoEliminar: false };
+    let ultimoIdNodo = 0;
 
-    let width, height;
-    let xAxis, yAxis;
-    let xAxisGroup, yAxisGroup;
+    const opciones = {
+        nodes: {
+            shape: 'circle',
+            font: {
+                size: 14,
+                color: '#ffffff',
+                multi: true
+            },
+            borderWidth: 2,
+            scaling: {
+                min: 16,
+                max: 32,
+                label: {
+                    enabled: true,
+                    min: 14,
+                    max: 30,
+                    drawThreshold: 8,
+                    maxVisible: 20
+                }
+            }
+        },
+        edges: {
+            arrows: { to: false },
+            selfReferenceSize: 20,
+            selfReference: {
+                angle: Math.PI / 4
+            },
+            font: {
+                align: 'middle'
+            }
+        },
+        physics: {
+            enabled: true
+        },
+        interaction: {
+            dragNodes: true
+        }
+    };
 
-    function updateDimensions() {
-        width = grafoContainer.offsetWidth;
-        height = grafoContainer.offsetHeight;
+    function inicializarRed() {
+        const datos = {
+            nodes: nodos,
+            edges: aristas
+        };
+        network = new vis.Network(grafoContainer, datos, opciones);
+    
+        network.on("click", function(params) {
+            if (estado.modoEliminar) {
+                const nodeId = this.getNodeAt(params.pointer.DOM);
+                const edgeId = this.getEdgeAt(params.pointer.DOM);
+                if (nodeId) {
+                    nodos.remove({id: nodeId});
+                    const aristasAsociadas = aristas.get({
+                        filter: function(arista) {
+                            return arista.from === nodeId || arista.to === nodeId;
+                        }
+                    });
+                    aristas.remove(aristasAsociadas);
+                } else if (edgeId) {
+                    aristas.remove({id: edgeId});
+                }
+                return;
+            }
+        
+            if (params.nodes.length > 0) {
+                const nodeId = params.nodes[0];
+                if (estado.seleccionando) {
+                    const nodoOrigen = estado.nodoOrigen;
+                    const nodoDestino = nodeId;
+                    if (nodoOrigen !== nodoDestino && !aristaDuplicada(nodoOrigen, nodoDestino)) {
+                        // Calcular centro entre nodos
+                        const nodoOrigenData = nodos.get(nodoOrigen);
+                        const nodoDestinoData = nodos.get(nodoDestino);
+                        const centroX = (parseFloat(nodoOrigenData.coordX) + parseFloat(nodoDestinoData.coordX)) / 2;
+                        const centroY = (parseFloat(nodoOrigenData.coordY) + parseFloat(nodoDestinoData.coordY)) / 2;
+                        
+                        // Crear arista
+                        aristas.add({
+                            from: nodoOrigen,
+                            to: nodoDestino,
+                            label: `Centro (${centroX}, ${centroY})`
+                        });
+                        
+                        // Calcular centroide
+                        const numNodos = nodos.length;
+                        let sumX = 0;
+                        let sumY = 0;
+                        nodos.forEach(nodo => {
+                            sumX += parseFloat(nodo.coordX);
+                            sumY += parseFloat(nodo.coordY);
+                        });
+                        const centroidX = sumX / numNodos;
+                        const centroidY = sumY / numNodos;
+                        console.log(`Centroide: (${centroidX}, ${centroidY})`);
+                    }
+                    estado.seleccionando = false;
+                    estado.nodoOrigen = null;
+                } else {
+                    estado.seleccionando = true;
+                    estado.nodoOrigen = nodeId;
+                }
+            } else {
+                const coordenadas = params.pointer.canvas;
+                const nombreNodo = prompt("Ingrese el nombre del nodo:", `Nodo ${ultimoIdNodo + 1}`);
+                if (nombreNodo !== null) {
+                    const coordX = prompt("Ingrese la coordenada X del nodo:", "0");
+                    const coordY = prompt("Ingrese la coordenada Y del nodo:", "0");
+                    // Verificar si ya existe un nodo en estas coordenadas
+                    const nodoExistente = nodos.get({
+                        filter: function(nodo) {
+                            return nodo.coordX === coordX && nodo.coordY === coordY;
+                        }
+                    });
+                    if (nodoExistente.length > 0) {
+                        alert("Ya existe un nodo en estas coordenadas. Por favor, elige un lugar diferente.");
+                        return;
+                    }
+                    crearNodo(coordenadas.x, coordenadas.y, estado.colorActual, nombreNodo, coordX, coordY);
+                } else {
+                    alert("Coordenadas inválidas. El nodo no será creado.");
+                }
+            }
+        });
+    
+        network.on("oncontext", function(params) {
+            params.event.preventDefault();
+            const nodeId = this.getNodeAt(params.pointer.DOM);
+            const edgeId = this.getEdgeAt(params.pointer.DOM);
+    
+            if (nodeId !== undefined) {
+                const nuevoNombre = prompt("Ingrese el nuevo nombre del nodo:", "");
+                if (nuevoNombre !== null) {
+                    const nodo = nodos.get(nodeId);
+                    nodos.update({id: nodeId, label: `${nuevoNombre} (${nodo.x}, ${nodo.y})`});
+                }
+            } else if (edgeId !== undefined) {
+                const nuevoAtributo = prompt("Ingrese el nuevo atributo de la arista:", "");
+                if (nuevoAtributo !== null) {
+                    aristas.update({id: edgeId, label: nuevoAtributo});
+                }
+            }
+        });
+    }
+    
+    document.getElementById('resolverBtn').addEventListener('click', function() {
+        // Verificar si hay nodos en la red
+        if (nodos.length === 0) {
+            alert("No hay nodos en la red para calcular el centroide.");
+            return;
+        }
+    
+        // Verificar si todos los nodos tienen al menos dos conexiones
+        const nodosValidos = nodos.getIds().filter(nodeId => {
+            const conexiones = aristas.get({
+                filter: function(arista) {
+                    return arista.from === nodeId || arista.to === nodeId;
+                }
+            });
+            return conexiones.length >= 2;
+        });
+    
+        if (nodosValidos.length !== nodos.length) {
+            alert("Se necesita un sistema cerrado de nodos para resolver el ejercicio.");
+            return;
+        }
+    
+        // Calcular el promedio de las coordenadas X y Y de todos los nodos
+        let sumCoordX = 0;
+        let sumCoordY = 0;
+        nodos.forEach(nodo => {
+            sumCoordX += parseFloat(nodo.coordX);
+            sumCoordY += parseFloat(nodo.coordY);
+        });
+        const centroidCoordX = sumCoordX / nodos.length;
+        const centroidCoordY = sumCoordY / nodos.length;
+    
+        // Obtener las dimensiones del contenedor
+        const containerWidth = grafoContainer.offsetWidth;
+        const containerHeight = grafoContainer.offsetHeight;
+    
+        // Calcular las coordenadas del centroide en relación con el contenedor
+        const centroideX = containerWidth / 220;
+        const centroideY = containerHeight / 220;
+    
+        // Crear nodo para el centroide
+        const centroideNode = {
+            id: 'centroide',
+            label: `Centroide (${centroidCoordX.toFixed(2)}, ${centroidCoordY.toFixed(2)})`,
+            x: centroideX,
+            y: centroideY,
+            color: {
+                background: 'red',
+                border: 'black'
+            },
+            shape: 'dot',
+            size: 20
+        };
+    
+        // Agregar nodo del centroide a la red
+        nodos.add(centroideNode);
+    });
+    
+    
+    
 
-        xAxis = d3.scaleLinear()
-            .domain([-54.995, 54.995]) // Rango de -50 a 50 para centrar en 0
-            .range([0, width]);
-
-        yAxis = d3.scaleLinear()
-            .domain([-54.995, 54.995]) // Rango de -50 a 50 para centrar en 0
-            .range([height, 0]);
-
-        xAxisGroup = svg.append("g")
-            .attr("transform", `translate(0,${height / 2})`) // Centrar en la mitad de la altura
-            .call(d3.axisBottom(xAxis));
-
-        yAxisGroup = svg.append("g")
-            .attr("transform", `translate(${width / 2},0)`) // Centrar en la mitad del ancho
-            .call(d3.axisLeft(yAxis));
-
-        xAxisGroup.selectAll(".tick line")
-            .attr("stroke", "white")
-            .attr("stroke-width", 2);
-
-        yAxisGroup.selectAll(".tick line")
-            .attr("stroke", "white")
-            .attr("stroke-width", 2);
-
-        xAxisGroup.selectAll(".tick text")
-            .attr("fill", "white");
-
-        yAxisGroup.selectAll(".tick text")
-            .attr("fill", "white");
-
-        svg.append("line")
-            .attr("x1", width / 2)
-            .attr("y1", 0)
-            .attr("x2", width / 2)
-            .attr("y2", height)
-            .attr("stroke", "white")
-            .attr("stroke-width", 1);
-
-        svg.append("line")
-            .attr("x1", 0)
-            .attr("y1", height / 2)
-            .attr("x2", width)
-            .attr("y2", height / 2)
-            .attr("stroke", "white")
-            .attr("stroke-width", 1);
+    function crearNodo(x, y, color, nombre, coordX, coordY) {
+        ultimoIdNodo++;
+        nodos.add({
+            id: ultimoIdNodo,
+            label: `${nombre} (${coordX}, ${coordY})`,
+            coordX: coordX,
+            coordY: coordY,
+            x: x,
+            y: y,
+            color: color,
+            physics: false
+        });
     }
 
-    updateDimensions();
+    function aristaDuplicada(origen, destino) {
+        const aristasExistentes = aristas.get({
+            filter: function(item) {
+                return (item.from === origen && item.to === destino);
+            }
+        });
+        return aristasExistentes.length > 0;
+    }
 
-    window.addEventListener('resize', updateDimensions);
-
-    function exportarComoPNG(nombreArchivo) { // Exportar imagen del grafo
+    function exportarComoPNG(nombreArchivo) {
         html2canvas(grafoContainer).then(canvas => {
             let enlace = document.createElement('a');
             enlace.download = nombreArchivo || 'grafo.png';
@@ -80,7 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    async function exportarComoPDF(nombreArchivo) { // Exportar PDF del grafo
+    async function exportarComoPDF(nombreArchivo) {
         const canvas = await html2canvas(grafoContainer);
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jspdf.jsPDF({
@@ -91,368 +259,87 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function exportarGrafo(nombreArchivo) {
-        const puntosRojoPresentes = svg.select("circle.red-dot").size() > 0;
-
-        if (puntosRojoPresentes) {
-            alert("No se puede exportar mientras haya una solución presente. Por favor, borra la solución antes de exportar.");
-            return;
-        }
-
-        const data = {
-            nodos: [],
-            conexiones: conexiones
+        const datosExportar = {
+            nodos: nodos.get({ returnType: "Object" }),
+            aristas: aristas.get(),
+            estado: estado
         };
-
-        // Obtener la información de cada nodo
-        svg.selectAll("circle").each(function() {
-            const nodo = d3.select(this);
-            const id = nodo.attr("id");
-            const nombre = nodo.attr("data-nombre"); // Obtener el nombre del nodo
-            const x = parseFloat(nodo.attr("cx")); // Coordenada escalada para SVG
-            const y = parseFloat(nodo.attr("cy")); // Coordenada escalada para SVG
-            const originalX = parseFloat(nodo.attr("data-x")); // Coordenada original
-            const originalY = parseFloat(nodo.attr("data-y")); // Coordenada original
-
-            // Verificar si las coordenadas son números válidos
-            if (!isNaN(x) && !isNaN(y)) {
-                data.nodos.push({ id, nombre, x, y, originalX, originalY }); // Agregar el nombre del nodo
-            }
-        });
-
-        // Convertir el objeto de datos a JSON
-        const jsonData = JSON.stringify(data);
-
-        if (!nombreArchivo.endsWith(".json")) {
-            nombreArchivo += ".json";
-        }
-
-        // Crear un enlace de descarga para el archivo JSON
-        const enlace = document.createElement('a');
-        enlace.download = nombreArchivo || 'grafo.json';
-        enlace.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(jsonData);
-        enlace.click();
+        const datosStr = JSON.stringify(datosExportar);
+        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(datosStr);
+        
+        let exportarLink = document.createElement('a');
+        exportarLink.setAttribute('href', dataUri);
+        exportarLink.setAttribute('download', nombreArchivo || 'grafo.json');
+        document.body.appendChild(exportarLink);
+        
+        exportarLink.click();
+        document.body.removeChild(exportarLink);
     }
 
     function importarGrafo(event) {
         const archivo = event.target.files[0];
-        const lector = new FileReader();
-        lector.onload = function(e) {
-            const data = JSON.parse(e.target.result);
+        if (!archivo) {
+            return;
+        }
 
-            // Limpiar el lienzo
-            svg.selectAll("*").remove();
-
-            conexiones = {};
-
-            data.nodos.forEach(nodo => {
-                const nuevoNodo = svg.append("circle")
-                    .attr("id", nodo.id)
-                    .attr("data-nombre", nodo.nombre)
-                    .attr("cx", nodo.x)
-                    .attr("cy", nodo.y)
-                    .attr("data-x", nodo.originalX)
-                    .attr("data-y", nodo.originalY)
-                    .attr("r", 8)
-                    .attr("fill", "blue")
-                    .on("click", function() {
-                        if (nodoOrigen === null) {
-                            nodoOrigen = this;
-                        } else {
-                            conectarNodos(nodoOrigen, this);
-                            nodoOrigen = null;
-                        }
-                    })
-                    .on("contextmenu", function() {
-                        event.preventDefault();
-                        const id = d3.select(this).attr("id");
-                        const lineas = svg.selectAll("line");
-                        lineas.each(function() {
-                            if (
-                                this.getAttribute("x1") === d3.select(`#${id}`).attr("cx") ||
-                                this.getAttribute("x2") === d3.select(`#${id}`).attr("cx") ||
-                                this.getAttribute("y1") === d3.select(`#${id}`).attr("cy") ||
-                                this.getAttribute("y2") === d3.select(`#${id}`).attr("cy")
-                            ) {
-                                this.remove();
-                            }
-                        });
-                        svg.select(`#${id}-text`).remove();
-                        this.remove();
-                        delete conexiones[id];
-                    });
-
-                svg.selectAll("circle").raise();
-
-                svg.append("text")
-                    .attr("id", `${nodo.id}-text`)
-                    .attr("x", nodo.x + 15)
-                    .attr("y", nodo.y - 15)
-                    .attr("fill", "white")
-                    .style("font-size", "13px")
-                    .text(`${nodo.nombre} (${nodo.originalX}, ${nodo.originalY})`);
-
-                conexiones[nodo.id] = [];
-            });
-
-            Object.keys(data.conexiones).forEach(idOrigen => {
-                data.conexiones[idOrigen].forEach(idDestino => {
-                    const nodoOrigen = document.getElementById(idOrigen);
-                    const nodoDestino = document.getElementById(idDestino);
-                    if (nodoOrigen && nodoDestino) {
-                        conectarNodos(nodoOrigen, nodoDestino);
-                    }
-                });
-            });
-
-            updateDimensions();
+        const reader = new FileReader();
+        reader.onload = function(fileEvent) {
+            try {
+                const datos = JSON.parse(fileEvent.target.result);
+                nodos.clear();
+                aristas.clear();
+                nodos.add(Object.values(datos.nodos));
+                aristas.add(datos.aristas);
+                estado = datos.estado;
+                colorPicker.value = estado.colorActual;
+                ultimoIdNodo = Math.max(...Object.values(datos.nodos).map(nodo => nodo.id));
+            } catch (error) {
+                console.error('Error al importar el archivo', error);
+            }
         };
-
-        lector.readAsText(archivo);
+        reader.readAsText(archivo);
     }
-    
-    
-    
-    
-    // Asignar la función importarGrafo al evento change del input de importación
-    importarArchivo.addEventListener('change', importarGrafo);
-    
-    // Asignar la función exportarGrafo al evento click del botón de exportar JSON
-    exportJSON.addEventListener('click', function() {
-        let nombreArchivo = prompt("Ingrese el nombre del archivo:", "grafo.json");
-        exportarGrafo(nombreArchivo);
-    });
 
-    guardarBtn.addEventListener('click', function() { // Se apreta el botón de exportar
+    guardarBtn.addEventListener('click', function() {
         exportOptions.style.display = 'block';
     });
 
-    exportPNG.addEventListener('click', function() { // Se apreta el botón de exportar como PNG
+    exportPNG.addEventListener('click', function() {
         let nombreArchivo = prompt("Ingrese el nombre del archivo:", "grafo.png");
         exportarComoPNG(nombreArchivo);
         exportOptions.style.display = 'none';
     });
 
-    exportPDF.addEventListener('click', function() { // Se apreta el botón de exportar como PDF
+    exportPDF.addEventListener('click', function() {
         let nombreArchivo = prompt("Ingrese el nombre del archivo:", "grafo.pdf");
         exportarComoPDF(nombreArchivo);
         exportOptions.style.display = 'none';
     });
 
-
-    cargarBtn.addEventListener('click', function() {
-        importarArchivo.click();
+    exportJSON.addEventListener('click', function() {
+        let nombreArchivo = prompt("Ingrese el nombre del archivo:", "grafo.json");
+        exportarGrafo(nombreArchivo);
+        exportOptions.style.display = 'none';
     });
 
+    cargarBtn.addEventListener('click', () => importarArchivo.click());
+    importarArchivo.addEventListener('change', importarGrafo);
 
-    document.getElementById('limpiarBtn').addEventListener('click', function() { // Limpiar grafo completo y actualizar matriz
-        location.reload(); // Refrescar la página
+    document.getElementById('eliminarBtn').addEventListener('click', function() {
+        estado.modoEliminar = !estado.modoEliminar;
+        grafoContainer.style.cursor = estado.modoEliminar ? 'crosshair' : '';
     });
 
-    let contadorNodos = 0; // Contador para llevar el orden de los nodos agregados
-    let nodoOrigen = null;
-    let conexiones = {}; // Objeto para almacenar las conexiones entre nodos
-
-    function conectarNodos(nodoOrigen, nodoDestino) {
-        const x1 = parseFloat(nodoOrigen.getAttribute("cx"));
-        const y1 = parseFloat(nodoOrigen.getAttribute("cy"));
-        const x2 = parseFloat(nodoDestino.getAttribute("cx"));
-        const y2 = parseFloat(nodoDestino.getAttribute("cy"));
-    
-        // Añadir la línea después de los nodos para que estén dibujados sobre las líneas
-        const linea = svg.append("line")
-            .attr("x1", x1)
-            .attr("y1", y1)
-            .attr("x2", x2)
-            .attr("y2", y2)
-            .attr("stroke", "white")
-            .attr("stroke-width", 2);
-    
-        // Almacenar la conexión entre nodos
-        const idNodoOrigen = nodoOrigen.getAttribute("id");
-        const idNodoDestino = nodoDestino.getAttribute("id");
-        conexiones[idNodoOrigen] = conexiones[idNodoOrigen] || [];
-        conexiones[idNodoDestino] = conexiones[idNodoDestino] || [];
-        conexiones[idNodoOrigen].push(idNodoDestino);
-        conexiones[idNodoDestino].push(idNodoOrigen);
-    
-        // Asegurar que los nodos estén dibujados sobre las líneas
-        svg.selectAll("circle").raise();
-    }
-    
-    document.getElementById('agregarBtn').addEventListener('click', function() {
-        const nombreNodo = prompt("Ingrese el nombre del nodo:");
-        const xCoord = parseFloat(prompt("Ingrese la coordenada en el eje X (entre -50 y 50):"));
-        const yCoord = parseFloat(prompt("Ingrese la coordenada en el eje Y (entre -50 y 50):"));
-    
-        if (isNaN(xCoord) || isNaN(yCoord) || xCoord < -50 || xCoord > 50 || yCoord < -50 || yCoord > 50) {
-            alert("Por favor, ingrese coordenadas válidas dentro del rango (-50, 50).");
-            return;
-        }
-    
-        const contador = ++contadorNodos; // Incrementar el contador de nodos
-        const nombreVariable = nombreNodo || `nodo${contador}`; // Utilizar el nombre proporcionado o generar uno
-        const nodoId = `nodo${contador}`; // Crear un identificador único para el nodo
-        const nodo = svg.append("circle")
-            .attr("id", nodoId) // Asignar un id único al nodo
-            .attr("data-nombre", nombreNodo) // Guardar el nombre del nodo
-            .attr("cx", xAxis(xCoord))
-            .attr("cy", yAxis(yCoord))
-            .attr("data-x", xCoord) // Guardar coordenada original
-            .attr("data-y", yCoord) // Guardar coordenada original
-            .attr("r", 8)
-            .attr("fill", "blue")
-            .on("click", function() {
-                if (nodoOrigen === null) {
-                    nodoOrigen = this;
-                } else {
-                    conectarNodos(nodoOrigen, this);
-                    nodoOrigen = null;
-                }
-            })
-            .on("contextmenu", function() {
-                event.preventDefault();
-    
-                // Eliminar el nodo
-                this.remove();
-                // Eliminar las líneas conectadas a este nodo
-                svg.selectAll("line").each(function() {
-                    if (this.getAttribute("x1") === nodo.attr("cx") && this.getAttribute("y1") === nodo.attr("cy")) {
-                        this.remove();
-                    }
-                    if (this.getAttribute("x2") === nodo.attr("cx") && this.getAttribute("y2") === nodo.attr("cy")) {
-                        this.remove();
-                    }
-                });
-                // Eliminar el texto asociado al nodo
-                svg.select(`#${nodoId}-text`).remove();
-            });
-    
-        // Ajustar el orden de los elementos para asegurar que los nodos estén dibujados sobre las líneas
-        svg.selectAll("circle").raise();
-    
-        // Agregar el nombre de la variable y las coordenadas al lado del nodo
-        svg.append("text")
-            .attr("id", `${nodoId}-text`) // Asignar un id único al texto asociado al nodo
-            .attr("x", xAxis(xCoord) + 15)
-            .attr("y", yAxis(yCoord) - 15)
-            .attr("fill", "white")
-            .style("font-size", "13px") // Ajustar el tamaño de la fuente aquí
-            .text(`${nombreVariable} (${xCoord}, ${yCoord})`);
-    });
-    
-    document.getElementById('borrarSolucionBtn').addEventListener('click', function() {
-        // Remover puntos rojos (solución) del SVG
-        svg.selectAll("circle.red-dot").remove();
-    
-        // Remover texto del centroide
-        svg.select("#centroid-text").remove();
-    
-        // Limpiar el contenido del contenedor de información
-        const infoContainer = document.getElementById('info-container');
-        infoContainer.innerHTML = "";
-    
-        // Remover puntos medios entre nodos
-        svg.selectAll("circle.midpoint-dot").remove();
+    document.getElementById('cambiarColorBtn').addEventListener('input', function(event) {
+        estado.colorActual = event.target.value;
     });
 
-    document.getElementById('resolverBtn').addEventListener('click', function() {
-    // Limpiar puntos rojos existentes
-    svg.selectAll("circle.red-dot").remove();
-    svg.selectAll("circle.midpoint-dot").remove();
-
-    const nodos = svg.selectAll("circle");
-    let nodosConDosConexiones = true;
-    nodos.each(function() {
-        const id = d3.select(this).attr("id");
-        if (!(conexiones[id] && conexiones[id].length >= 2)) {
-            nodosConDosConexiones = false;
-        }
+    document.getElementById('limpiarBtn').addEventListener('click', function() {
+        nodos.clear();
+        aristas.clear();
+        estado = { seleccionando: false, nodoOrigen: null, colorActual: estado.colorActual, modoEliminar: false };
+        ultimoIdNodo = 0;
     });
 
-    // Si algún nodo no tiene al menos 2 conexiones, mostrar un mensaje y evitar la resolución
-    if (!nodosConDosConexiones) {
-        alert("Para resolver el grafo, todos los nodos deben estar unidos con al menos 2 conexiones.");
-        return;
-    }
-
-    let sumX = 0;
-    let sumY = 0;
-    const nodosCoords = [];
-    const puntosMedios = [];
-
-    nodos.each(function() {
-        const x = parseFloat(d3.select(this).attr("cx"));
-        const y = parseFloat(d3.select(this).attr("cy"));
-        const nombre = d3.select(this).attr("data-nombre"); // Obtener el nombre del nodo
-        nodosCoords.push({ x, y, nombre, id: d3.select(this).attr("id") }); // Agregar el nombre del nodo y el ID al objeto de coordenadas
-        sumX += x;
-        sumY += y;
-    });
-
-    const numNodos = nodos.size();
-    const centerX = sumX / numNodos;
-    const centerY = sumY / numNodos;
-
-    const centroidX = centerX / (width / 100) - 50;
-    const centroidY = 50 - (centerY / (height / 100));
-
-    // Agregar un punto rojo en el centro del grupo cerrado
-    svg.append("circle")
-        .attr("cx", centerX)
-        .attr("cy", centerY)
-        .attr("r", 5)
-        .attr("fill", "red")
-        .classed("red-dot", true); // Marcar como punto rojo
-
-    // Agregar texto con las coordenadas del centroide
-    svg.append("text")
-        .attr("id", "centroid-text") // Identificación única para el texto del centroide
-        .attr("x", centerX + 5)
-        .attr("y", centerY - 5)
-        .attr("fill", "white")
-        .style("font-size", "13px") // Ajustar el tamaño de la fuente aquí
-        .text(`${centroidX.toFixed(2)}, ${centroidY.toFixed(2)}`);
-
-    // Actualizar el contenido del contenedor de información
-    const infoContainer = document.getElementById('info-container');
-    infoContainer.innerHTML = `<h3>Información de Coordenadas</h3>
-                               <p>Centroide: (${centroidX.toFixed(2)}, ${centroidY.toFixed(2)})</p>
-                               <h4>Coordenadas de Nodos:</h4>`;
-
-    // Agregar coordenadas de nodos al contenedor de información y mostrar los puntos en el gráfico
-    nodosCoords.forEach(coord => {
-        const nodoX = coord.x / (width / 100) - 50;
-        const nodoY = 50 - (coord.y / (height / 100)); // Invertir el eje Y
-        infoContainer.innerHTML += `<p>${coord.nombre}: (${nodoX.toFixed(2)}, ${nodoY.toFixed(2)})</p>`;
-    });
-
-    // Calcular y mostrar las coordenadas de los puntos medios entre los nodos conectados
-    for (let i = 0; i < nodosCoords.length; i++) {
-        for (let j = i + 1; j < nodosCoords.length; j++) {
-            const nodo1 = nodosCoords[i];
-            const nodo2 = nodosCoords[j];
-            
-            // Verificar si los nodos están conectados
-            if (conexiones[nodo1.id].includes(nodo2.id)) {
-                const xMedio = (nodo1.x + nodo2.x) / 2;
-                const yMedio = (nodo1.y + nodo2.y) / 2;
-                const medioX = xMedio / (width / 100) - 50;
-                const medioY = 50 - (yMedio / (height / 100)); // Invertir el eje Y
-                puntosMedios.push({ x: medioX, y: medioY });
-
-                // Agregar coordenadas de punto medio al contenedor de información
-                infoContainer.innerHTML += `<p>Punto Medio entre ${nodo1.nombre} y ${nodo2.nombre}: (${medioX.toFixed(2)}, ${medioY.toFixed(2)})</p>`;
-
-                // Agregar un punto rojo en las coordenadas del punto medio
-                svg.append("circle")
-                    .attr("cx", xMedio)
-                    .attr("cy", yMedio)
-                    .attr("r", 3)
-                    .attr("fill", "red")
-                    .classed("midpoint-dot", true); // Marcar como punto medio
-            }
-        }
-    }
-});
-    
+    inicializarRed();
 });

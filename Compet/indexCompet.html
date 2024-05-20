@@ -5,32 +5,17 @@
     <link rel="stylesheet" href="stylesCompet.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
     <script src="competBack.js"></script>
+    <script src="tuto.js"></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.2/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
     <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-    <script src="https://d3js.org/d3.v6.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <title>Compet</title>
 </head>
-<style>
-    /* Estilos para el contenedor de información del nodo */
-    .info-container {
-        position: absolute;
-        top: 0;
-        right: 0;
-        padding: 20px;
-        background-color: rgba(0, 0, 0, 0.5);
-        color: white;
-        font-family: Arial, sans-serif;
-    }
-
-    .info-item {
-        margin-bottom: 10px;
-    }
-</style>
     
 <body>
 
@@ -65,13 +50,10 @@
                 <a href="../ArbolBinario/indexArbol.html">
                     <button class="nav-btn">ARBOL BINARIO</button>
                 </a>
-                <a href="../Kruskal/indexkruskal.html">
+                <a href="../Kruskal/indexKruskal.html">
                     <button class="nav-btn">KRUSKAL</button>
                 </a>
-                <a href="../Dijkstra/indexdijkstra.html">
-                    <button class="nav-btn">DIJKSTRA</button>
-                </a>
-                <a href="">
+                <a href="../Kruskal/indexKruskal.html">
                     <button class="nav-btn selected">COMPET</button>
                 </a>
                 <a href="../Contacto/indexContacto.html">
@@ -109,8 +91,13 @@
         </div>
 
         <div style="margin-top: 20px;">
+            <label for="cambiarColorBtn" style="color: white; margin-right: 5px;">Color de Nodo:</label>
+            <input type="color" id="cambiarColorBtn" value="#d2e5ff">
+            <!-- Botón Eliminar -->
+            <button id="eliminarBtn" style="margin-left: 10px;">Eliminar</button>
             <button id="limpiarBtn" style="margin-left: 10px;">Limpiar</button>
-            <button id="agregarBtn" style="margin-left: 10px;">Agregar</button>
+            <button id="resolverBtn" style="margin-left: 10px;">Resolver</button>
+
         </div>        
 
         <button id="guardarBtn">Exportar</button>
@@ -120,9 +107,6 @@
             <button id="exportJSON">JSON (editable)</button>
         </div>              
         <button id="cargarBtn">Importar</button>
-        <button id="resolverBtn">Resolver</button>
-        <button id="borrarSolucionBtn">Borrar Solucion</button>
-        <div id="info-container" style="position: fixed; top: 0; right: 25px; width: 200px; background-color: rgba(0, 0, 0, 0.5); color: white; padding: 10px;"></div>
         <input type="file" id="importarArchivo" style="display: none;" accept=".json">
 
         <!-- End of Top Container -->
@@ -147,7 +131,7 @@
         <!-- End of Botón help -->
 
     </div>
-    <script src="tutocompet.js"></script>
+
 </body>
 
 </html>
