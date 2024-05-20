@@ -10,16 +10,17 @@ document.addEventListener('DOMContentLoaded', function() {
             posicionMedio: true,
         },
         {
-            elemento: document.getElementById('agregarBtn'),
-            mensaje: 'Agrega un nodo al lienzo.',
-        },
-        {
             elemento: document.getElementById('guardarBtn'),
             mensaje: 'Guarda el estado actual de tu grafo aquí.',
         },
         {
             elemento: document.getElementById('cargarBtn'),
             mensaje: 'Carga un grafo previamente guardado.',
+        },
+        
+        {
+            elemento: document.getElementById('eliminarBtn'),
+            mensaje: 'Elimina un elemeto y continua con tu ejemplo.',
         },
         {
             elemento: document.getElementById('limpiarBtn'),
