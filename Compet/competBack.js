@@ -186,12 +186,20 @@ document.addEventListener('DOMContentLoaded', function() {
         const centroidCoordX = sumCoordX / nodos.length;
         const centroidCoordY = sumCoordY / nodos.length;
     
+        // Obtener las dimensiones del contenedor
+        const containerWidth = grafoContainer.offsetWidth;
+        const containerHeight = grafoContainer.offsetHeight;
+    
+        // Calcular las coordenadas del centroide en relación con el contenedor
+        const centroideX = containerWidth / 220;
+        const centroideY = containerHeight / 220;
+    
         // Crear nodo para el centroide
         const centroideNode = {
             id: 'centroide',
             label: `Centroide (${centroidCoordX.toFixed(2)}, ${centroidCoordY.toFixed(2)})`,
-            x: centroidCoordX,
-            y: centroidCoordY,
+            x: centroideX,
+            y: centroideY,
             color: {
                 background: 'red',
                 border: 'black'
