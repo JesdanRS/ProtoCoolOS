@@ -142,8 +142,17 @@ document.addEventListener('DOMContentLoaded', function() {
             if (nodeId !== undefined) {
                 const nuevoNombre = prompt("Ingrese el nuevo nombre del nodo:", "");
                 if (nuevoNombre !== null) {
-                    const nodo = nodos.get(nodeId);
-                    nodos.update({id: nodeId, label: `${nuevoNombre} (${nodo.x}, ${nodo.y})`});
+                    const nuevaCoordX = prompt("Ingrese la nueva coordenada X del nodo:", "");
+                    const nuevaCoordY = prompt("Ingrese la nueva coordenada Y del nodo:", "");
+                    if (nuevaCoordX !== null && nuevaCoordY !== null) {
+                        const nodo = nodos.get(nodeId);
+                        nodos.update({
+                            id: nodeId,
+                            label: `${nuevoNombre} (${nuevaCoordX}, ${nuevaCoordY})`,
+                            coordX: nuevaCoordX,
+                            coordY: nuevaCoordY
+                        });
+                    }
                 }
             } else if (edgeId !== undefined) {
                 const nuevoAtributo = prompt("Ingrese el nuevo atributo de la arista:", "");
@@ -213,8 +222,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     
-    
-
     function crearNodo(x, y, color, nombre, coordX, coordY) {
         ultimoIdNodo++;
         nodos.add({
